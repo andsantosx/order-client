@@ -1,17 +1,23 @@
-import { Button } from './components/ui/button'
+import { Header } from "./components/header"
+import { Hero } from "./components/hero"
+import { Categories } from "./components/categories"
+import { Products } from "./components/products"
+import { Featured } from "./components/featured"
+import { PromoBanner } from "./components/promo-banner"
+import { Newsletter } from "./components/newsletter"
+import { Footer } from "./components/footer"
 
-export default function App() {
+export default function Home() {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-slate-50">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-slate-900 mb-4">
-          Order Client
-        </h1>
-        <p className="text-slate-600 mb-6">
-          Bem-vindo ao seu projeto
-        </p>
-        <Button>Começar</Button>
-      </div>
-    </div>
+    <main className="min-h-screen bg-background">
+      <Header />
+      <Hero />
+      <Categories />
+      <Products />
+      <Featured />
+      <PromoBanner />
+      <Newsletter />
+      <Footer />
+    </main>
   )
 }
