@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { Search, ShoppingBag, Menu, X } from "lucide-react"
+import { Search, Menu, X, Heart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -8,17 +8,19 @@ import {
   SheetTrigger,
   SheetTitle,
 } from "@/components/ui/sheet"
+import { useWishlistStore } from "@/store/wishlistStore"
 
 const navLinks = [
-  { name: "Colecao", href: "#" },
-  { name: "Masculino", href: "#" },
-  { name: "Feminino", href: "#" },
-  { name: "Lancamentos", href: "#" },
+  { name: "Loja", href: "/loja" },
+  { name: "Novidades", href: "/loja?sort=newest" },
+  { name: "Favoritos", href: "/favoritos" },
+  { name: "Contato", href: "#contato" },
 ]
 
 export function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const { items: wishlistItems } = useWishlistStore()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -92,11 +94,15 @@ export function Header() {
           </div>
 
           <Button variant="ghost" size="icon" className="relative hover:bg-secondary/50 rounded-full h-10 w-10">
-            <ShoppingBag className="h-5 w-5" />
-            <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
-              2
-            </span>
-            <span className="sr-only">Sacola</span>
+            <a href="/favoritos" className="flex items-center justify-center w-full h-full">
+              <Heart className="h-5 w-5" />
+              {wishlistItems.length > 0 && (
+                <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                  {wishlistItems.length}
+                </span>
+              )}
+            </a>
+            <span className="sr-only">Favoritos</span>
           </Button>
 
           {/* Mobile Menu */}

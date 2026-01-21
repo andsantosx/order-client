@@ -1,23 +1,41 @@
-import { Header } from "./components/header"
-import { Hero } from "./components/hero"
-import { Categories } from "./components/categories"
-import { Products } from "./components/products"
-import { Featured } from "./components/featured"
-import { PromoBanner } from "./components/promo-banner"
-import { Newsletter } from "./components/newsletter"
-import { Footer } from "./components/footer"
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom"
+import { Toaster } from "react-hot-toast"
+import { Header } from "@/components/header"
+import { CartSidebar } from "@/components/cart/CartSidebar"
+import { Footer } from "@/components/footer"
+import { HomePage } from "@/pages/HomePage"
+import { ShopPage } from "@/pages/ShopPage"
+import { ProductDetailPage } from "@/pages/ProductDetailPage"
+import { WishlistPage } from "@/pages/WishlistPage"
 
-export default function Home() {
+function AppContent() {
+  const location = useLocation()
+  const isHomePage = location.pathname === "/"
+
   return (
-    <main className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header />
-      <Hero />
-      <Categories />
-      <Products />
-      <Featured />
-      <PromoBanner />
-      <Newsletter />
-      <Footer />
-    </main>
+      <CartSidebar />
+      <div className="flex-1">
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/loja" element={<ShopPage />} />
+          <Route path="/produto/:id" element={<ProductDetailPage />} />
+          <Route path="/favoritos" element={<WishlistPage />} />
+        </Routes>
+      </div>
+      {!isHomePage && <Footer />}
+    </div>
   )
 }
+
+export function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
+      <Toaster position="bottom-right" />
+    </BrowserRouter>
+  )
+}
+
+export default App
