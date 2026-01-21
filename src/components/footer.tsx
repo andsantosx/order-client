@@ -2,24 +2,24 @@ import { Instagram, Twitter, Youtube } from "lucide-react"
 
 const footerLinks = {
   shop: [
-    { name: "Novidades", href: "#" },
-    { name: "Masculino", href: "#" },
-    { name: "Feminino", href: "#" },
-    { name: "Acessorios", href: "#" },
-    { name: "Sale", href: "#" },
+    { name: "Novidades", href: "/loja?sort=newest" },
+    { name: "Masculino", href: "/loja?cat=Camisetas" },
+    { name: "Feminino", href: "/loja?cat=Vestidos" },
+    { name: "Acessorios", href: "/loja?cat=Acessórios" },
+    { name: "Sale", href: "/loja?sort=price-low" },
   ],
   help: [
-    { name: "Rastrear Pedido", href: "#" },
-    { name: "Entregas", href: "#" },
-    { name: "Devolucoes", href: "#" },
-    { name: "Pagamentos", href: "#" },
-    { name: "FAQ", href: "#" },
+    { name: "Rastrear Pedido", href: "/contato" },
+    { name: "Entregas", href: "/contato" },
+    { name: "Devolucoes", href: "/contato" },
+    { name: "Pagamentos", href: "/contato" },
+    { name: "FAQ", href: "/contato" },
   ],
   company: [
-    { name: "Sobre", href: "#" },
-    { name: "Carreiras", href: "#" },
-    { name: "Sustentabilidade", href: "#" },
-    { name: "Imprensa", href: "#" },
+    { name: "Sobre", href: "/sobre" },
+    { name: "Carreiras", href: "/contato" },
+    { name: "Sustentabilidade", href: "/sobre" },
+    { name: "Imprensa", href: "/contato" },
   ],
 }
 

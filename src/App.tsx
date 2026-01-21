@@ -7,6 +7,8 @@ import { HomePage } from "@/pages/HomePage"
 import { ShopPage } from "@/pages/ShopPage"
 import { ProductDetailPage } from "@/pages/ProductDetailPage"
 import { WishlistPage } from "@/pages/WishlistPage"
+import { ContactPage } from "@/pages/ContactPage"
+import { AboutPage } from "@/pages/AboutPage"
 
 function AppContent() {
   const location = useLocation()
@@ -22,6 +24,8 @@ function AppContent() {
           <Route path="/loja" element={<ShopPage />} />
           <Route path="/produto/:id" element={<ProductDetailPage />} />
           <Route path="/favoritos" element={<WishlistPage />} />
+          <Route path="/sobre" element={<AboutPage />} />
+          <Route path="/contato" element={<ContactPage />} />
         </Routes>
       </div>
       {!isHomePage && <Footer />}
