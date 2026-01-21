@@ -1,17 +1,45 @@
-import { Button } from './components/ui/button'
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom"
+import { Toaster } from "react-hot-toast"
+import { Header } from "@/components/header"
+import { CartSidebar } from "@/components/cart/CartSidebar"
+import { Footer } from "@/components/footer"
+import { HomePage } from "@/pages/HomePage"
+import { ShopPage } from "@/pages/ShopPage"
+import { ProductDetailPage } from "@/pages/ProductDetailPage"
+import { WishlistPage } from "@/pages/WishlistPage"
+import { ContactPage } from "@/pages/ContactPage"
+import { AboutPage } from "@/pages/AboutPage"
 
-export default function App() {
+function AppContent() {
+  const location = useLocation()
+  const isHomePage = location.pathname === "/"
+
   return (
-    <div className="flex items-center justify-center min-h-screen bg-slate-50">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-slate-900 mb-4">
-          Order Client
-        </h1>
-        <p className="text-slate-600 mb-6">
-          Bem-vindo ao seu projeto
-        </p>
-        <Button>Começar</Button>
+    <div className="min-h-screen bg-background flex flex-col">
+      <Header />
+      <CartSidebar />
+      <div className="flex-1">
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/loja" element={<ShopPage />} />
+          <Route path="/produto/:id" element={<ProductDetailPage />} />
+          <Route path="/favoritos" element={<WishlistPage />} />
+          <Route path="/sobre" element={<AboutPage />} />
+          <Route path="/contato" element={<ContactPage />} />
+        </Routes>
       </div>
+      {!isHomePage && <Footer />}
     </div>
   )
 }
+
+export function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
+      <Toaster position="bottom-right" />
+    </BrowserRouter>
+  )
+}
+
+export default App
