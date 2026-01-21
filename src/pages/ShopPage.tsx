@@ -1,57 +1,64 @@
-import { useState, useMemo } from "react"
-import { Heart, ShoppingBag, Eye, Star, Search } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import { allProducts, categories } from "@/data/products"
-import { useCartStore } from "@/store/cartStore"
-import { useWishlistStore } from "@/store/wishlistStore"
-import toast from "react-hot-toast"
+import { useState, useMemo } from "react";
+import { Heart, ShoppingBag, Eye, Star, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { allProducts, categories } from "@/data/products";
+import { useCartStore } from "@/store/cartStore";
+import { useWishlistStore } from "@/store/wishlistStore";
+import toast from "react-hot-toast";
 
 export function ShopPage() {
-  const [selectedCategory, setSelectedCategory] = useState<string>("")
-  const [searchTerm, setSearchTerm] = useState("")
-  const [priceRange, setPriceRange] = useState([0, 600])
-  const [sortBy, setSortBy] = useState("newest")
-  const [hoveredId, setHoveredId] = useState<number | null>(null)
-  const { addItem } = useCartStore()
-  const { addItem: addToWishlist, isInWishlist, removeItem: removeFromWishlist } = useWishlistStore()
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [priceRange, setPriceRange] = useState([0, 600]);
+  const [sortBy, setSortBy] = useState("newest");
+  const [hoveredId, setHoveredId] = useState<number | null>(null);
+  const { addItem } = useCartStore();
+  const {
+    addItem: addToWishlist,
+    isInWishlist,
+    removeItem: removeFromWishlist,
+  } = useWishlistStore();
 
   const filteredProducts = useMemo(() => {
-    let filtered = allProducts
+    let filtered = allProducts;
 
     // Filter by category
     if (selectedCategory) {
-      filtered = filtered.filter((p) => p.category === selectedCategory)
+      filtered = filtered.filter((p) => p.category === selectedCategory);
     }
 
     // Filter by search term
     if (searchTerm) {
-      filtered = filtered.filter((p) =>
-        p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.description.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+      filtered = filtered.filter(
+        (p) =>
+          p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          p.description.toLowerCase().includes(searchTerm.toLowerCase()),
+      );
     }
 
     // Filter by price range
-    filtered = filtered.filter((p) => p.price >= priceRange[0] && p.price <= priceRange[1])
+    filtered = filtered.filter(
+      (p) => p.price >= priceRange[0] && p.price <= priceRange[1],
+    );
 
     // Sort
     switch (sortBy) {
       case "price-low":
-        filtered.sort((a, b) => a.price - b.price)
-        break
+        filtered.sort((a, b) => a.price - b.price);
+        break;
       case "price-high":
-        filtered.sort((a, b) => b.price - a.price)
-        break
+        filtered.sort((a, b) => b.price - a.price);
+        break;
       case "rating":
-        filtered.sort((a, b) => b.rating - a.rating)
-        break
+        filtered.sort((a, b) => b.rating - a.rating);
+        break;
       case "newest":
       default:
-        break
+        break;
     }
 
-    return filtered
-  }, [selectedCategory, searchTerm, priceRange, sortBy])
+    return filtered;
+  }, [selectedCategory, searchTerm, priceRange, sortBy]);
 
   const handleAddToCart = (product: any) => {
     addItem({
@@ -61,25 +68,25 @@ export function ShopPage() {
       image: product.image,
       quantity: 1,
       selectedColor: product.colors[0],
-    })
-    toast.success("Adicionado à sacola!")
-  }
+    });
+    toast.success("Adicionado à sacola!");
+  };
 
   const handleWishlist = (product: any) => {
     if (isInWishlist(product.id)) {
-      removeFromWishlist(product.id)
-      toast.success("Removido dos favoritos")
+      removeFromWishlist(product.id);
+      toast.success("Removido dos favoritos");
     } else {
       addToWishlist({
         id: product.id,
         name: product.name,
         price: product.price,
         image: product.image,
-        addedAt: Date.now(),
-      })
-      toast.success("Adicionado aos favoritos!")
+        addedAt: new Date().getTime(),
+      });
+      toast.success("Adicionado aos favoritos!");
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-background pt-24 pb-16">
@@ -90,7 +97,8 @@ export function ShopPage() {
             Nossa Coleção
           </h1>
           <p className="text-lg text-muted-foreground">
-            Explore nossa seleção exclusiva de roupas e acessórios de alta qualidade
+            Explore nossa seleção exclusiva de roupas e acessórios de alta
+            qualidade
           </p>
         </div>
 
@@ -99,7 +107,9 @@ export function ShopPage() {
           <div className="space-y-6">
             {/* Search */}
             <div>
-              <label className="text-sm font-semibold text-foreground mb-3 block">Buscar</label>
+              <label className="text-sm font-semibold text-foreground mb-3 block">
+                Buscar
+              </label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -113,7 +123,9 @@ export function ShopPage() {
 
             {/* Categories */}
             <div>
-              <label className="text-sm font-semibold text-foreground mb-3 block">Categoria</label>
+              <label className="text-sm font-semibold text-foreground mb-3 block">
+                Categoria
+              </label>
               <div className="space-y-2">
                 <button
                   onClick={() => setSelectedCategory("")}
@@ -144,28 +156,32 @@ export function ShopPage() {
 
             {/* Price Range */}
             <div>
-              <label className="text-sm font-semibold text-foreground mb-3 block">Preço</label>
+              <label className="text-sm font-semibold text-foreground mb-3 block">
+                Preço
+              </label>
               <div className="space-y-3">
                 <input
                   type="range"
                   min="0"
                   max="600"
                   value={priceRange[1]}
-                  onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
+                  onChange={(e) =>
+                    setPriceRange([priceRange[0], Number(e.target.value)])
+                  }
                   className="w-full"
                 />
                 <div className="flex justify-between text-sm text-muted-foreground">
                   <span>R$ 0</span>
-                  <span>
-                    R$ {priceRange[1].toLocaleString("pt-BR")}
-                  </span>
+                  <span>R$ {priceRange[1].toLocaleString("pt-BR")}</span>
                 </div>
               </div>
             </div>
 
             {/* Sort */}
             <div>
-              <label className="text-sm font-semibold text-foreground mb-3 block">Ordenar por</label>
+              <label className="text-sm font-semibold text-foreground mb-3 block">
+                Ordenar por
+              </label>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
@@ -189,7 +205,9 @@ export function ShopPage() {
 
             {filteredProducts.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-lg text-muted-foreground">Nenhum produto encontrado</p>
+                <p className="text-lg text-muted-foreground">
+                  Nenhum produto encontrado
+                </p>
               </div>
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -244,7 +262,9 @@ export function ShopPage() {
                               : "bg-white/20 text-white hover:bg-white/30"
                           }`}
                         >
-                          <Heart className={`h-5 w-5 ${isInWishlist(product.id) ? "fill-current" : ""}`} />
+                          <Heart
+                            className={`h-5 w-5 ${isInWishlist(product.id) ? "fill-current" : ""}`}
+                          />
                         </button>
                         <button
                           onClick={() => handleAddToCart(product)}
@@ -272,7 +292,9 @@ export function ShopPage() {
                             />
                           ))}
                         </div>
-                        <span className="text-xs text-muted-foreground">({product.reviews})</span>
+                        <span className="text-xs text-muted-foreground">
+                          ({product.reviews})
+                        </span>
                       </div>
                       <div className="flex items-baseline gap-2 mt-3">
                         <p className="font-bold text-lg text-foreground">
@@ -293,5 +315,5 @@ export function ShopPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,28 +1,39 @@
-import { useParams } from "react-router-dom"
-import { useState } from "react"
-import { Heart, ShoppingBag, Star, Truck, RotateCcw, Shield } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { allProducts } from "@/data/products"
-import { useCartStore } from "@/store/cartStore"
-import { useWishlistStore } from "@/store/wishlistStore"
-import toast from "react-hot-toast"
+import { useParams } from "react-router-dom";
+import { useState } from "react";
+import {
+  Heart,
+  ShoppingBag,
+  Star,
+  Truck,
+  RotateCcw,
+  Shield,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { allProducts } from "@/data/products";
+import { useCartStore } from "@/store/cartStore";
+import { useWishlistStore } from "@/store/wishlistStore";
+import toast from "react-hot-toast";
 
 export function ProductDetailPage() {
-  const { id } = useParams()
-  const product = allProducts.find((p) => p.id === Number(id))
-  const [quantity, setQuantity] = useState(1)
-  const [selectedColor, setSelectedColor] = useState(product?.colors[0])
-  const [selectedSize, setSelectedSize] = useState(product?.sizes[0])
-  const [selectedImage, setSelectedImage] = useState(0)
-  const { addItem } = useCartStore()
-  const { isInWishlist, addItem: addToWishlist, removeItem: removeFromWishlist } = useWishlistStore()
+  const { id } = useParams();
+  const product = allProducts.find((p) => p.id === Number(id));
+  const [quantity, setQuantity] = useState(1);
+  const [selectedColor, setSelectedColor] = useState(product?.colors[0]);
+  const [selectedSize, setSelectedSize] = useState(product?.sizes[0]);
+  const [selectedImage, setSelectedImage] = useState(0);
+  const { addItem } = useCartStore();
+  const {
+    isInWishlist,
+    addItem: addToWishlist,
+    removeItem: removeFromWishlist,
+  } = useWishlistStore();
 
   if (!product) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center pt-24">
         <p className="text-xl text-muted-foreground">Produto não encontrado</p>
       </div>
-    )
+    );
   }
 
   const handleAddToCart = () => {
@@ -34,26 +45,26 @@ export function ProductDetailPage() {
       quantity,
       selectedColor,
       selectedSize,
-    })
-    toast.success("Adicionado à sacola!")
-    setQuantity(1)
-  }
+    });
+    toast.success("Adicionado à sacola!");
+    setQuantity(1);
+  };
 
   const handleWishlist = () => {
     if (isInWishlist(product.id)) {
-      removeFromWishlist(product.id)
-      toast.success("Removido dos favoritos")
+      removeFromWishlist(product.id);
+      toast.success("Removido dos favoritos");
     } else {
       addToWishlist({
         id: product.id,
         name: product.name,
         price: product.price,
         image: product.image,
-        addedAt: Date.now(),
-      })
-      toast.success("Adicionado aos favoritos!")
+        addedAt: new Date().getTime(),
+      });
+      toast.success("Adicionado aos favoritos!");
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-background pt-24 pb-16">
@@ -75,10 +86,16 @@ export function ProductDetailPage() {
                   key={i}
                   onClick={() => setSelectedImage(i)}
                   className={`w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors ${
-                    selectedImage === i ? "border-primary" : "border-transparent"
+                    selectedImage === i
+                      ? "border-primary"
+                      : "border-transparent"
                   }`}
                 >
-                  <img src={img} alt="" className="w-full h-full object-cover" />
+                  <img
+                    src={img}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
                 </button>
               ))}
             </div>
@@ -98,7 +115,9 @@ export function ProductDetailPage() {
                   {product.category}
                 </span>
               </div>
-              <h1 className="text-4xl font-bold text-foreground mb-3">{product.name}</h1>
+              <h1 className="text-4xl font-bold text-foreground mb-3">
+                {product.name}
+              </h1>
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
                   {[...Array(5)].map((_, i) => (
@@ -108,7 +127,9 @@ export function ProductDetailPage() {
                     />
                   ))}
                 </div>
-                <span className="text-sm text-muted-foreground">{product.reviews} avaliações</span>
+                <span className="text-sm text-muted-foreground">
+                  {product.reviews} avaliações
+                </span>
               </div>
             </div>
 
@@ -126,13 +147,18 @@ export function ProductDetailPage() {
               </div>
               {product.originalPrice && (
                 <p className="text-sm text-primary font-semibold">
-                  Economize R$ {(product.originalPrice - product.price).toLocaleString("pt-BR")}
+                  Economize R${" "}
+                  {(product.originalPrice - product.price).toLocaleString(
+                    "pt-BR",
+                  )}
                 </p>
               )}
             </div>
 
             {/* Description */}
-            <p className="text-foreground/80 leading-relaxed">{product.description}</p>
+            <p className="text-foreground/80 leading-relaxed">
+              {product.description}
+            </p>
 
             {/* Stock */}
             <div className="flex items-center gap-2">
@@ -144,7 +170,9 @@ export function ProductDetailPage() {
 
             {/* Color Selection */}
             <div>
-              <label className="block text-sm font-semibold text-foreground mb-3">Cor</label>
+              <label className="block text-sm font-semibold text-foreground mb-3">
+                Cor
+              </label>
               <div className="flex gap-3">
                 {product.colors.map((color) => (
                   <button
@@ -163,7 +191,9 @@ export function ProductDetailPage() {
 
             {/* Size Selection */}
             <div>
-              <label className="block text-sm font-semibold text-foreground mb-3">Tamanho</label>
+              <label className="block text-sm font-semibold text-foreground mb-3">
+                Tamanho
+              </label>
               <div className="flex flex-wrap gap-2">
                 {product.sizes.map((size) => (
                   <button
@@ -183,7 +213,9 @@ export function ProductDetailPage() {
 
             {/* Quantity */}
             <div>
-              <label className="block text-sm font-semibold text-foreground mb-3">Quantidade</label>
+              <label className="block text-sm font-semibold text-foreground mb-3">
+                Quantidade
+              </label>
               <div className="flex items-center border border-border rounded-lg w-fit">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -191,7 +223,9 @@ export function ProductDetailPage() {
                 >
                   -
                 </button>
-                <span className="px-6 py-2 text-center font-semibold">{quantity}</span>
+                <span className="px-6 py-2 text-center font-semibold">
+                  {quantity}
+                </span>
                 <button
                   onClick={() => setQuantity(quantity + 1)}
                   className="px-4 py-2 text-foreground hover:bg-secondary transition-colors"
@@ -218,7 +252,9 @@ export function ProductDetailPage() {
                     : "border-border text-muted-foreground hover:border-foreground hover:text-foreground"
                 }`}
               >
-                <Heart className={`h-5 w-5 ${isInWishlist(product.id) ? "fill-current" : ""}`} />
+                <Heart
+                  className={`h-5 w-5 ${isInWishlist(product.id) ? "fill-current" : ""}`}
+                />
               </button>
             </div>
 
@@ -226,15 +262,21 @@ export function ProductDetailPage() {
             <div className="grid grid-cols-3 gap-4 pt-8 border-t border-border">
               <div className="text-center">
                 <Truck className="h-6 w-6 text-primary mx-auto mb-2" />
-                <p className="text-xs font-semibold text-foreground">Frete Grátis</p>
+                <p className="text-xs font-semibold text-foreground">
+                  Frete Grátis
+                </p>
               </div>
               <div className="text-center">
                 <RotateCcw className="h-6 w-6 text-primary mx-auto mb-2" />
-                <p className="text-xs font-semibold text-foreground">Devolução Fácil</p>
+                <p className="text-xs font-semibold text-foreground">
+                  Devolução Fácil
+                </p>
               </div>
               <div className="text-center">
                 <Shield className="h-6 w-6 text-primary mx-auto mb-2" />
-                <p className="text-xs font-semibold text-foreground">Garantia</p>
+                <p className="text-xs font-semibold text-foreground">
+                  Garantia
+                </p>
               </div>
             </div>
           </div>
@@ -242,10 +284,14 @@ export function ProductDetailPage() {
 
         {/* Related Products */}
         <div className="pt-8 border-t border-border">
-          <h2 className="text-3xl font-bold text-foreground mb-6">Produtos Relacionados</h2>
+          <h2 className="text-3xl font-bold text-foreground mb-6">
+            Produtos Relacionados
+          </h2>
           <div className="grid md:grid-cols-4 gap-6">
             {allProducts
-              .filter((p) => p.category === product.category && p.id !== product.id)
+              .filter(
+                (p) => p.category === product.category && p.id !== product.id,
+              )
               .slice(0, 4)
               .map((relatedProduct) => (
                 <a
@@ -272,5 +318,5 @@ export function ProductDetailPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
