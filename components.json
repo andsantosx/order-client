@@ -1,0 +1,10 @@
+{
+  "style": "default",
+  "rsc": false,
+  "tsx": true,
+  "alias": "@",
+  "baseColor": "slate",
+  "css": "src/index.css",
+  "components": "src/components",
+  "utils": "src/lib/utils"
+}
