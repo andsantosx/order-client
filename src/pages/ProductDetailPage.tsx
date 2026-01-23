@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Heart,
   ShoppingBag,
@@ -9,17 +9,19 @@ import {
   Shield,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { allProducts } from "@/data/products";
 import { useCartStore } from "@/store/cartStore";
 import { useWishlistStore } from "@/store/wishlistStore";
 import toast from "react-hot-toast";
+import type { Product } from "@/types";
+
+const API_URL = import.meta.env.VITE_API_BASE_URL;
 
 export function ProductDetailPage() {
-  const { id } = useParams();
-  const product = allProducts.find((p) => p.id === Number(id));
+  const { id } = useParams<{ id: string }>();
+  const [product, setProduct] = useState<Product | null>(null);
   const [quantity, setQuantity] = useState(1);
-  const [selectedColor, setSelectedColor] = useState(product?.colors[0]);
-  const [selectedSize, setSelectedSize] = useState(product?.sizes[0]);
+  const [selectedColor, setSelectedColor] = useState<string | undefined>(undefined);
+  const [selectedSize, setSelectedSize] = useState<string | undefined>(undefined);
   const [selectedImage, setSelectedImage] = useState(0);
   const { addItem } = useCartStore();
   const {
@@ -28,10 +30,30 @@ export function ProductDetailPage() {
     removeItem: removeFromWishlist,
   } = useWishlistStore();
 
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/products/${id}`);
+        const data = await response.json();
+        const productWithPrice = { ...data, price: data.price_cents / 100 };
+        setProduct(productWithPrice);
+        setSelectedColor(productWithPrice.colors[0]);
+        setSelectedSize(productWithPrice.sizes[0]);
+      } catch (error) {
+        console.error("Failed to fetch product:", error);
+        toast.error("Não foi possível carregar o produto.");
+      }
+    };
+
+    if (id) {
+      fetchProduct();
+    }
+  }, [id]);
+
   if (!product) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center pt-24">
-        <p className="text-xl text-muted-foreground">Produto não encontrado</p>
+        <p className="text-xl text-muted-foreground">Carregando...</p>
       </div>
     );
   }
@@ -195,7 +217,7 @@ export function ProductDetailPage() {
                 Tamanho
               </label>
               <div className="flex flex-wrap gap-2">
-                {product.sizes.map((size) => (
+                {product.sizes.map((size: string) => (
                   <button
                     key={size}
                     onClick={() => setSelectedSize(size)}
@@ -279,41 +301,6 @@ export function ProductDetailPage() {
                 </p>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Related Products */}
-        <div className="pt-8 border-t border-border">
-          <h2 className="text-3xl font-bold text-foreground mb-6">
-            Produtos Relacionados
-          </h2>
-          <div className="grid md:grid-cols-4 gap-6">
-            {allProducts
-              .filter(
-                (p) => p.category === product.category && p.id !== product.id,
-              )
-              .slice(0, 4)
-              .map((relatedProduct) => (
-                <a
-                  key={relatedProduct.id}
-                  href={`/produto/${relatedProduct.id}`}
-                  className="group"
-                >
-                  <div className="aspect-[3/4] rounded-lg overflow-hidden bg-card mb-3">
-                    <img
-                      src={relatedProduct.image}
-                      alt={relatedProduct.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
-                  <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                    {relatedProduct.name}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    R$ {relatedProduct.price.toLocaleString("pt-BR")}
-                  </p>
-                </a>
-              ))}
           </div>
         </div>
       </div>

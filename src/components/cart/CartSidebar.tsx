@@ -1,11 +1,13 @@
-import { useCartStore } from "@/store/cartStore"
-import { ShoppingBag, Trash2, Plus, Minus } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { useState } from "react"
+import { useCartStore } from "@/store/cartStore";
+import { ShoppingBag, Trash2, Plus, Minus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 
 export function CartSidebar() {
-  const { items, removeItem, updateQuantity, getTotal, clearCart } = useCartStore()
-  const [isOpen, setIsOpen] = useState(false)
+  const { items, removeItem, updateQuantity, getTotal, clearCart } =
+    useCartStore();
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
@@ -69,28 +71,45 @@ export function CartSidebar() {
                     className="w-20 h-20 rounded-lg object-cover"
                   />
                   <div className="flex-1">
-                    <h4 className="font-medium text-foreground text-sm">{item.name}</h4>
+                    <h4 className="font-medium text-foreground text-sm">
+                      {item.name}
+                    </h4>
                     {item.selectedColor && (
                       <p className="text-xs text-muted-foreground">
-                        Cor: <span className="inline-block w-3 h-3 rounded-full border" style={{ backgroundColor: item.selectedColor }} />
+                        Cor:{" "}
+                        <span
+                          className="inline-block w-3 h-3 rounded-full border"
+                          style={{ backgroundColor: item.selectedColor }}
+                        />
                       </p>
                     )}
                     {item.selectedSize && (
-                      <p className="text-xs text-muted-foreground">Tamanho: {item.selectedSize}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Tamanho: {item.selectedSize}
+                      </p>
                     )}
                     <p className="font-semibold text-primary mt-1">
-                      R$ {(item.price * item.quantity).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                      R${" "}
+                      {(item.price * item.quantity).toLocaleString("pt-BR", {
+                        minimumFractionDigits: 2,
+                      })}
                     </p>
                     <div className="flex items-center gap-2 mt-2">
                       <button
-                        onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                        onClick={() =>
+                          updateQuantity(item.id, Math.max(1, item.quantity - 1))
+                        }
                         className="p-1 hover:bg-secondary rounded transition-colors"
                       >
                         <Minus className="h-3 w-3" />
                       </button>
-                      <span className="text-xs font-medium w-6 text-center">{item.quantity}</span>
+                      <span className="text-xs font-medium w-6 text-center">
+                        {item.quantity}
+                      </span>
                       <button
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        onClick={() =>
+                          updateQuantity(item.id, item.quantity + 1)
+                        }
                         className="p-1 hover:bg-secondary rounded transition-colors"
                       >
                         <Plus className="h-3 w-3" />
@@ -115,7 +134,10 @@ export function CartSidebar() {
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Subtotal</span>
                   <span className="font-medium">
-                    R$ {getTotal().toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                    R${" "}
+                    {getTotal().toLocaleString("pt-BR", {
+                      minimumFractionDigits: 2,
+                    })}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
@@ -126,16 +148,21 @@ export function CartSidebar() {
               <div className="flex justify-between text-lg font-bold border-t border-border pt-4">
                 <span>Total</span>
                 <span className="text-primary">
-                  R$ {getTotal().toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                  R${" "}
+                  {getTotal().toLocaleString("pt-BR", {
+                    minimumFractionDigits: 2,
+                  })}
                 </span>
               </div>
-              <Button className="w-full h-12 bg-primary text-primary-foreground hover:bg-primary/90">
-                Ir para Checkout
-              </Button>
+              <Link to="/checkout" onClick={() => setIsOpen(false)}>
+                <Button className="w-full h-12 bg-primary text-primary-foreground hover:bg-primary/90">
+                  Ir para Checkout
+                </Button>
+              </Link>
               <button
                 onClick={() => {
-                  clearCart()
-                  setIsOpen(false)
+                  clearCart();
+                  setIsOpen(false);
                 }}
                 className="w-full py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
@@ -146,5 +173,5 @@ export function CartSidebar() {
         </div>
       </div>
     </>
-  )
+  );
 }

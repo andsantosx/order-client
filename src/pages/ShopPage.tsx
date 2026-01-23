@@ -1,17 +1,21 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Heart, ShoppingBag, Eye, Star, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { allProducts, categories } from "@/data/products";
 import { useCartStore } from "@/store/cartStore";
 import { useWishlistStore } from "@/store/wishlistStore";
 import toast from "react-hot-toast";
+import type { Product } from "@/types";
+
+const API_URL = import.meta.env.VITE_API_BASE_URL;
 
 export function ShopPage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<{ id: string; name: string; icon: string }[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
   const [priceRange, setPriceRange] = useState([0, 600]);
   const [sortBy, setSortBy] = useState("newest");
-  const [hoveredId, setHoveredId] = useState<number | null>(null);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
   const { addItem } = useCartStore();
   const {
     addItem: addToWishlist,
@@ -19,15 +23,32 @@ export function ShopPage() {
     removeItem: removeFromWishlist,
   } = useWishlistStore();
 
-  const filteredProducts = useMemo(() => {
-    let filtered = allProducts;
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/products`);
+        const data = await response.json();
+        const productsWithPrice = data.map((p: any) => ({ ...p, price: p.price_cents / 100 }));
+        setProducts(productsWithPrice);
 
-    // Filter by category
+        const uniqueCategories = Array.from(new Set(productsWithPrice.map((p: Product) => p.category)));
+        setCategories(uniqueCategories.map((c: any) => ({ id: c, name: c, icon: "🛍️" })));
+      } catch (error) {
+        console.error("Failed to fetch products:", error);
+        toast.error("Não foi possível carregar os produtos.");
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const filteredProducts = useMemo(() => {
+    let filtered = products;
+
     if (selectedCategory) {
       filtered = filtered.filter((p) => p.category === selectedCategory);
     }
 
-    // Filter by search term
     if (searchTerm) {
       filtered = filtered.filter(
         (p) =>
@@ -36,12 +57,10 @@ export function ShopPage() {
       );
     }
 
-    // Filter by price range
     filtered = filtered.filter(
       (p) => p.price >= priceRange[0] && p.price <= priceRange[1],
     );
 
-    // Sort
     switch (sortBy) {
       case "price-low":
         filtered.sort((a, b) => a.price - b.price);
@@ -58,9 +77,9 @@ export function ShopPage() {
     }
 
     return filtered;
-  }, [selectedCategory, searchTerm, priceRange, sortBy]);
+  }, [products, selectedCategory, searchTerm, priceRange, sortBy]);
 
-  const handleAddToCart = (product: any) => {
+  const handleAddToCart = (product: Product) => {
     addItem({
       id: product.id,
       name: product.name,
@@ -72,7 +91,7 @@ export function ShopPage() {
     toast.success("Adicionado à sacola!");
   };
 
-  const handleWishlist = (product: any) => {
+  const handleWishlist = (product: Product) => {
     if (isInWishlist(product.id)) {
       removeFromWishlist(product.id);
       toast.success("Removido dos favoritos");

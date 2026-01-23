@@ -1,24 +1,24 @@
-import { create } from "zustand"
-import { persist } from "zustand/middleware"
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 export interface CartItem {
-  id: number
-  name: string
-  price: number
-  image: string
-  quantity: number
-  selectedColor?: string
-  selectedSize?: string
+  id: string;
+  name: string;
+  price: number;
+  image: string;
+  quantity: number;
+  selectedColor?: string;
+  selectedSize?: string;
 }
 
 interface CartStore {
-  items: CartItem[]
-  addItem: (item: CartItem) => void
-  removeItem: (id: number) => void
-  updateQuantity: (id: number, quantity: number) => void
-  clearCart: () => void
-  getTotal: () => number
-  getItemCount: () => number
+  items: CartItem[];
+  addItem: (item: CartItem) => void;
+  removeItem: (id: string) => void;
+  updateQuantity: (id: string, quantity: number) => void;
+  clearCart: () => void;
+  getTotal: () => number;
+  getItemCount: () => number;
 }
 
 export const useCartStore = create<CartStore>()(
@@ -27,15 +27,17 @@ export const useCartStore = create<CartStore>()(
       items: [],
       addItem: (item) =>
         set((state) => {
-          const existingItem = state.items.find((i) => i.id === item.id)
+          const existingItem = state.items.find((i) => i.id === item.id);
           if (existingItem) {
             return {
               items: state.items.map((i) =>
-                i.id === item.id ? { ...i, quantity: i.quantity + item.quantity } : i
+                i.id === item.id
+                  ? { ...i, quantity: i.quantity + item.quantity }
+                  : i
               ),
-            }
+            };
           }
-          return { items: [...state.items, item] }
+          return { items: [...state.items, item] };
         }),
       removeItem: (id) =>
         set((state) => ({
@@ -43,20 +45,25 @@ export const useCartStore = create<CartStore>()(
         })),
       updateQuantity: (id, quantity) =>
         set((state) => ({
-          items: state.items.map((i) => (i.id === id ? { ...i, quantity } : i)),
+          items: state.items.map((i) =>
+            i.id === id ? { ...i, quantity } : i
+          ),
         })),
       clearCart: () => set({ items: [] }),
       getTotal: () => {
-        const state = get()
-        return state.items.reduce((total, item) => total + item.price * item.quantity, 0)
+        const state = get();
+        return state.items.reduce(
+          (total, item) => total + item.price * item.quantity,
+          0
+        );
       },
       getItemCount: () => {
-        const state = get()
-        return state.items.reduce((count, item) => count + item.quantity, 0)
+        const state = get();
+        return state.items.reduce((count, item) => count + item.quantity, 0);
       },
     }),
     {
       name: "cart-store",
     }
   )
-)
+);

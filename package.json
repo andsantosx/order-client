@@ -12,6 +12,8 @@
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-slot": "^1.2.4",
+    "@stripe/react-stripe-js": "^2.7.3",
+    "@stripe/stripe-js": "^4.1.0",
     "axios": "^1.13.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -47,6 +49,10 @@
     "vite": "npm:rolldown-vite@7.2.5"
   },
   "overrides": {
-    "vite": "npm:rolldown-vite@7.2.5"
+    "vite": "npm:rolldown-vite@7.2.5",
+    "@stripe/react-stripe-js": {
+      "react": "$react",
+      "react-dom": "$react-dom"
+    }
   }
 }
