@@ -154,11 +154,11 @@ export function CartSidebar() {
                   })}
                 </span>
               </div>
-              <Link to="/checkout" onClick={() => setIsOpen(false)}>
-                <Button className="w-full h-12 bg-primary text-primary-foreground hover:bg-primary/90">
+              <Button asChild className="w-full h-12 bg-primary text-primary-foreground hover:bg-primary/90">
+                <Link to="/checkout" onClick={() => setIsOpen(false)}>
                   Ir para Checkout
-                </Button>
-              </Link>
+                </Link>
+              </Button>
               <button
                 onClick={() => {
                   clearCart();
