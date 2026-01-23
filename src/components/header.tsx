@@ -1,39 +1,45 @@
-import { useState, useEffect } from "react"
-import { Search, Menu, X, Heart } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { useState, useEffect } from "react";
+import { Search, Menu, X, Heart, ShoppingBag } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Sheet,
   SheetContent,
   SheetTrigger,
   SheetTitle,
-} from "@/components/ui/sheet"
-import { useWishlistStore } from "@/store/wishlistStore"
+} from "@/components/ui/sheet";
+import { useWishlistStore } from "@/store/wishlistStore";
+import { useCartStore } from "@/store/cartStore";
 
 const navLinks = [
   { name: "Loja", href: "/loja" },
   { name: "Novidades", href: "/loja?sort=newest" },
   { name: "Favoritos", href: "/favoritos" },
   { name: "Contato", href: "#contato" },
-]
+];
 
 export function Header() {
-  const [isSearchOpen, setIsSearchOpen] = useState(false)
-  const [scrolled, setScrolled] = useState(false)
-  const { items: wishlistItems } = useWishlistStore()
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const { items: wishlistItems } = useWishlistStore();
+  const { items: cartItems, toggleCart } = useCartStore();
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 50)
-    }
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+      setScrolled(window.scrollY > 50);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-      scrolled ? "bg-background/80 backdrop-blur-xl border-b border-border" : "bg-transparent"
-    }`}>
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        scrolled
+          ? "bg-background/80 backdrop-blur-xl border-b border-border"
+          : "bg-transparent"
+      }`}
+    >
       <div className="mx-auto flex h-20 max-w-[1400px] items-center justify-between px-6 lg:px-10">
         {/* Logo */}
         <a href="/" className="flex items-center group">
@@ -93,8 +99,15 @@ export function Header() {
             )}
           </div>
 
-          <Button variant="ghost" size="icon" className="relative hover:bg-secondary/50 rounded-full h-10 w-10">
-            <a href="/favoritos" className="flex items-center justify-center w-full h-full">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative hover:bg-secondary/50 rounded-full h-10 w-10"
+          >
+            <a
+              href="/favoritos"
+              className="flex items-center justify-center w-full h-full"
+            >
               <Heart className="h-5 w-5" />
               {wishlistItems.length > 0 && (
                 <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
@@ -105,15 +118,39 @@ export function Header() {
             <span className="sr-only">Favoritos</span>
           </Button>
 
+          {/* Cart Button */}
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="relative hover:bg-secondary/50 rounded-full h-10 w-10"
+            onClick={toggleCart}
+          >
+            <ShoppingBag className="h-5 w-5" />
+            {cartItems.length > 0 && (
+              <span className="absolute top-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-primary-foreground">
+                {cartItems.reduce((sum, item) => sum + item.quantity, 0)}
+              </span>
+            )}
+            <span className="sr-only">Carrinho</span>
+          </Button>
+
           {/* Mobile Menu */}
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="lg:hidden hover:bg-secondary/50 rounded-full h-10 w-10">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="lg:hidden hover:bg-secondary/50 rounded-full h-10 w-10"
+              >
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-full max-w-md bg-background/95 backdrop-blur-xl border-border">
+            <SheetContent
+              side="right"
+              className="w-full max-w-md bg-background/95 backdrop-blur-xl border-border"
+            >
               <SheetTitle className="sr-only">Menu de navegacao</SheetTitle>
               <div className="flex flex-col gap-8 pt-12">
                 <div className="flex items-center gap-3 bg-secondary/30 px-4 py-3 rounded-2xl border border-border">
@@ -133,7 +170,9 @@ export function Header() {
                       style={{ animationDelay: `${index * 50}ms` }}
                     >
                       {link.name}
-                      <span className="text-sm font-sans text-muted-foreground group-hover:text-primary transition-colors">0{index + 1}</span>
+                      <span className="text-sm font-sans text-muted-foreground group-hover:text-primary transition-colors">
+                        0{index + 1}
+                      </span>
                     </a>
                   ))}
                 </nav>
@@ -143,5 +182,5 @@ export function Header() {
         </div>
       </div>
     </header>
-  )
+  );
 }

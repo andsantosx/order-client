@@ -13,6 +13,9 @@ export interface CartItem {
 
 interface CartStore {
   items: CartItem[];
+  isCartOpen: boolean; // Estado de visibilidade
+  toggleCart: () => void; // Ação para abrir/fechar
+  closeCart: () => void; // Ação para fechar
   addItem: (item: CartItem) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
@@ -25,6 +28,9 @@ export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
       items: [],
+      isCartOpen: false,
+      toggleCart: () => set((state) => ({ isCartOpen: !state.isCartOpen })),
+      closeCart: () => set({ isCartOpen: false }),
       addItem: (item) =>
         set((state) => {
           const existingItem = state.items.find((i) => i.id === item.id);
@@ -64,6 +70,8 @@ export const useCartStore = create<CartStore>()(
     }),
     {
       name: "cart-store",
+      // Impede que o estado 'isCartOpen' seja salvo no localStorage
+      partialize: (state) => ({ items: state.items }),
     }
   )
 );

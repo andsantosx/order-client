@@ -1,44 +1,33 @@
 import { useCartStore } from "@/store/cartStore";
 import { ShoppingBag, Trash2, Plus, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
 import { Link } from "react-router-dom";
 
 export function CartSidebar() {
-  const { items, removeItem, updateQuantity, getTotal, clearCart } =
-    useCartStore();
-  const [isOpen, setIsOpen] = useState(false);
+  const {
+    items,
+    removeItem,
+    updateQuantity,
+    getTotal,
+    clearCart,
+    isCartOpen,
+    closeCart,
+  } = useCartStore();
 
   return (
     <>
-      {/* Cart Icon Button */}
-      <Button
-        type="button" // Adicionado para garantir que não seja tratado como submit
-        variant="ghost"
-        size="icon"
-        className="relative hover:bg-secondary/50 rounded-full h-10 w-10"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <ShoppingBag className="h-5 w-5" />
-        {items.length > 0 && (
-          <span className="absolute top-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-primary-foreground">
-            {items.reduce((sum, item) => sum + item.quantity, 0)}
-          </span>
-        )}
-      </Button>
-
       {/* Sidebar Overlay */}
-      {isOpen && (
+      {isCartOpen && (
         <div
           className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
-          onClick={() => setIsOpen(false)}
+          onClick={closeCart}
         />
       )}
 
       {/* Cart Sidebar */}
       <div
         className={`fixed right-0 top-0 h-screen w-full max-w-md bg-background border-l border-border shadow-xl transform transition-transform duration-300 z-50 ${
-          isOpen ? "translate-x-0" : "translate-x-full"
+          isCartOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         <div className="flex flex-col h-full">
@@ -46,7 +35,7 @@ export function CartSidebar() {
           <div className="flex items-center justify-between p-6 border-b border-border">
             <h2 className="text-2xl font-bold text-foreground">Sacola</h2>
             <button
-              onClick={() => setIsOpen(false)}
+              onClick={closeCart}
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
               ✕
@@ -156,14 +145,14 @@ export function CartSidebar() {
                 </span>
               </div>
               <Button asChild className="w-full h-12 bg-primary text-primary-foreground hover:bg-primary/90">
-                <Link to="/checkout" onClick={() => setIsOpen(false)}>
+                <Link to="/checkout" onClick={closeCart}>
                   Ir para Checkout
                 </Link>
               </Button>
               <button
                 onClick={() => {
                   clearCart();
-                  setIsOpen(false);
+                  closeCart();
                 }}
                 className="w-full py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
