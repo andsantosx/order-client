@@ -4,7 +4,7 @@ export function Products() {
     return (
         <div>
             <h1>Products</h1>
-            <Button>Click me</Button>
+            <Button>TESTE SOMENTE</Button>
         </div>
     )
 }
