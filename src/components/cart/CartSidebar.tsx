@@ -13,6 +13,7 @@ export function CartSidebar() {
     <>
       {/* Cart Icon Button */}
       <Button
+        type="button" // Adicionado para garantir que não seja tratado como submit
         variant="ghost"
         size="icon"
         className="relative hover:bg-secondary/50 rounded-full h-10 w-10"
