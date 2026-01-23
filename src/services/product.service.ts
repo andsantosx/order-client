@@ -7,6 +7,8 @@ export const productService = {
         return data.map((item: any) => ({
             ...item,
             price: item.price_cents / 100,
+            colors: item.colors || [],
+            sizes: item.sizes || [],
         }));
     },
 
@@ -15,6 +17,8 @@ export const productService = {
         return {
             ...data,
             price: data.price_cents / 100,
+            colors: data.colors || [],
+            sizes: data.sizes || [],
         };
     },
 
