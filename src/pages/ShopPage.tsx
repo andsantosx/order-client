@@ -6,7 +6,7 @@ import { useWishlistStore } from "@/store/wishlistStore";
 import toast from "react-hot-toast";
 import type { Product } from "@/types";
 
-const API_URL = import.meta.env.VITE_API_BASE_URL;
+import { productService } from "@/services/product.service";
 
 export function ShopPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -26,12 +26,10 @@ export function ShopPage() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/products`);
-        const data = await response.json();
-        const productsWithPrice = data.map((p: any) => ({ ...p, price: p.price_cents / 100 }));
-        setProducts(productsWithPrice);
+        const data = await productService.getAll();
+        setProducts(data);
 
-        const uniqueCategories = Array.from(new Set(productsWithPrice.map((p: Product) => p.category)));
+        const uniqueCategories = Array.from(new Set(data.map((p: Product) => p.category)));
         setCategories(uniqueCategories.map((c: any) => ({ id: c, name: c, icon: "🛍️" })));
       } catch (error) {
         console.error("Failed to fetch products:", error);
@@ -148,11 +146,10 @@ export function ShopPage() {
               <div className="space-y-2">
                 <button
                   onClick={() => setSelectedCategory("")}
-                  className={`w-full text-left px-4 py-2 rounded-lg transition-colors ${
-                    selectedCategory === ""
-                      ? "bg-primary text-primary-foreground"
-                      : "hover:bg-secondary text-foreground"
-                  }`}
+                  className={`w-full text-left px-4 py-2 rounded-lg transition-colors ${selectedCategory === ""
+                    ? "bg-primary text-primary-foreground"
+                    : "hover:bg-secondary text-foreground"
+                    }`}
                 >
                   Todas
                 </button>
@@ -160,11 +157,10 @@ export function ShopPage() {
                   <button
                     key={cat.id}
                     onClick={() => setSelectedCategory(cat.name)}
-                    className={`w-full text-left px-4 py-2 rounded-lg transition-colors ${
-                      selectedCategory === cat.name
-                        ? "bg-primary text-primary-foreground"
-                        : "hover:bg-secondary text-foreground"
-                    }`}
+                    className={`w-full text-left px-4 py-2 rounded-lg transition-colors ${selectedCategory === cat.name
+                      ? "bg-primary text-primary-foreground"
+                      : "hover:bg-secondary text-foreground"
+                      }`}
                   >
                     <span className="mr-2">{cat.icon}</span>
                     {cat.name}
@@ -242,19 +238,17 @@ export function ShopPage() {
                       <img
                         src={product.image}
                         alt={product.name}
-                        className={`w-full h-full object-cover transition-all duration-500 ${
-                          hoveredId === product.id ? "scale-110" : "scale-100"
-                        }`}
+                        className={`w-full h-full object-cover transition-all duration-500 ${hoveredId === product.id ? "scale-110" : "scale-100"
+                          }`}
                       />
 
                       {/* Tag */}
                       {product.tag && (
                         <div
-                          className={`absolute top-4 left-4 px-3 py-1.5 rounded-full text-xs font-medium backdrop-blur-sm ${
-                            product.tag.includes("%")
-                              ? "bg-primary text-primary-foreground"
-                              : "bg-secondary/80 text-foreground border border-border"
-                          }`}
+                          className={`absolute top-4 left-4 px-3 py-1.5 rounded-full text-xs font-medium backdrop-blur-sm ${product.tag.includes("%")
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-secondary/80 text-foreground border border-border"
+                            }`}
                         >
                           {product.tag}
                         </div>
@@ -269,17 +263,15 @@ export function ShopPage() {
 
                       {/* Actions */}
                       <div
-                        className={`absolute inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center gap-3 transition-opacity duration-300 ${
-                          hoveredId === product.id ? "opacity-100" : "opacity-0"
-                        }`}
+                        className={`absolute inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center gap-3 transition-opacity duration-300 ${hoveredId === product.id ? "opacity-100" : "opacity-0"
+                          }`}
                       >
                         <button
                           onClick={() => handleWishlist(product)}
-                          className={`p-3 rounded-full transition-all ${
-                            isInWishlist(product.id)
-                              ? "bg-destructive text-white"
-                              : "bg-white/20 text-white hover:bg-white/30"
-                          }`}
+                          className={`p-3 rounded-full transition-all ${isInWishlist(product.id)
+                            ? "bg-destructive text-white"
+                            : "bg-white/20 text-white hover:bg-white/30"
+                            }`}
                         >
                           <Heart
                             className={`h-5 w-5 ${isInWishlist(product.id) ? "fill-current" : ""}`}

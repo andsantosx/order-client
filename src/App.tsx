@@ -1,8 +1,8 @@
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
-import { Header } from "@/components/header";
+import { Header } from "@/components/layout/header";
 import { CartSidebar } from "@/components/cart/CartSidebar";
-import { Footer } from "@/components/footer";
+import { Footer } from "@/components/layout/footer";
 import { HomePage } from "@/pages/HomePage";
 import { ShopPage } from "@/pages/ShopPage";
 import { ProductDetailPage } from "@/pages/ProductDetailPage";

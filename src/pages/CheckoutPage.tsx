@@ -1,3 +1,5 @@
+import { orderService } from "@/services/order.service";
+import { paymentService } from "@/services/payment.service";
 import { useCartStore } from "@/store/cartStore";
 import { Button } from "@/components/ui/button";
 import { loadStripe } from "@stripe/stripe-js";
@@ -6,7 +8,6 @@ import { CheckoutForm } from "@/components/CheckoutForm";
 import { useState } from "react";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
-const API_URL = import.meta.env.VITE_API_BASE_URL;
 
 export function CheckoutPage() {
   const { items, getTotal } = useCartStore();
@@ -14,31 +15,14 @@ export function CheckoutPage() {
 
   const handleCheckout = async () => {
     try {
-      const orderResponse = await fetch(`${API_URL}/api/orders`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          items: items.map((item) => ({
-            productId: item.id,
-            quantity: item.quantity,
-          })),
-        }),
-      });
-      const order = await orderResponse.json();
-
-      const paymentIntentResponse = await fetch(
-        `${API_URL}/api/payments/create-intent`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ orderId: order.id }),
-        }
+      const order = await orderService.create(
+        items.map((item) => ({
+          productId: item.id,
+          quantity: item.quantity,
+        }))
       );
-      const { clientSecret } = await paymentIntentResponse.json();
+
+      const { clientSecret } = await paymentService.createIntent(order.id);
       setClientSecret(clientSecret);
     } catch (error) {
       console.error("Checkout failed:", error);
