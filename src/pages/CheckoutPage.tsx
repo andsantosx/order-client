@@ -5,7 +5,7 @@ import { Elements } from "@stripe/react-stripe-js";
 import { CheckoutForm } from "@/components/CheckoutForm";
 import { useState } from "react";
 
-const stripePromise = loadStripe("pk_test_51PbpP5RpHc3QYzr5Yf2jL9C7o6nL3d3S2Nej0t8waL3LP2T8l7HkkljR1ekT5b5t5X5f5X5f5X5f5X5f");
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 const API_URL = import.meta.env.VITE_API_BASE_URL;
 
 export function CheckoutPage() {
