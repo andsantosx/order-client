@@ -3,9 +3,8 @@ import { ShoppingBag, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useCartStore } from "@/store/cartStore";
 import toast from "react-hot-toast";
-import type { Product } from "@/types";
 
-import { getAll as getAllProducts } from "@/services/product/getAll";
+import { getAll as getAllProducts, type Product } from "@/services/product/getAll";
 
 export function ShopPage() {
   const [products, setProducts] = useState<Product[]>([]);

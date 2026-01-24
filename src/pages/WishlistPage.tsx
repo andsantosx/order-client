@@ -13,7 +13,6 @@ export function WishlistPage() {
       id: item.id,
       name: item.name,
       price: item.price,
-      image: item.image,
       quantity: 1,
     })
     removeItem(item.id)
@@ -51,22 +50,16 @@ export function WishlistPage() {
                   key={item.id}
                   className="group rounded-2xl border border-border bg-card overflow-hidden hover:shadow-lg transition-all"
                 >
-                  {/* Image */}
-                  <div className="relative aspect-[3/4] overflow-hidden bg-muted">
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
-
                   {/* Content */}
-                  <div className="p-4 space-y-3">
-                    <h3 className="font-semibold text-foreground line-clamp-2">{item.name}</h3>
+                  <div className="p-6 space-y-3">
+                    <h3 className="font-semibold text-foreground text-lg line-clamp-2">{item.name}</h3>
                     <p className="text-xl font-bold text-primary">
-                      R$ {item.price.toLocaleString("pt-BR")}
+                      {new Intl.NumberFormat("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                      }).format(item.price)}
                     </p>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 pt-2">
                       <button
                         onClick={() => handleMoveToCart(item)}
                         className="flex-1 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-semibold flex items-center justify-center gap-2"

@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react"
 import { ShoppingBag } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { getAll as getAllProducts } from "@/services/product/getAll"
-import type { Product } from "@/types"
+import { getAll as getAllProducts, type Product } from "@/services/product/getAll"
 import { useCartStore } from "@/store/cartStore"
 import toast from "react-hot-toast"
 
