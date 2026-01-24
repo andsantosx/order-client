@@ -1,22 +1,16 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-
-const API_URL = import.meta.env.VITE_API_BASE_URL;
+import { create } from "@/services/product/create";
 
 export function CreateProductPage() {
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [stock, setStock] = useState("");
-  const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("");
-  const [image, setImage] = useState("");
-  const [colors, setColors] = useState(""); // comma-separated
-  const [sizes, setSizes] = useState(""); // comma-separated
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,29 +20,10 @@ export function CreateProductPage() {
       price_cents: Math.round(parseFloat(price) * 100),
       currency: "BRL",
       stock: parseInt(stock, 10),
-      description,
-      category,
-      image,
-      colors: colors.split(",").map((c) => c.trim()),
-      sizes: sizes.split(",").map((s) => s.trim()),
-      rating: 0,
-      reviews: 0,
     };
 
     try {
-      const response = await fetch(`${API_URL}/api/products`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(productData),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to create product");
-      }
-
-      const newProduct = await response.json();
+      const newProduct = await create(productData);
       toast.success("Produto criado com sucesso!");
       navigate(`/produto/${newProduct.id}`);
     } catch (error) {
@@ -98,48 +73,6 @@ export function CreateProductPage() {
                 required
               />
             </div>
-          </div>
-          <div>
-            <label className="text-sm font-semibold text-foreground mb-2 block">
-              Categoria
-            </label>
-            <Input
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label className="text-sm font-semibold text-foreground mb-2 block">
-              URL da Imagem
-            </label>
-            <Input
-              value={image}
-              onChange={(e) => setImage(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label className="text-sm font-semibold text-foreground mb-2 block">
-              Descrição
-            </label>
-            <Textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label className="text-sm font-semibold text-foreground mb-2 block">
-              Cores (separadas por vírgula)
-            </label>
-            <Input value={colors} onChange={(e) => setColors(e.target.value)} />
-          </div>
-          <div>
-            <label className="text-sm font-semibold text-foreground mb-2 block">
-              Tamanhos (separados por vírgula)
-            </label>
-            <Input value={sizes} onChange={(e) => setSizes(e.target.value)} />
           </div>
           <Button type="submit" className="w-full h-12">
             Criar Produto

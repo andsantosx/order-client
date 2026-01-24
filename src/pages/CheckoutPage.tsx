@@ -1,5 +1,5 @@
-import { orderService } from "@/services/order.service";
-import { paymentService } from "@/services/payment.service";
+import { create as createOrder } from "@/services/order/create";
+import { create as createPaymentIntent } from "@/services/payment/create";
 import { useCartStore } from "@/store/cartStore";
 import { Button } from "@/components/ui/button";
 import { loadStripe } from "@stripe/stripe-js";
@@ -15,14 +15,14 @@ export function CheckoutPage() {
 
   const handleCheckout = async () => {
     try {
-      const order = await orderService.create(
+      const order = await createOrder(
         items.map((item) => ({
           productId: item.id,
           quantity: item.quantity,
         }))
       );
 
-      const { clientSecret } = await paymentService.createIntent(order.id);
+      const { clientSecret } = await createPaymentIntent(order.id);
       setClientSecret(clientSecret);
     } catch (error) {
       console.error("Checkout failed:", error);
