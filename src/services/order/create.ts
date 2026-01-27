@@ -1,6 +1,20 @@
 import { apiClient } from "@/lib/api-client";
 import type { OrderResponse } from "./getById";
 
+export interface ShippingAddress {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+}
+
+export interface OrderRequest {
+    items: OrderRequestItem[];
+    guestEmail: string;
+    shippingAddress: ShippingAddress;
+}
+
 export interface OrderRequestItem {
     productId: string;
     quantity: number;
@@ -29,7 +43,7 @@ function mapOrderResponse(data: ApiOrderResponse): OrderResponse {
     };
 }
 
-export const create = async (items: OrderRequestItem[]): Promise<OrderResponse> => {
-    const { data } = await apiClient.post<ApiOrderResponse>("/api/orders", { items });
+export const create = async (orderData: OrderRequest): Promise<OrderResponse> => {
+    const { data } = await apiClient.post<ApiOrderResponse>("/api/orders", orderData);
     return mapOrderResponse(data);
 };

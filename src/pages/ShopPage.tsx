@@ -139,6 +139,21 @@ export function ShopPage() {
                 className="group relative rounded-xl border bg-card text-card-foreground shadow-sm hover:shadow-md transition-shadow"
               >
                 <div className="p-6">
+                  {/* Product Image */}
+                  <div className="aspect-square mb-4 overflow-hidden rounded-lg bg-gray-100">
+                    {product.image ? (
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="h-full w-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-gray-400">
+                        Sem Imagem
+                      </div>
+                    )}
+                  </div>
+
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <h3 className="font-semibold text-lg leading-none tracking-tight mb-2">

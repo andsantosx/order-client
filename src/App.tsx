@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { Header } from "@/components/layout/header";
 import { CartSidebar } from "@/components/cart/CartSidebar";
@@ -13,9 +13,19 @@ import { CheckoutPage } from "@/pages/CheckoutPage";
 import { OrderConfirmationPage } from "@/pages/OrderConfirmationPage";
 import { CreateProductPage } from "@/pages/CreateProductPage";
 
+import { LoginPage } from "@/pages/LoginPage";
+import { RegisterPage } from "@/pages/RegisterPage";
+import { MyOrdersPage } from "@/pages/MyOrdersPage";
+import { AdminDashboardPage } from "@/pages/admin/AdminDashboardPage";
+import { AdminProductsPage } from "@/pages/admin/AdminProductsPage";
+import { AdminOrdersPage } from "@/pages/admin/AdminOrdersPage";
+import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
+
 function AppContent() {
   const location = useLocation();
   const isHomePage = location.pathname === "/";
+  // Hide footer on admin pages
+  const isAdminPage = location.pathname.startsWith("/admin");
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -23,21 +33,36 @@ function AppContent() {
       <CartSidebar />
       <div className="flex-1">
         <Routes>
+          {/* Public Routes */}
           <Route path="/" element={<HomePage />} />
           <Route path="/loja" element={<ShopPage />} />
-          <Route path="/produto/novo" element={<CreateProductPage />} />
           <Route path="/produto/:id" element={<ProductDetailPage />} />
-          <Route path="/favoritos" element={<WishlistPage />} />
           <Route path="/sobre" element={<AboutPage />} />
           <Route path="/contato" element={<ContactPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
-          <Route
-            path="/order-confirmation"
-            element={<OrderConfirmationPage />}
-          />
+          <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+
+          {/* Customer Routes */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/meus-pedidos" element={<MyOrdersPage />} />
+            <Route path="/favoritos" element={<WishlistPage />} />
+          </Route>
+
+          {/* Admin Routes */}
+          <Route element={<ProtectedRoute requireAdmin />}>
+            <Route path="/admin" element={<AdminDashboardPage />}>
+              <Route index element={<Navigate to="/admin/products" replace />} />
+              <Route path="products" element={<AdminProductsPage />} />
+              <Route path="orders" element={<AdminOrdersPage />} />
+            </Route>
+            <Route path="/produto/novo" element={<CreateProductPage />} />
+          </Route>
+
         </Routes>
       </div>
-      {!isHomePage && <Footer />}
+      {!isHomePage && !isAdminPage && <Footer />}
     </div>
   );
 }

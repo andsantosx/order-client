@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Search, Menu, X, Heart, ShoppingBag } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/sheet";
 import { useWishlistStore } from "@/store/wishlistStore";
 import { useCartStore } from "@/store/cartStore";
+import { useAuthStore } from "@/store/authStore";
+import { Search, Menu, X, Heart, ShoppingBag, User as UserIcon } from "lucide-react";
 
 const navLinks = [
   { name: "Loja", href: "/loja" },
@@ -23,6 +25,7 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const { items: wishlistItems } = useWishlistStore();
   const { items: cartItems, toggleCart } = useCartStore();
+  const { user, logout } = useAuthStore();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -34,11 +37,10 @@ export function Header() {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        scrolled
-          ? "bg-background/80 backdrop-blur-xl border-b border-border"
-          : "bg-transparent"
-      }`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled
+        ? "bg-background/80 backdrop-blur-xl border-b border-border"
+        : "bg-transparent"
+        }`}
     >
       <div className="mx-auto flex h-20 max-w-[1400px] items-center justify-between px-6 lg:px-10">
         {/* Logo */}
@@ -117,6 +119,41 @@ export function Header() {
             </a>
             <span className="sr-only">Favoritos</span>
           </Button>
+
+          {/* User Menu */}
+          {user ? (
+            <div className="relative group">
+              <button className="flex items-center justify-center h-10 w-10 rounded-full hover:bg-secondary/50">
+                <UserIcon className="h-5 w-5" />
+              </button>
+              {/* Simple Dropdown for demo, ideal would be Radix DropdownMenu */}
+              <div className="absolute right-0 top-full mt-2 w-48 bg-card border border-border rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                <div className="p-2">
+                  <div className="px-2 py-1.5 text-sm font-semibold border-b mb-1">
+                    {user.name}
+                  </div>
+                  {user.isAdmin ? (
+                    <a href="/admin" className="block px-2 py-1.5 text-sm hover:bg-secondary rounded">Painel Admin</a>
+                  ) : (
+                    <a href="/meus-pedidos" className="block px-2 py-1.5 text-sm hover:bg-secondary rounded">Meus Pedidos</a>
+                  )}
+                  <button
+                    onClick={() => { logout(); window.location.href = "/"; }}
+                    className="w-full text-left px-2 py-1.5 text-sm text-destructive hover:bg-destructive/10 rounded mt-1"
+                  >
+                    Sair
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <Button variant="ghost" size="icon" className="hover:bg-secondary/50 rounded-full h-10 w-10" asChild>
+              <a href="/login">
+                <UserIcon className="h-5 w-5" />
+                <span className="sr-only">Entrar</span>
+              </a>
+            </Button>
+          )}
 
           {/* Cart Button */}
           <Button

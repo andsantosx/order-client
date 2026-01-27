@@ -4,13 +4,12 @@ import { ShoppingBag, Truck, RotateCcw, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/cartStore";
 import toast from "react-hot-toast";
-import type { Product } from "@/services/product/getAll";
+import type { Product } from "@/services/product/getById";
+import { getById as getProductById } from "@/services/product/getById";
 
-const API_URL = import.meta.env.VITE_API_BASE_URL;
 
 export function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
-  // We need to allow partial product or cast response because API returns price_cents
   const [product, setProduct] = useState<Product | null>(null);
   const [quantity, setQuantity] = useState(1);
   const { addItem } = useCartStore();
@@ -18,27 +17,16 @@ export function ProductDetailPage() {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/products/${id}`);
-        const data = await response.json();
-
-        // Map API response to UI Product type
-        const productData: Product = {
-          id: data.id,
-          name: data.name,
-          price: typeof data.price_cents === 'string' ? parseFloat(data.price_cents) / 100 : data.price_cents / 100,
-          stock: data.stock
-        };
-
-        setProduct(productData);
+        if (!id) return;
+        const data = await getProductById(id);
+        setProduct(data);
       } catch (error) {
         console.error("Failed to fetch product:", error);
         toast.error("Não foi possível carregar o produto.");
       }
     };
 
-    if (id) {
-      fetchProduct();
-    }
+    fetchProduct();
   }, [id]);
 
   if (!product) {

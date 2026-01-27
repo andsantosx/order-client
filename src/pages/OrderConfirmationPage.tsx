@@ -8,16 +8,19 @@ export function OrderConfirmationPage() {
   const [status, setStatus] = useState<string | null>(null);
 
   useEffect(() => {
+    // Check for Mercado Pago params or internal state
     const searchParams = new URLSearchParams(location.search);
-    const paymentIntentClientSecret = searchParams.get(
-      "payment_intent_client_secret"
-    );
+    const paymentId = searchParams.get("payment_id"); // Mercado Pago adds this
+    const statusParam = searchParams.get("status"); // Mercado Pago adds this
+    const orderIdState = location.state?.orderId;
 
-    if (paymentIntentClientSecret) {
-      // Here you would typically verify the payment status with your backend
-      // For this example, we'll just assume it's successful
+    if (paymentId && statusParam === 'approved') {
       setStatus("success");
       clearCart();
+    } else if (orderIdState) {
+      // Came from our internal navigation after MP Brick success
+      setStatus("success");
+      // clearCart() is already called in CheckoutPage, but doing it again is harmless
     } else {
       setStatus("error");
     }
