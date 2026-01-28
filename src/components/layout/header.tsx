@@ -135,7 +135,7 @@ export function Header() {
                   {user.isAdmin ? (
                     <a href="/admin" className="block px-2 py-1.5 text-sm hover:bg-secondary rounded">Painel Admin</a>
                   ) : (
-                    <a href="/meus-pedidos" className="block px-2 py-1.5 text-sm hover:bg-secondary rounded">Meus Pedidos</a>
+                    <a href="/profile" className="block px-2 py-1.5 text-sm hover:bg-secondary rounded">Minha Conta</a>
                   )}
                   <button
                     onClick={() => { logout(); window.location.href = "/"; }}

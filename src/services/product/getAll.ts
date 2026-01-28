@@ -11,29 +11,42 @@ export interface Product {
 export interface ProductResponse {
     id: string;
     name: string;
-    price_cents: string | number;
-    currency: string;
-    // stock removed from backend, using sizes instead
+    price_cents: number;
     images: { id: number; url: string }[];
+    sizes: { id: number; quantity: number; size: { id: number; name: string } }[];
 }
 
-interface PaginatedResponse {
+export interface ProductQueryParams {
+    search?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    sortBy?: string;
+}
+
+export interface PaginatedProductResponse {
     data: ProductResponse[];
     total: number;
     page: number;
     limit: number;
 }
 
-export const getAll = async (): Promise<Product[]> => {
-    const response = await apiClient.get<PaginatedResponse>("/api/products");
-    // axios returns data in response.data
-    const { data } = response.data;
+export const getAll = async (params: ProductQueryParams = {}): Promise<Product[]> => {
+    const queryParams: any = {};
+    if (params.search) queryParams.search = params.search;
+    // API docs specify camelCase for price params
+    if (params.minPrice !== undefined) queryParams.minPrice = params.minPrice * 100; // API expects cents
+    if (params.maxPrice !== undefined) queryParams.maxPrice = params.maxPrice * 100; // API expects cents
+    if (params.sortBy) queryParams.sort = params.sortBy;
 
-    return data.map((item) => ({
+    const { data } = await apiClient.get<PaginatedProductResponse>("/api/products", {
+        params: queryParams
+    });
+
+    return data.data.map((item) => ({
         id: item.id,
         name: item.name,
-        price: typeof item.price_cents === 'string' ? parseFloat(item.price_cents) / 100 : item.price_cents / 100,
-        stock: 10, // Default stock as it is now managed by sizes
+        price: (item.price_cents || 0) / 100, // Convert cents to float, safe fallback
+        stock: (item.sizes || []).reduce((acc, size) => acc + (size.quantity || 0), 0), // Sum stock from sizes, safe fallback
         image: item.images?.[0]?.url
     }));
 };

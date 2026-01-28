@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { apiClient } from "@/lib/api-client";
 import { useAuthStore } from "@/store/authStore";
+import { updateStatus as updateOrderStatus } from "@/services/order/updateStatus";
 import toast from "react-hot-toast";
 
 interface Order {
@@ -53,13 +54,36 @@ export function AdminOrdersPage() {
                                 {new Date(order.created_at).toLocaleDateString()}
                             </td>
                             <td className="py-4">
-                                {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(order.total_amount))}
+                                {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(order.total_amount) / 100)}
                             </td>
                             <td className="py-4">
-                                <span className={`inline-block px-2 py-1 rounded text-xs font-semibold 
-                                ${order.status === 'PAID' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                                    {order.status}
-                                </span>
+                                <div className="flex items-center gap-2">
+                                    <select
+                                        value={order.status}
+                                        onChange={async (e) => {
+                                            const newStatus = e.target.value;
+                                            try {
+                                                const updatedOrder = await updateOrderStatus(order.id, newStatus);
+                                                toast.success("Status atualizado");
+                                                setOrders(orders.map(o => o.id === order.id ? { ...o, status: updatedOrder.status } : o));
+                                            } catch (error) {
+                                                toast.error("Erro ao atualizar status");
+                                            }
+                                        }}
+                                        className={`px-2 py-1 rounded text-xs font-semibold border-none cursor-pointer outline-none
+                                            ${order.status === 'PAID' ? 'bg-green-100 text-green-800' :
+                                                order.status === 'SHIPPED' ? 'bg-blue-100 text-blue-800' :
+                                                    order.status === 'DELIVERED' ? 'bg-purple-100 text-purple-800' :
+                                                        order.status === 'CANCELED' ? 'bg-red-100 text-red-800' :
+                                                            'bg-yellow-100 text-yellow-800'}`}
+                                    >
+                                        <option value="PENDING">PENDING</option>
+                                        <option value="PAID">PAID</option>
+                                        <option value="SHIPPED">SHIPPED</option>
+                                        <option value="DELIVERED">DELIVERED</option>
+                                        <option value="CANCELED">CANCELED</option>
+                                    </select>
+                                </div>
                             </td>
                         </tr>
                     ))}

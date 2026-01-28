@@ -1,12 +1,44 @@
+import { useEffect } from "react"
 import { Heart, ShoppingBag, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useWishlistStore } from "@/store/wishlistStore"
 import { useCartStore } from "@/store/cartStore"
+import { useAuthStore } from "@/store/authStore"
+import { getAll as getWishlistItems } from "@/services/wishlist/getAll"
+import { remove as removeFromWishlist } from "@/services/wishlist/remove"
 import toast from "react-hot-toast"
 
 export function WishlistPage() {
-  const { items, removeItem, clearWishlist } = useWishlistStore()
+  const { items, removeItem, clearWishlist, setItems } = useWishlistStore()
   const { addItem } = useCartStore()
+  const { user } = useAuthStore()
+
+  useEffect(() => {
+    const fetchWishlist = async () => {
+      if (!user) return
+      try {
+        const apiItems = await getWishlistItems()
+        setItems(apiItems)
+      } catch (error) {
+        console.error("Failed to sync wishlist", error)
+        // Optionally keep local items if API fails, or show error
+      }
+    }
+    fetchWishlist()
+  }, [user, setItems])
+
+  const handleRemove = async (id: string) => {
+    if (user) {
+      try {
+        await removeFromWishlist(id)
+      } catch (error) {
+        toast.error("Erro ao remover do backend")
+        return // Don't remove locally if backend failed? Or optimistic?
+        // Let's be optimistic usually, but here simple is fine
+      }
+    }
+    removeItem(id)
+  }
 
   const handleMoveToCart = (item: any) => {
     addItem({
@@ -14,8 +46,9 @@ export function WishlistPage() {
       name: item.name,
       price: item.price,
       quantity: 1,
+      imageUrl: item.image,
     })
-    removeItem(item.id)
+    handleRemove(item.id)
     toast.success("Movido para a sacola!")
   }
 
@@ -68,7 +101,7 @@ export function WishlistPage() {
                         Adicionar
                       </button>
                       <button
-                        onClick={() => removeItem(item.id)}
+                        onClick={() => handleRemove(item.id)}
                         className="px-4 py-2 rounded-lg border border-border text-muted-foreground hover:text-destructive hover:border-destructive transition-colors"
                       >
                         <Trash2 className="h-4 w-4" />

@@ -22,11 +22,7 @@ export function LoginPage() {
             setAuth(response.user, response.token);
             toast.success(`Bem-vindo, ${response.user.name}!`);
 
-            if (response.user.isAdmin) {
-                navigate("/admin/dashboard");
-            } else {
-                navigate("/");
-            }
+            navigate("/");
         } catch (error) {
             console.error("Login failed:", error);
             toast.error("Email ou senha inválidos.");

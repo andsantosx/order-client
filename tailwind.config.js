@@ -27,6 +27,9 @@ export default {
       borderRadius: {
         lg: "var(--radius)",
       },
+      fontFamily: {
+        display: ["Inter", "sans-serif"], // Using Inter for now, can be swapped for a more distinctive font later
+      },
     },
   },
   plugins: [],

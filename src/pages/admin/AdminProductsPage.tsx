@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { getAll as getAllProducts, type Product } from "@/services/product/getAll";
+import { remove as deleteProduct } from "@/services/product/delete";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash } from "lucide-react";
 import toast from "react-hot-toast";
@@ -16,17 +18,19 @@ export function AdminProductsPage() {
             const data = await getAllProducts();
             setProducts(data);
         } catch (error) {
+            console.error("Failed to load products:", error);
             toast.error("Erro ao carregar produtos");
         }
     };
 
-    const handleDelete = async () => {
+    const handleDelete = async (id: string) => {
         if (!confirm("Tem certeza que deseja excluir?")) return;
         try {
-            // await deleteProduct(id); // Need to implement delete service
+            await deleteProduct(id);
             toast.success("Produto excluído");
             loadProducts();
         } catch (error) {
+            console.error(error);
             toast.error("Erro ao excluir");
         }
     }
@@ -51,10 +55,12 @@ export function AdminProductsPage() {
                             </td>
                             <td className="py-4">{product.stock}</td>
                             <td className="py-4 text-right space-x-2">
-                                <Button variant="ghost" size="icon" onClick={() => toast("Editar não implementado")}>
-                                    <Edit className="w-4 h-4" />
-                                </Button>
-                                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleDelete()}>
+                                <Link to={`/produto/editar/${product.id}`}>
+                                    <Button variant="ghost" size="icon">
+                                        <Edit className="w-4 h-4" />
+                                    </Button>
+                                </Link>
+                                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleDelete(product.id)}>
                                     <Trash className="w-4 h-4" />
                                 </Button>
                             </td>

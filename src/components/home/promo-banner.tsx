@@ -1,110 +1,92 @@
-import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, Zap, Truck, RotateCcw, Shield } from "lucide-react"
+import { ArrowRight, Star, Truck, ShieldCheck, RefreshCw } from "lucide-react"
 
 const features = [
-  { icon: Zap, label: "Entrega Express", value: "24h" },
-  { icon: Truck, label: "Frete Gratis", value: "+R$299" },
-  { icon: RotateCcw, label: "Devolucao", value: "30 dias" },
-  { icon: Shield, label: "Garantia", value: "1 ano" },
+  {
+    id: "01",
+    icon: Truck,
+    label: "Express Delivery",
+    value: "24H",
+    desc: "Receive your order within 24 hours in major cities."
+  },
+  {
+    id: "02",
+    icon: Star,
+    label: "Premium Quality",
+    value: "100%",
+    desc: "Verified authentic materials and craftsmanship."
+  },
+  {
+    id: "03",
+    icon: RefreshCw,
+    label: "Easy Returns",
+    value: "30D",
+    desc: "Hassle-free returns within 30 days of purchase."
+  },
+  {
+    id: "04",
+    icon: ShieldCheck,
+    label: "Secure Warranty",
+    value: "1YR",
+    desc: "Comprehensive coverage for all manufacturing defects."
+  },
 ]
 
 export function PromoBanner() {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      const rect = document.getElementById("promo-section")?.getBoundingClientRect()
-      if (rect) {
-        setMousePosition({
-          x: ((e.clientX - rect.left) / rect.width - 0.5) * 30,
-          y: ((e.clientY - rect.top) / rect.height - 0.5) * 30,
-        })
-      }
-    }
-    window.addEventListener("mousemove", handleMouseMove)
-    return () => window.removeEventListener("mousemove", handleMouseMove)
-  }, [])
-
   return (
-    <section id="promo-section" className="relative py-32 lg:py-40 overflow-hidden">
-      {/* Animated gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background to-accent/10" />
-      
-      {/* Moving orbs */}
-      <div 
-        className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full bg-primary/20 blur-[150px]"
-        style={{ transform: `translate(${mousePosition.x}px, ${mousePosition.y}px)` }}
-      />
-      <div 
-        className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full bg-accent/15 blur-[120px]"
-        style={{ transform: `translate(${mousePosition.x * -0.5}px, ${mousePosition.y * -0.5}px)` }}
-      />
-      
-      {/* Grid overlay */}
-      <div className="absolute inset-0 opacity-[0.03]" 
-        style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 1px)`,
-          backgroundSize: '40px 40px'
-        }}
-      />
+    <section className="py-24 bg-secondary/30">
+      <div className="mx-auto max-w-[1400px] px-6 lg:px-10">
 
-      <div className="relative z-10 mx-auto max-w-[1400px] px-6 lg:px-10">
-        <div className="text-center mb-20">
-          <p className="text-sm font-medium text-primary tracking-wide mb-4">Por que nos escolher</p>
-          <h2 className="font-[var(--font-display)] text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-foreground mb-6">
-            Experiencia
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
-              Incomparavel
-            </span>
-          </h2>
-          <p className="max-w-2xl mx-auto text-lg text-muted-foreground">
-            Mais do que uma loja, somos um destino para quem busca estilo, qualidade e inovacao.
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-16 gap-8">
+          <div className="max-w-2xl">
+            <p className="text-sm font-bold uppercase tracking-[0.2em] text-muted-foreground mb-4">Why Choose Us</p>
+            <h2 className="font-[var(--font-display)] text-5xl md:text-6xl font-black uppercase tracking-tighter text-foreground leading-[0.9]">
+              Unparalleled<br />Experience
+            </h2>
+          </div>
+          <p className="max-w-md text-lg text-muted-foreground leading-relaxed">
+            More than just a store. A destination for those who seek style, quality, and innovation in every detail.
           </p>
         </div>
 
-        {/* Features Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 border-t border-border">
           {features.map((feature, index) => (
-            <div 
-              key={feature.label}
-              className="group relative p-8 rounded-3xl bg-card/50 backdrop-blur-sm border border-border hover:border-primary/50 transition-all duration-500 hover:-translate-y-2"
+            <div
+              key={feature.id}
+              className={`
+                group relative p-8 border-b border-border 
+                ${index % 2 === 0 ? 'md:border-r' : ''} 
+                lg:border-r lg:last:border-r-0
+              `}
             >
-              <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              
-              <div className="relative">
-                <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
-                  <feature.icon className="h-7 w-7 text-primary" />
-                </div>
-                <p className="font-[var(--font-display)] text-3xl font-bold text-foreground mb-2">{feature.value}</p>
-                <p className="text-muted-foreground">{feature.label}</p>
+              <div className="mb-6 flex justify-between items-start">
+                <span className="font-mono text-sm text-muted-foreground">({feature.id})</span>
+                <feature.icon className="w-6 h-6 text-foreground stroke-[1.5]" />
               </div>
-              
-              {/* Decorative number */}
-              <span className="absolute top-6 right-6 text-6xl font-bold text-foreground/5 font-[var(--font-display)]">
-                0{index + 1}
-              </span>
+
+              <div className="space-y-4">
+                <h3 className="font-[var(--font-display)] text-6xl font-black text-foreground tracking-tighter group-hover:text-primary transition-colors">
+                  {feature.value}
+                </h3>
+                <div>
+                  <p className="font-bold text-lg uppercase tracking-wide mb-1">{feature.label}</p>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{feature.desc}</p>
+                </div>
+              </div>
             </div>
           ))}
         </div>
 
-        {/* CTA */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Button 
-            size="lg" 
-            className="h-14 px-10 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 font-medium"
+        <div className="flex justify-center mt-16">
+          <Button
+            size="lg"
+            className="h-14 px-10 rounded-full bg-foreground text-background hover:bg-foreground/90 font-bold uppercase tracking-widest"
           >
-            Comecar a comprar
-            <ArrowRight className="ml-2 h-5 w-5" />
-          </Button>
-          <Button 
-            variant="outline" 
-            size="lg" 
-            className="h-14 px-10 rounded-full border-border hover:bg-secondary bg-transparent"
-          >
-            Falar com atendimento
+            Start Shopping
+            <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </div>
+
       </div>
     </section>
   )

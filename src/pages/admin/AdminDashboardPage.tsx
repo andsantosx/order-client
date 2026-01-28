@@ -1,11 +1,12 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
-import { Package, ShoppingBag } from "lucide-react";
+import { Package, ShoppingBag, LayoutDashboard } from "lucide-react";
 
 export function AdminDashboardPage() {
     const location = useLocation();
     const currentPath = location.pathname;
 
     const tabs = [
+        { name: "Visão Geral", path: "/admin", icon: LayoutDashboard, exact: true },
         { name: "Produtos", path: "/admin/products", icon: Package },
         { name: "Pedidos", path: "/admin/orders", icon: ShoppingBag },
     ];
@@ -25,9 +26,10 @@ export function AdminDashboardPage() {
                         <Link
                             key={tab.path}
                             to={tab.path}
-                            className={`flex items-center gap-2 px-6 py-3 border-b-2 transition-colors ${currentPath.startsWith(tab.path)
-                                ? "border-primary text-primary font-semibold"
-                                : "border-transparent text-muted-foreground hover:text-foreground"
+                            className={`flex items-center gap-2 px-6 py-3 border-b-2 transition-colors 
+                            ${(tab.exact ? currentPath === tab.path : currentPath.startsWith(tab.path))
+                                    ? "border-primary text-primary font-semibold"
+                                    : "border-transparent text-muted-foreground hover:text-foreground"
                                 }`}
                         >
                             <tab.icon className="w-4 h-4" />

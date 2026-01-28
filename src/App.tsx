@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { Header } from "@/components/layout/header";
 import { CartSidebar } from "@/components/cart/CartSidebar";
@@ -12,14 +12,16 @@ import { AboutPage } from "@/pages/AboutPage";
 import { CheckoutPage } from "@/pages/CheckoutPage";
 import { OrderConfirmationPage } from "@/pages/OrderConfirmationPage";
 import { CreateProductPage } from "@/pages/CreateProductPage";
+import { EditProductPage } from "@/pages/EditProductPage";
 
 import { LoginPage } from "@/pages/LoginPage";
 import { RegisterPage } from "@/pages/RegisterPage";
-import { MyOrdersPage } from "@/pages/MyOrdersPage";
 import { AdminDashboardPage } from "@/pages/admin/AdminDashboardPage";
+import { AdminOverviewPage } from "@/pages/admin/AdminOverviewPage";
 import { AdminProductsPage } from "@/pages/admin/AdminProductsPage";
 import { AdminOrdersPage } from "@/pages/admin/AdminOrdersPage";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
+import { ProfilePage } from "./pages/ProfilePage";
 
 function AppContent() {
   const location = useLocation();
@@ -46,18 +48,19 @@ function AppContent() {
 
           {/* Customer Routes */}
           <Route element={<ProtectedRoute />}>
-            <Route path="/meus-pedidos" element={<MyOrdersPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
             <Route path="/favoritos" element={<WishlistPage />} />
           </Route>
 
           {/* Admin Routes */}
           <Route element={<ProtectedRoute requireAdmin />}>
             <Route path="/admin" element={<AdminDashboardPage />}>
-              <Route index element={<Navigate to="/admin/products" replace />} />
+              <Route index element={<AdminOverviewPage />} />
               <Route path="products" element={<AdminProductsPage />} />
               <Route path="orders" element={<AdminOrdersPage />} />
             </Route>
             <Route path="/produto/novo" element={<CreateProductPage />} />
+            <Route path="/produto/editar/:id" element={<EditProductPage />} />
           </Route>
 
         </Routes>
