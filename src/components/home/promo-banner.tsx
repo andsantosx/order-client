@@ -1,5 +1,4 @@
-import { Button } from "@/components/ui/button"
-import { ArrowRight, Star, Truck, ShieldCheck, RefreshCw } from "lucide-react"
+import { Star, Truck, ShieldCheck, RefreshCw } from "lucide-react"
 
 const features = [
   {

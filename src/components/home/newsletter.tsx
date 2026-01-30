@@ -1,21 +1,4 @@
-import React from "react"
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { ArrowRight, Check, Sparkles } from "lucide-react"
-
 export function Newsletter() {
-  const [email, setEmail] = useState("")
-  const [isSubscribed, setIsSubscribed] = useState(false)
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (email) {
-      setIsSubscribed(true)
-      setEmail("")
-    }
-  }
-
   return (
     <section className="relative py-24 lg:py-32 overflow-hidden">
       {/* Gradient background */}
