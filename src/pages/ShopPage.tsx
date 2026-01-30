@@ -1,4 +1,4 @@
-import { Search, SlidersHorizontal, Plus, Minus, X, Check } from "lucide-react";
+import { SlidersHorizontal, Plus, Minus, X, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/cartStore";
@@ -7,14 +7,18 @@ import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/s
 
 import { getAll as getAllProducts, type Product } from "@/services/product/getAll";
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 export function ShopPage() {
+  const [searchParams] = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Get search and category from URL params
+  const searchFromUrl = searchParams.get("search") || "";
+  const categoryFromUrl = searchParams.get("category") || "";
+
   // Filter States
-  const [searchTerm, setSearchTerm] = useState("");
-  const [activeSearch, setActiveSearch] = useState("");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [activeMinPrice, setActiveMinPrice] = useState<number | undefined>(undefined);
@@ -25,7 +29,6 @@ export function ShopPage() {
 
   // Collapsible sections state
   const [openSections, setOpenSections] = useState({
-    search: true,
     price: true,
     sort: true
   });
@@ -37,13 +40,14 @@ export function ShopPage() {
   // Fetch when filters change
   useEffect(() => {
     fetchProducts();
-  }, [activeSearch, activeMinPrice, activeMaxPrice, sortBy]);
+  }, [searchFromUrl, categoryFromUrl, activeMinPrice, activeMaxPrice, sortBy]);
 
   const fetchProducts = async () => {
     setIsLoading(true);
     try {
       const data = await getAllProducts({
-        search: activeSearch,
+        search: searchFromUrl,
+        category: categoryFromUrl,
         minPrice: activeMinPrice,
         maxPrice: activeMaxPrice,
         sortBy
@@ -57,22 +61,18 @@ export function ShopPage() {
     }
   };
 
-  const handleSearchSubmit = () => {
-    setActiveSearch(searchTerm);
-  };
-
   const applyPriceFilter = () => {
     setActiveMinPrice(minPrice ? Number(minPrice) : undefined);
     setActiveMaxPrice(maxPrice ? Number(maxPrice) : undefined);
   };
 
   const clearFilters = () => {
-    setSearchTerm("");
-    setActiveSearch("");
     setMinPrice("");
     setMaxPrice("");
     setActiveMinPrice(undefined);
     setActiveMaxPrice(undefined);
+    // Redirect to clear search param
+    window.location.href = "/loja";
   };
 
   // Reusable filter content JSX
@@ -80,7 +80,6 @@ export function ShopPage() {
     <div className="space-y-8 h-full flex flex-col">
       {/* Label */}
       <div className="flex items-center justify-between pb-4 border-b border-border shrink-0">
-        <span className="text-xl font-black uppercase tracking-tighter">Filtros</span>
         {isMobile && (
           <SheetClose asChild>
             <Button variant="ghost" size="icon">
@@ -88,37 +87,9 @@ export function ShopPage() {
             </Button>
           </SheetClose>
         )}
-        {!isMobile && <SlidersHorizontal className="w-5 h-5" />}
       </div>
 
       <div className="overflow-y-auto flex-1 pr-2 space-y-6">
-        {/* Search Filter */}
-        <div className="space-y-4">
-          <button
-            onClick={() => toggleSection('search')}
-            className="flex items-center justify-between w-full text-sm font-bold uppercase tracking-wider hover:text-primary transition-colors"
-          >
-            Buscar
-            {openSections.search ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-          </button>
-
-          {openSections.search && (
-            <div className="relative flex gap-2">
-              <div className="relative flex-1">
-                <Input
-                  placeholder="Buscar..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSearchSubmit()}
-                  className="pl-3 bg-secondary/20 border-border focus-visible:ring-primary"
-                />
-              </div>
-              <Button size="icon" onClick={handleSearchSubmit} className="shrink-0 bg-primary text-primary-foreground hover:bg-primary/90">
-                <Search className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
-        </div>
 
         {/* Price Filter */}
         <div className="space-y-6">

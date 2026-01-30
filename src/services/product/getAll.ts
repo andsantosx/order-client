@@ -20,6 +20,7 @@ export interface ProductResponse {
 
 export interface ProductQueryParams {
     search?: string;
+    category?: string;
     minPrice?: number;
     maxPrice?: number;
     sortBy?: string;
@@ -35,6 +36,7 @@ export interface PaginatedProductResponse {
 export const getAll = async (params: ProductQueryParams = {}): Promise<Product[]> => {
     const queryParams: any = {};
     if (params.search) queryParams.search = params.search;
+    if (params.category) queryParams.category = params.category;
     // API docs specify camelCase for price params
     if (params.minPrice !== undefined) queryParams.minPrice = params.minPrice * 100; // API expects cents
     if (params.maxPrice !== undefined) queryParams.maxPrice = params.maxPrice * 100; // API expects cents
