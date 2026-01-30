@@ -20,7 +20,7 @@ export function CheckoutPage() {
   const { user } = useAuthStore();
   const navigate = useNavigate();
 
-  const [step, setStep] = useState<"shipping" | "payment">("shipping");
+  const [step, setStep] = useState<"shipping" | "payment" | "pix">("shipping");
   const [guestEmail, setGuestEmail] = useState(user?.email || "");
   const [shippingAddress, setShippingAddress] = useState({
     street: "",
@@ -30,6 +30,12 @@ export function CheckoutPage() {
     country: "Brasil",
   });
   const [mp, setMp] = useState<any>(null);
+  const [pixData, setPixData] = useState<{
+    qrCodeBase64: string;
+    qrCode: string;
+    expiration: string;
+    orderId: string;
+  } | null>(null);
 
   // Load saved address
   useEffect(() => {
@@ -88,7 +94,7 @@ export function CheckoutPage() {
 
                 const order = await createOrder({
                   items: items.map(i => ({ productId: i.id, quantity: i.quantity })),
-                  guestEmail: guestEmail,
+                  guestEmail: user ? undefined : guestEmail,
                   shippingAddress: shippingAddress
                 });
 
@@ -99,12 +105,38 @@ export function CheckoutPage() {
                   payer: { ...paymentFormData.payer, email: guestEmail }
                 };
 
-                await processPayment(paymentData);
+                console.log("=== PAYMENT DEBUG ===");
+                console.log("paymentFormData from Brick:", paymentFormData);
+                console.log("Final paymentData to API:", paymentData);
+                console.log("payment_method_id:", paymentData.payment_method_id || paymentFormData.payment_method_id);
+                console.log("=====================");
 
-                toast.success("Pagamento realizado com sucesso!");
-                clearCart();
-                navigate("/order-confirmation", { state: { orderId: order.id } });
+                const paymentResponse = await processPayment(paymentData);
 
+                if (paymentResponse.status === 'approved') {
+                  toast.success("Pagamento realizado com sucesso!");
+                  clearCart();
+                  navigate("/order-confirmation", { state: { orderId: order.id } });
+                } else if (paymentResponse.status === 'pending' && paymentResponse.status_detail === 'pending_waiting_transfer') {
+                  // PIX payment - show QR code
+                  const qrCodeBase64 = paymentResponse.point_of_interaction?.transaction_data?.qr_code_base64;
+                  const qrCode = paymentResponse.point_of_interaction?.transaction_data?.qr_code;
+
+                  if (qrCodeBase64 && qrCode) {
+                    setPixData({
+                      qrCodeBase64,
+                      qrCode,
+                      expiration: paymentResponse.date_of_expiration || '',
+                      orderId: order.id
+                    });
+                    setStep("pix");
+                    toast.success("QR Code PIX gerado! Escaneie para pagar.");
+                  } else {
+                    toast.error("Erro ao gerar QR Code PIX. Tente novamente.");
+                  }
+                } else {
+                  toast.error(`Pagamento não aprovado: ${paymentResponse.status_detail || paymentResponse.status}`);
+                }
               } catch (error) {
                 console.error("Payment error:", error);
                 toast.error("Erro ao processar pagamento.");
@@ -233,6 +265,69 @@ export function CheckoutPage() {
                 <Button variant="outline" onClick={() => setStep("shipping")} className="w-full rounded-full">
                   Voltar / Alterar Endereço
                 </Button>
+              </div>
+            )}
+
+            {/* Step 3: PIX QR Code */}
+            {step === 'pix' && pixData && (
+              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center font-bold">✓</div>
+                  <h2 className="text-xl font-bold">Pague com PIX</h2>
+                </div>
+
+                <div className="bg-card p-8 rounded-2xl border border-border text-center space-y-6">
+                  <div className="bg-white p-4 rounded-xl inline-block mx-auto">
+                    <img
+                      src={`data:image/png;base64,${pixData.qrCodeBase64}`}
+                      alt="QR Code PIX"
+                      className="w-64 h-64 mx-auto"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <p className="text-muted-foreground text-sm">Escaneie o QR Code com o app do seu banco</p>
+                    <p className="text-xs text-muted-foreground">
+                      Válido até: {pixData.expiration ? new Date(pixData.expiration).toLocaleString() : 'N/A'}
+                    </p>
+                  </div>
+
+                  <div className="border-t border-border pt-4">
+                    <p className="text-sm text-muted-foreground mb-2">Ou copie o código PIX:</p>
+                    <div className="flex gap-2">
+                      <input
+                        readOnly
+                        value={pixData.qrCode}
+                        className="flex-1 bg-secondary/50 px-3 py-2 rounded text-xs font-mono truncate"
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          navigator.clipboard.writeText(pixData.qrCode);
+                          toast.success("Código PIX copiado!");
+                        }}
+                      >
+                        Copiar
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="pt-4">
+                    <Button
+                      className="w-full rounded-full"
+                      onClick={() => {
+                        clearCart();
+                        navigate("/order-confirmation", { state: { orderId: pixData.orderId } });
+                      }}
+                    >
+                      Já fiz o pagamento
+                    </Button>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      O status será atualizado automaticamente após a confirmação.
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
           </div>

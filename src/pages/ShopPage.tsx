@@ -1,9 +1,9 @@
-import { Search, SlidersHorizontal, Plus, Minus } from "lucide-react";
+import { Search, SlidersHorizontal, Plus, Minus, X, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/cartStore";
 import toast from "react-hot-toast";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 
 import { getAll as getAllProducts, type Product } from "@/services/product/getAll";
 import { useEffect, useState } from "react";
@@ -11,9 +11,16 @@ import { useEffect, useState } from "react";
 export function ShopPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Filter States
   const [searchTerm, setSearchTerm] = useState("");
-  const [priceRange, setPriceRange] = useState([0, 1000]);
+  const [activeSearch, setActiveSearch] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [activeMinPrice, setActiveMinPrice] = useState<number | undefined>(undefined);
+  const [activeMaxPrice, setActiveMaxPrice] = useState<number | undefined>(undefined);
   const [sortBy, setSortBy] = useState("newest");
+
   const { addItem } = useCartStore();
 
   // Collapsible sections state
@@ -27,21 +34,18 @@ export function ShopPage() {
     setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
-  // Debounce search
+  // Fetch when filters change
   useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchProducts();
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [searchTerm, priceRange, sortBy]);
+    fetchProducts();
+  }, [activeSearch, activeMinPrice, activeMaxPrice, sortBy]);
 
   const fetchProducts = async () => {
     setIsLoading(true);
     try {
       const data = await getAllProducts({
-        search: searchTerm,
-        minPrice: priceRange[0],
-        maxPrice: priceRange[1],
+        search: activeSearch,
+        minPrice: activeMinPrice,
+        maxPrice: activeMaxPrice,
         sortBy
       });
       setProducts(data);
@@ -53,104 +57,175 @@ export function ShopPage() {
     }
   };
 
-  // Initial load is handled by the useEffect above due to initial state
+  const handleSearchSubmit = () => {
+    setActiveSearch(searchTerm);
+  };
 
+  const applyPriceFilter = () => {
+    setActiveMinPrice(minPrice ? Number(minPrice) : undefined);
+    setActiveMaxPrice(maxPrice ? Number(maxPrice) : undefined);
+  };
 
-  const FilterContent = () => (
-    <div className="space-y-8">
+  const clearFilters = () => {
+    setSearchTerm("");
+    setActiveSearch("");
+    setMinPrice("");
+    setMaxPrice("");
+    setActiveMinPrice(undefined);
+    setActiveMaxPrice(undefined);
+  };
+
+  // Reusable filter content JSX
+  const renderFilters = (isMobile = false) => (
+    <div className="space-y-8 h-full flex flex-col">
       {/* Label */}
-      <div className="flex items-center justify-between pb-4 border-b border-border">
-        <span className="text-xl font-black uppercase tracking-tighter">Filters</span>
-        <SlidersHorizontal className="w-5 h-5" />
-      </div>
-
-      {/* Search Filter */}
-      <div className="space-y-4">
-        <button
-          onClick={() => toggleSection('search')}
-          className="flex items-center justify-between w-full text-sm font-bold uppercase tracking-wider"
-        >
-          Search
-          {openSections.search ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-        </button>
-
-        {openSections.search && (
-          <div className="relative">
-            <Input
-              placeholder="Search products..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-3 bg-transparent border-input"
-            />
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          </div>
+      <div className="flex items-center justify-between pb-4 border-b border-border shrink-0">
+        <span className="text-xl font-black uppercase tracking-tighter">Filtros</span>
+        {isMobile && (
+          <SheetClose asChild>
+            <Button variant="ghost" size="icon">
+              <X className="w-5 h-5" />
+            </Button>
+          </SheetClose>
         )}
+        {!isMobile && <SlidersHorizontal className="w-5 h-5" />}
       </div>
 
-      {/* Price Filter */}
-      <div className="space-y-4">
-        <button
-          onClick={() => toggleSection('price')}
-          className="flex items-center justify-between w-full text-sm font-bold uppercase tracking-wider"
-        >
-          Price
-          {openSections.price ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-        </button>
+      <div className="overflow-y-auto flex-1 pr-2 space-y-6">
+        {/* Search Filter */}
+        <div className="space-y-4">
+          <button
+            onClick={() => toggleSection('search')}
+            className="flex items-center justify-between w-full text-sm font-bold uppercase tracking-wider hover:text-primary transition-colors"
+          >
+            Buscar
+            {openSections.search ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+          </button>
 
-        {openSections.price && (
-          <div className="space-y-4 pt-2">
-            <input
-              type="range"
-              min="0"
-              max="1000"
-              step="10"
-              value={priceRange[1]}
-              onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
-              className="w-full h-1 bg-secondary appearance-none cursor-pointer accent-black"
-            />
-            <div className="flex justify-between text-xs font-medium text-muted-foreground">
-              <span>R$ {priceRange[0]}</span>
-              <span>R$ {priceRange[1]}</span>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Sort Filter */}
-      <div className="space-y-4">
-        <button
-          onClick={() => toggleSection('sort')}
-          className="flex items-center justify-between w-full text-sm font-bold uppercase tracking-wider"
-        >
-          Sort By
-          {openSections.sort ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-        </button>
-
-        {openSections.sort && (
-          <div className="space-y-2">
-            {[
-              { label: "Newest", value: "newest" },
-              { label: "Price: Low to High", value: "price-low" },
-              { label: "Price: High to Low", value: "price-high" }
-            ].map((option) => (
-              <label key={option.value} className="flex items-center gap-3 cursor-pointer group">
-                <div className={`w-4 h-4 border border-input flex items-center justify-center ${sortBy === option.value ? 'bg-primary border-primary' : ''}`}>
-                  {sortBy === option.value && <div className="w-2 h-2 bg-background" />}
-                </div>
-                <input
-                  type="radio"
-                  name="sort"
-                  value={option.value}
-                  checked={sortBy === option.value}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="hidden"
+          {openSections.search && (
+            <div className="relative flex gap-2">
+              <div className="relative flex-1">
+                <Input
+                  placeholder="Buscar..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearchSubmit()}
+                  className="pl-3 bg-secondary/20 border-border focus-visible:ring-primary"
                 />
-                <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">{option.label}</span>
-              </label>
-            ))}
-          </div>
-        )}
+              </div>
+              <Button size="icon" onClick={handleSearchSubmit} className="shrink-0 bg-primary text-primary-foreground hover:bg-primary/90">
+                <Search className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {/* Price Filter */}
+        <div className="space-y-6">
+          <button
+            onClick={() => toggleSection('price')}
+            className="flex items-center justify-between w-full text-sm font-bold uppercase tracking-wider hover:text-primary transition-colors"
+          >
+            Preço
+            {openSections.price ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+          </button>
+
+          {openSections.price && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <div className="flex-1">
+                  <Input
+                    type="number"
+                    placeholder="Mín"
+                    value={minPrice}
+                    onChange={(e) => setMinPrice(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && applyPriceFilter()}
+                    className="bg-secondary/20 border-border"
+                  />
+                </div>
+                <span className="text-muted-foreground">—</span>
+                <div className="flex-1">
+                  <Input
+                    type="number"
+                    placeholder="Máx"
+                    value={maxPrice}
+                    onChange={(e) => setMaxPrice(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && applyPriceFilter()}
+                    className="bg-secondary/20 border-border"
+                  />
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full"
+                onClick={applyPriceFilter}
+              >
+                Aplicar Filtro
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {/* Sort Filter */}
+        <div className="space-y-4">
+          <button
+            onClick={() => toggleSection('sort')}
+            className="flex items-center justify-between w-full text-sm font-bold uppercase tracking-wider hover:text-primary transition-colors"
+          >
+            Ordenar
+            {openSections.sort ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+          </button>
+
+          {openSections.sort && (
+            <div className="space-y-2">
+              {[
+                { label: "Mais Recentes", value: "newest" },
+                { label: "Preço: Menor para Maior", value: "price-low" },
+                { label: "Preço: Maior para Menor", value: "price-high" }
+              ].map((option) => (
+                <label key={option.value} className="flex items-center gap-3 cursor-pointer group p-2 rounded hover:bg-secondary/50 transition-colors">
+                  <div className={`w-4 h-4 border border-input rounded-sm flex items-center justify-center transition-colors ${sortBy === option.value ? 'bg-primary border-primary text-primary-foreground' : 'bg-transparent'}`}>
+                    {sortBy === option.value && <Check className="w-3 h-3" />}
+                  </div>
+                  <input
+                    type="radio"
+                    name="sort"
+                    value={option.value}
+                    checked={sortBy === option.value}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="hidden"
+                  />
+                  <span className={`text-sm transition-colors ${sortBy === option.value ? 'text-foreground font-medium' : 'text-muted-foreground group-hover:text-foreground'}`}>
+                    {option.label}
+                  </span>
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Clear Filters Button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full text-muted-foreground hover:text-foreground"
+          onClick={clearFilters}
+        >
+          Limpar Filtros
+        </Button>
       </div>
+
+      {/* Mobile Footer Actions */}
+      {isMobile && (
+        <div className="pt-4 border-t border-border mt-auto">
+          <SheetClose asChild>
+            <Button className="w-full font-bold uppercase tracking-wider">
+              Ver {products.length} Resultados
+            </Button>
+          </SheetClose>
+        </div>
+      )}
     </div>
   );
 
@@ -162,37 +237,35 @@ export function ShopPage() {
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
           <div>
             <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter text-foreground mb-4 leading-none">
-              All<br />Products
+              Nossa<br />Coleção
             </h1>
             <p className="text-muted-foreground text-lg max-w-sm">
-              Explore our latest collection of premium essentials.
+              Explore nossa última coleção de peças essenciais premium.
             </p>
           </div>
           <div className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
-            {products.length} Results
+            {products.length} Resultados
           </div>
         </div>
 
         <div className="lg:grid lg:grid-cols-[280px_1fr] gap-12">
 
           {/* Desktop Sidebar */}
-          <aside className="hidden lg:block h-fit sticky top-32">
-            <FilterContent />
+          <aside className="hidden lg:block h-[calc(100vh-140px)] sticky top-32 overflow-hidden">
+            {renderFilters(false)}
           </aside>
 
           {/* Mobile Filter Toggle */}
           <div className="lg:hidden mb-8">
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="outline" className="w-full flex justify-between uppercase font-bold tracking-wider">
-                  Filter & Sort
+                <Button variant="outline" className="w-full flex justify-between uppercase font-bold tracking-wider h-12">
+                  Filtrar & Ordenar
                   <SlidersHorizontal className="w-4 h-4" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-[300px]">
-                <div className="py-6">
-                  <FilterContent />
-                </div>
+              <SheetContent side="left" className="w-[320px] sm:w-[380px] p-6">
+                {renderFilters(true)}
               </SheetContent>
             </Sheet>
           </div>
@@ -203,9 +276,9 @@ export function ShopPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-12 gap-x-8">
                 {[1, 2, 3, 4, 5, 6].map(i => (
                   <div key={i} className="animate-pulse space-y-4">
-                    <div className="bg-secondary aspect-[3/4] w-full" />
-                    <div className="h-4 bg-secondary w-2/3" />
-                    <div className="h-4 bg-secondary w-1/3" />
+                    <div className="bg-secondary aspect-[3/4] w-full rounded-md" />
+                    <div className="h-4 bg-secondary w-2/3 rounded-full" />
+                    <div className="h-4 bg-secondary w-1/3 rounded-full" />
                   </div>
                 ))}
               </div>
@@ -214,7 +287,7 @@ export function ShopPage() {
                 {products.map((product) => (
                   <div key={product.id} className="group cursor-pointer">
                     {/* Image Container */}
-                    <div className="relative aspect-[3/4] mb-4 bg-secondary overflow-hidden">
+                    <div className="relative aspect-[3/4] mb-4 bg-secondary overflow-hidden rounded-md">
                       {product.image ? (
                         <img
                           src={product.image}
@@ -222,8 +295,8 @@ export function ShopPage() {
                           className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
                       ) : (
-                        <div className="h-full w-full flex items-center justify-center text-muted-foreground text-xs uppercase tracking-widest">
-                          No Image
+                        <div className="h-full w-full flex items-center justify-center text-muted-foreground text-xs uppercase tracking-widest bg-secondary/50">
+                          Sem Imagem
                         </div>
                       )}
 
@@ -238,22 +311,22 @@ export function ShopPage() {
                               quantity: 1,
                               imageUrl: product.image,
                             });
-                            toast.success("Added to Bag");
+                            toast.success("Adicionado à sacola");
                           }}
-                          className="w-full bg-white text-black hover:bg-white/90 font-bold uppercase tracking-wider rounded-none"
+                          className="w-full bg-white text-black hover:bg-white/90 font-bold uppercase tracking-wider rounded shadow-lg"
                         >
-                          Quick Add +
+                          Adicionar Rápido +
                         </Button>
                       </div>
                     </div>
 
                     {/* Product Info */}
                     <div className="space-y-1">
-                      <h3 className="font-bold text-sm uppercase tracking-wide text-foreground">
+                      <h3 className="font-bold text-sm uppercase tracking-wide text-foreground line-clamp-1">
                         {product.name}
                       </h3>
                       <div className="flex items-center justify-between">
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm font-medium text-foreground">
                           {new Intl.NumberFormat("pt-BR", {
                             style: "currency",
                             currency: "BRL",
@@ -265,17 +338,11 @@ export function ShopPage() {
                 ))}
               </div>
             ) : (
-              <div className="py-24 text-center">
-                <p className="text-xl font-medium text-muted-foreground">No products found matching your criteria.</p>
-                <Button
-                  variant="link"
-                  onClick={() => {
-                    setSearchTerm("");
-                    setPriceRange([0, 1000]);
-                  }}
-                  className="mt-4"
-                >
-                  Clear Filters
+              <div className="py-24 text-center border rounded-xl border-dashed">
+                <p className="text-xl font-medium text-muted-foreground mb-2">Nenhum produto encontrado.</p>
+                <p className="text-sm text-muted-foreground mb-6">Tente ajustar seus filtros de busca.</p>
+                <Button variant="outline" onClick={clearFilters}>
+                  Limpar Filtros
                 </Button>
               </div>
             )}

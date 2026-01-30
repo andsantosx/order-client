@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/store/authStore";
 import { getProfile, updateProfile } from "@/services/auth/profile";
-import { apiClient } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import toast from "react-hot-toast";
@@ -11,12 +10,7 @@ import { create as createAddressApi, type CreateAddressData } from "@/services/a
 import { remove as removeAddressApi } from "@/services/address/delete";
 import { useNavigate } from "react-router-dom";
 
-interface Order {
-    id: string;
-    total_amount: number;
-    status: string;
-    created_at: string;
-}
+import { listMyOrders, type Order } from "@/services/order/myOrders";
 
 export function ProfilePage() {
     const { token, logout } = useAuthStore();
@@ -32,13 +26,14 @@ export function ProfilePage() {
     // Orders State
     const [orders, setOrders] = useState<Order[]>([]);
     const [isLoadingOrders, setIsLoadingOrders] = useState(false);
+    const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
     // Address State
     const [addresses, setAddresses] = useState<Address[]>([]);
     const [isLoadingAddresses, setIsLoadingAddresses] = useState(false);
     const [isAddingAddress, setIsAddingAddress] = useState(false);
     const [newAddress, setNewAddress] = useState<CreateAddressData>({
-        street: '', city: '', state: '', zip_code: '', country: 'Brasil'
+        street: '', city: '', state: '', zipCode: '', country: 'Brasil'
     });
 
     // Initial Load
@@ -73,9 +68,7 @@ export function ProfilePage() {
     const loadOrders = async () => {
         setIsLoadingOrders(true);
         try {
-            const { data } = await apiClient.get<Order[]>("/api/orders", {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const data = await listMyOrders();
             setOrders(data);
         } catch (error) {
             console.error("Orders load error", error);
@@ -112,14 +105,16 @@ export function ProfilePage() {
     const handleAddAddress = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            // Note: service handles zip_code -> zipCode mapping
+            // Note: service handles formatting
             await createAddressApi(newAddress);
             toast.success("Endereço adicionado!");
             setIsAddingAddress(false);
-            setNewAddress({ street: '', city: '', state: '', zip_code: '', country: 'Brasil' });
+            setNewAddress({ street: '', city: '', state: '', zipCode: '', country: 'Brasil' });
             loadAddresses();
-        } catch (error) {
-            toast.error("Erro ao adicionar endereço");
+        } catch (error: any) {
+            console.error("Erro ao adicionar endereço:", error);
+            console.error("Payload enviado:", newAddress);
+            toast.error(error.response?.data?.error || "Erro ao adicionar endereço");
         }
     };
 
@@ -292,12 +287,73 @@ export function ProfilePage() {
                                                     </div>
                                                 </div>
                                                 <div className="flex justify-end">
-                                                    <Button variant="link" className="px-0">View Details</Button>
+                                                    <Button variant="link" className="px-0" onClick={() => setSelectedOrder(order)}>View Details</Button>
                                                 </div>
                                             </div>
                                         ))}
                                     </div>
                                 )}
+                            </div>
+                        )}
+
+                        {selectedOrder && (
+                            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setSelectedOrder(null)}>
+                                <div className="bg-background w-full max-w-2xl rounded-xl shadow-2xl border border-border p-6 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                                    <div className="flex items-center justify-between mb-6 pb-4 border-b border-border">
+                                        <div>
+                                            <h3 className="text-xl font-bold">Pedido #{selectedOrder.id.slice(0, 8).toUpperCase()}</h3>
+                                            <p className="text-sm text-muted-foreground">{new Date(selectedOrder.created_at).toLocaleString()}</p>
+                                        </div>
+                                        <button onClick={() => setSelectedOrder(null)} className="p-2 hover:bg-secondary rounded-full">
+                                            <LogOut className="w-5 h-5 rotate-180" />
+                                        </button>
+                                    </div>
+
+                                    <div className="space-y-8">
+                                        {/* Items */}
+                                        <div>
+                                            <h4 className="font-semibold mb-3 flex items-center gap-2">
+                                                <Package className="w-4 h-4" /> Itens do Pedido
+                                            </h4>
+                                            <div className="space-y-3">
+                                                {selectedOrder.items?.map((item, idx) => (
+                                                    <div key={idx} className="flex items-center gap-4 bg-secondary/20 p-3 rounded-lg">
+
+                                                        <div className="flex-1">
+                                                            <p className="font-medium">{item.product_name || item.name || item.product?.name || "Produto"}</p>
+                                                            <p className="text-xs text-muted-foreground">Qtd: {item.quantity}</p>
+                                                        </div>
+                                                        <p className="font-semibold">
+                                                            {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(item.unit_price) / 100)}
+                                                        </p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Shipping */}
+                                        {selectedOrder.shippingAddress && (
+                                            <div>
+                                                <h4 className="font-semibold mb-3 flex items-center gap-2">
+                                                    <MapPin className="w-4 h-4" /> Endereço de Entrega
+                                                </h4>
+                                                <div className="bg-secondary/20 p-4 rounded-lg text-sm">
+                                                    <p className="font-medium">{selectedOrder.shippingAddress.street}</p>
+                                                    <p className="text-muted-foreground">{selectedOrder.shippingAddress.city} - {selectedOrder.shippingAddress.state}</p>
+                                                    <p className="text-muted-foreground font-mono">{selectedOrder.shippingAddress.zip_code}</p>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Total */}
+                                        <div className="pt-4 border-t border-border flex justify-between items-center">
+                                            <span className="font-semibold">Total do Pedido</span>
+                                            <span className="text-2xl font-bold text-primary">
+                                                {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(selectedOrder.total_amount) / 100)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         )}
 
@@ -319,8 +375,8 @@ export function ProfilePage() {
                                             <div className="space-y-2">
                                                 <label className="text-sm font-semibold">CEP</label>
                                                 <Input
-                                                    value={newAddress.zip_code}
-                                                    onChange={e => setNewAddress({ ...newAddress, zip_code: e.target.value })}
+                                                    value={newAddress.zipCode}
+                                                    onChange={e => setNewAddress({ ...newAddress, zipCode: e.target.value })}
                                                     placeholder="00000-000"
                                                     required
                                                 />

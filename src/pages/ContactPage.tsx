@@ -1,14 +1,42 @@
+import { useState } from "react"
 import { MapPin, Phone, Mail, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { create as createContactMessage } from "@/services/contact/create"
 import toast from "react-hot-toast"
 
 export function ContactPage() {
-  const handleSubmit = (e: any) => {
-    e.preventDefault()
-    toast.success("Mensagem enviada com sucesso!")
-    e.target.reset()
-  }
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    subject: "",
+    message: ""
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      await createContactMessage({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone || undefined,
+        subject: formData.subject,
+        message: formData.message
+      });
+
+      toast.success("Mensagem enviada com sucesso!");
+      setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
+    } catch (error) {
+      console.error("Error sending message:", error);
+      toast.error("Erro ao enviar mensagem. Tente novamente.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background pt-24 pb-16">
@@ -93,19 +121,39 @@ export function ContactPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-foreground mb-2">Nome</label>
-                <Input placeholder="Seu nome completo" required />
+                <Input
+                  placeholder="Seu nome completo"
+                  required
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-foreground mb-2">Email</label>
-                <Input type="email" placeholder="seu@email.com" required />
+                <Input
+                  type="email"
+                  placeholder="seu@email.com"
+                  required
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-foreground mb-2">Telefone</label>
-                <Input placeholder="(11) 98765-4321" />
+                <Input
+                  placeholder="(11) 98765-4321"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-foreground mb-2">Assunto</label>
-                <Input placeholder="Qual é o assunto?" required />
+                <Input
+                  placeholder="Qual é o assunto?"
+                  required
+                  value={formData.subject}
+                  onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-foreground mb-2">Mensagem</label>
@@ -114,10 +162,16 @@ export function ContactPage() {
                   rows={5}
                   placeholder="Sua mensagem aqui..."
                   required
+                  value={formData.message}
+                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                 />
               </div>
-              <Button type="submit" className="w-full h-12 bg-primary text-primary-foreground hover:bg-primary/90">
-                Enviar Mensagem
+              <Button
+                type="submit"
+                className="w-full h-12 bg-primary text-primary-foreground hover:bg-primary/90"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Enviando..." : "Enviar Mensagem"}
               </Button>
             </form>
           </div>

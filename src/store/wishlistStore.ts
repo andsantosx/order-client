@@ -2,7 +2,8 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 export interface WishlistItem {
-  id: string;
+  id: string; // Product ID (for compatibility with UI components linking to products)
+  wishlistId?: string; // ID of the wishlist item in backend (required for removal)
   name: string;
   price: number;
   image: string;
@@ -15,6 +16,7 @@ interface WishlistStore {
   removeItem: (id: string) => void;
   isInWishlist: (id: string) => boolean;
   setItems: (items: WishlistItem[]) => void;
+  updateItem: (id: string, updates: Partial<WishlistItem>) => void;
   clearWishlist: () => void;
 }
 
@@ -37,6 +39,10 @@ export const useWishlistStore = create<WishlistStore>()(
         return state.items.some((i) => i.id === id);
       },
       setItems: (items: WishlistItem[]) => set({ items }),
+      updateItem: (id, updates) =>
+        set((state) => ({
+          items: state.items.map((i) => (i.id === id ? { ...i, ...updates } : i)),
+        })),
       clearWishlist: () => set({ items: [] }),
     }),
     {

@@ -12,7 +12,7 @@ import toast from "react-hot-toast"
 export function Products() {
   const [products, setProducts] = useState<Product[]>([])
   const { addItem } = useCartStore()
-  const { isInWishlist, addItem: addToWishlistStore, removeItem: removeFromWishlistStore } = useWishlistStore()
+  const { isInWishlist, addItem: addToWishlistStore, removeItem: removeFromWishlistStore, updateItem: updateWishlistStore, items: wishlistItems } = useWishlistStore()
   const { user } = useAuthStore()
 
   useEffect(() => {
@@ -29,18 +29,20 @@ export function Products() {
 
   const toggleWishlist = async (product: Product) => {
     const isLoved = isInWishlist(product.id)
+    const wishlistItem = wishlistItems.find(i => i.id === product.id)
 
     // Optimistic update
     if (isLoved) {
       removeFromWishlistStore(product.id)
-      if (user) {
+      if (user && wishlistItem?.wishlistId) {
         try {
-          await removeFromWishlistApi(product.id)
+          await removeFromWishlistApi(wishlistItem.wishlistId)
         } catch (error) {
           console.error("Error removing from wishlist", error)
+          // Optionally rollback store change here
         }
       }
-      toast.success("Removed from wishlist")
+      toast.success("Removido dos favoritos")
     } else {
       addToWishlistStore({
         id: product.id,
@@ -49,14 +51,17 @@ export function Products() {
         image: product.image || "",
         addedAt: Date.now()
       })
+
+      toast.success("Adicionado aos favoritos")
+
       if (user) {
         try {
-          await addToWishlistApi(product.id)
+          const newWishlistId = await addToWishlistApi(product.id)
+          updateWishlistStore(product.id, { wishlistId: newWishlistId })
         } catch (error) {
           console.error("Error adding to wishlist", error)
         }
       }
-      toast.success("Added to wishlist")
     }
   }
 

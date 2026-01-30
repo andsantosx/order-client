@@ -8,6 +8,7 @@ export function AdminDashboardPage() {
     const tabs = [
         { name: "Visão Geral", path: "/admin", icon: LayoutDashboard, exact: true },
         { name: "Produtos", path: "/admin/products", icon: Package },
+        { name: "Categorias", path: "/admin/categories", icon: Package }, // Reusing Package icon or use Tag if imported
         { name: "Pedidos", path: "/admin/orders", icon: ShoppingBag },
     ];
 

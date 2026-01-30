@@ -126,7 +126,7 @@ export function OrderConfirmationPage() {
                       <p className="text-xs text-muted-foreground">Qtde: {item.quantity}</p>
                     </div>
                     <p className="font-bold text-sm">
-                      {new Intl.NumberFormat("pt-BR", { style: "currency", currency: order.currency }).format(parseFloat(item.total_price))}
+                      {new Intl.NumberFormat("pt-BR", { style: "currency", currency: order.currency }).format(parseFloat(item.total_price) / 100)}
                     </p>
                   </div>
                 ))}
@@ -148,7 +148,7 @@ export function OrderConfirmationPage() {
               <div className="border-t border-border pt-4 flex justify-between items-center">
                 <span className="font-bold text-lg">Total Pago</span>
                 <span className="font-bold text-2xl text-primary">
-                  {new Intl.NumberFormat("pt-BR", { style: "currency", currency: order.currency }).format(order.total_amount)}
+                  {new Intl.NumberFormat("pt-BR", { style: "currency", currency: order.currency }).format(order.total_amount / 100)}
                 </span>
               </div>
             </div>

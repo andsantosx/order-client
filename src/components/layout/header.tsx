@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Sheet,
   SheetContent,
@@ -11,17 +10,15 @@ import {
 import { useWishlistStore } from "@/store/wishlistStore";
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
-import { Search, Menu, X, Heart, ShoppingBag, User as UserIcon } from "lucide-react";
+import { Menu, Heart, ShoppingBag, User as UserIcon } from "lucide-react";
 
 const navLinks = [
   { name: "Loja", href: "/loja" },
-  { name: "Novidades", href: "/loja?sort=newest" },
   { name: "Favoritos", href: "/favoritos" },
-  { name: "Contato", href: "#contato" },
+  { name: "Contato", href: "/contato" },
 ];
 
 export function Header() {
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { items: wishlistItems } = useWishlistStore();
   const { items: cartItems, toggleCart } = useCartStore();
@@ -49,9 +46,6 @@ export function Header() {
             <span className="font-[var(--font-display)] text-2xl font-bold tracking-tight text-foreground">
               ORDER
             </span>
-            <span className="font-[var(--font-display)] text-2xl font-light tracking-tight text-primary ml-1">
-              STORE
-            </span>
             <div className="absolute -bottom-1 left-0 h-[2px] w-0 bg-gradient-to-r from-primary to-accent group-hover:w-full transition-all duration-300" />
           </div>
         </a>
@@ -72,34 +66,6 @@ export function Header() {
 
         {/* Right Actions */}
         <div className="flex items-center gap-1">
-          {/* Search */}
-          <div className="hidden md:flex items-center">
-            {isSearchOpen ? (
-              <div className="flex items-center gap-2 bg-secondary/50 backdrop-blur-sm px-4 py-2 rounded-full border border-border">
-                <Search className="h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Buscar produtos..."
-                  className="w-48 border-0 bg-transparent text-sm focus-visible:ring-0 p-0 h-auto placeholder:text-muted-foreground/50"
-                  autoFocus
-                  onBlur={() => setIsSearchOpen(false)}
-                />
-                <button onClick={() => setIsSearchOpen(false)}>
-                  <X className="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors" />
-                </button>
-              </div>
-            ) : (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsSearchOpen(true)}
-                className="hover:bg-secondary/50 rounded-full h-10 w-10"
-              >
-                <Search className="h-5 w-5" />
-                <span className="sr-only">Buscar</span>
-              </Button>
-            )}
-          </div>
 
           <Button
             variant="ghost"
@@ -190,14 +156,7 @@ export function Header() {
             >
               <SheetTitle className="sr-only">Menu de navegacao</SheetTitle>
               <div className="flex flex-col gap-8 pt-12">
-                <div className="flex items-center gap-3 bg-secondary/30 px-4 py-3 rounded-2xl border border-border">
-                  <Search className="h-5 w-5 text-muted-foreground" />
-                  <Input
-                    type="text"
-                    placeholder="Buscar produtos..."
-                    className="border-0 bg-transparent text-base focus-visible:ring-0 placeholder:text-muted-foreground/50"
-                  />
-                </div>
+
                 <nav className="flex flex-col gap-2">
                   {navLinks.map((link, index) => (
                     <a

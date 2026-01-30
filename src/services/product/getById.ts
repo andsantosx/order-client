@@ -5,7 +5,7 @@ export interface Product {
     name: string;
     price: number;
     description?: string;
-    images: string[];
+    images: { id: string; url: string }[];
     sizes: { id: string; name: string }[];
 }
 
@@ -17,7 +17,10 @@ export const getById = async (id: string): Promise<Product> => {
         name: data.name,
         price: typeof data.price_cents === 'string' ? parseFloat(data.price_cents) / 100 : data.price_cents / 100,
         description: data.description || "Descrição do produto não disponível.",
-        images: data.images?.map((img: any) => img.url) || [],
+        images: data.images?.map((img: any) => ({
+            id: img.id,
+            url: img.url
+        })) || [],
         sizes: data.sizes?.map((s: any) => ({
             id: s.size.id,
             name: s.size.name

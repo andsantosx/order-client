@@ -16,6 +16,13 @@ export interface OrderResponse {
     currency: string;
     status: string;
     created_at: string;
+    shippingAddress?: {
+        street: string;
+        city: string;
+        state: string;
+        zip_code: string;
+        country: string;
+    };
 }
 
 interface ApiOrderResponse {
@@ -28,6 +35,7 @@ interface ApiOrderResponse {
     user: any;
     guest_email: any;
     idempotency_key: string;
+    shippingAddress?: any; // Expect object from backend
 }
 
 function mapOrderResponse(data: ApiOrderResponse): OrderResponse {
@@ -37,7 +45,8 @@ function mapOrderResponse(data: ApiOrderResponse): OrderResponse {
         total_amount: parseFloat(data.total_amount),
         currency: data.currency,
         status: data.status,
-        created_at: data.created_at
+        created_at: data.created_at,
+        shippingAddress: data.shippingAddress
     };
 }
 

@@ -54,7 +54,7 @@ export function ProductDetailPage() {
       name: product.name,
       price: product.price,
       quantity: 1,
-      imageUrl: product.images[0],
+      imageUrl: product.images[0]?.url,
       // You might want to add size to the cart item in the future
     });
     toast.success("Added to Bag");
@@ -70,9 +70,9 @@ export function ProductDetailPage() {
             {product.images.length > 0 ? (
               <div className="grid grid-cols-1 gap-4">
                 {product.images.map((img, idx) => (
-                  <div key={idx} className="aspect-[3/4] bg-secondary w-full relative overflow-hidden group">
+                  <div key={img.id || idx} className="aspect-[3/4] bg-secondary w-full relative overflow-hidden group">
                     <img
-                      src={img}
+                      src={img.url}
                       alt={`${product.name} ${idx + 1}`}
                       className="object-cover w-full h-full"
                     />

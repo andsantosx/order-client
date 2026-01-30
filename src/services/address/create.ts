@@ -1,14 +1,15 @@
 import { apiClient } from "@/lib/api-client";
 import type { Address } from "./getAll";
 
-export type CreateAddressData = Omit<Address, "id">;
+export interface CreateAddressData {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+}
 
 export const create = async (data: CreateAddressData): Promise<Address> => {
-    // Map to API expected format (camelCase for zipCode based on docs)
-    const payload = {
-        ...data,
-        zipCode: data.zip_code
-    };
-    const response = await apiClient.post<Address>("/api/profile/addresses", payload);
+    const response = await apiClient.post<Address>("/api/profile/addresses", data);
     return response.data;
 };

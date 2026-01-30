@@ -7,7 +7,7 @@ export function AboutPage() {
         {/* Hero */}
         <div className="mb-16 text-center">
           <h1 className="text-5xl lg:text-6xl font-bold text-foreground mb-6">
-            Sobre a ORDER STORE
+            Sobre a ORDER
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Somos uma marca comprometida com qualidade, estilo e sustentabilidade. Desde 2024, entregamos moda de excelência para quem ousa ser diferente.
@@ -44,7 +44,7 @@ export function AboutPage() {
           <div>
             <h2 className="text-4xl font-bold text-foreground mb-4">Nossa História</h2>
             <p className="text-muted-foreground mb-4 leading-relaxed">
-              ORDER STORE nasceu de uma paixão por moda contemporânea e um compromisso com a qualidade. Começamos pequenos, com uma visão clara: criar roupas que não apenas acompanhem as tendências, mas que as definam.
+              ORDER nasceu de uma paixão por moda contemporânea e um compromisso com a qualidade. Começamos pequenos, com uma visão clara: criar roupas que não apenas acompanhem as tendências, mas que as definam.
             </p>
             <p className="text-muted-foreground mb-4 leading-relaxed">
               Através dos anos, crescemos mantendo nossos valores principais: qualidade impecável, design inovador e atendimento ao cliente excepcional.

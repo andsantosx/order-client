@@ -1,27 +1,5 @@
 import { Instagram, Twitter, Youtube } from "lucide-react"
-
-const footerLinks = {
-  shop: [
-    { name: "Novidades", href: "/loja?sort=newest" },
-    { name: "Masculino", href: "/loja?cat=Camisetas" },
-    { name: "Feminino", href: "/loja?cat=Vestidos" },
-    { name: "Acessorios", href: "/loja?cat=Acessórios" },
-    { name: "Sale", href: "/loja?sort=price-low" },
-  ],
-  help: [
-    { name: "Rastrear Pedido", href: "/contato" },
-    { name: "Entregas", href: "/contato" },
-    { name: "Devolucoes", href: "/contato" },
-    { name: "Pagamentos", href: "/contato" },
-    { name: "FAQ", href: "/contato" },
-  ],
-  company: [
-    { name: "Sobre", href: "/sobre" },
-    { name: "Carreiras", href: "/contato" },
-    { name: "Sustentabilidade", href: "/sobre" },
-    { name: "Imprensa", href: "/contato" },
-  ],
-}
+import { useAuthStore } from "@/store/authStore";
 
 const socialLinks = [
   { name: "Instagram", icon: Instagram, href: "#" },
@@ -30,6 +8,26 @@ const socialLinks = [
 ]
 
 export function Footer() {
+  const { user } = useAuthStore();
+  const helpLinkDestination = user ? "/profile" : "/register";
+
+  const footerLinks = {
+    shop: [
+      { name: "Sale", href: "/loja?sort=price-low" },
+    ],
+    help: [
+      { name: "Rastrear Pedido", href: helpLinkDestination },
+      { name: "Entregas", href: helpLinkDestination },
+      { name: "Devolucoes", href: helpLinkDestination },
+      { name: "Pagamentos", href: helpLinkDestination },
+      { name: "FAQ", href: "/contato" },
+    ],
+    company: [
+      { name: "Sobre", href: "/sobre" },
+      { name: "Sustentabilidade", href: "/sobre" },
+    ],
+  }
+
   return (
     <footer className="bg-card border-t border-border">
       <div className="mx-auto max-w-[1400px] px-6 lg:px-10 py-16 lg:py-20">
@@ -39,9 +37,6 @@ export function Footer() {
             <a href="/" className="inline-block mb-6 group">
               <span className="font-[var(--font-display)] text-3xl font-bold tracking-tight text-foreground">
                 ORDER
-              </span>
-              <span className="font-[var(--font-display)] text-3xl font-light tracking-tight text-primary ml-1">
-                STORE
               </span>
             </a>
             <p className="text-muted-foreground mb-8 max-w-sm leading-relaxed">

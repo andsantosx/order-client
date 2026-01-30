@@ -12,7 +12,7 @@ export interface WishlistItem {
 // Adapting the response to match what the UI expects (Product-like)
 export const getAll = async (): Promise<WishlistItem[]> => {
     // The endpoint returns list of products in wishlist
-    const { data } = await apiClient.get<any[]>("/api/wishlist");
+    const { data } = await apiClient.get<any[]>("/api/profile/wishlist");
 
     // Map response if necessary. Assuming backend returns an array of objects that contain 'product' info
     // or the list of products directly.
@@ -21,7 +21,8 @@ export const getAll = async (): Promise<WishlistItem[]> => {
     // If user followed common sense, it returns the user's wishlist items.
 
     return data.map((item: any) => ({
-        id: item.id || item.productId, // Adjust based on backend structure
+        id: item.product?.id || item.productId, // UI expects Product ID here
+        wishlistId: item.id, // Backend Wishlist ID
         name: item.name || item.product?.name,
         price: item.price || item.product?.price_cents ? (item.product.price_cents / 100) : 0,
         image: item.image || item.product?.images?.[0]?.url || "",

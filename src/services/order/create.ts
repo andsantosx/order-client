@@ -11,7 +11,7 @@ export interface ShippingAddress {
 
 export interface OrderRequest {
     items: OrderRequestItem[];
-    guestEmail: string;
+    guestEmail?: string;
     shippingAddress: ShippingAddress;
 }
 

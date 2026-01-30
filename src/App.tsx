@@ -20,6 +20,7 @@ import { AdminDashboardPage } from "@/pages/admin/AdminDashboardPage";
 import { AdminOverviewPage } from "@/pages/admin/AdminOverviewPage";
 import { AdminProductsPage } from "@/pages/admin/AdminProductsPage";
 import { AdminOrdersPage } from "@/pages/admin/AdminOrdersPage";
+import { AdminCategoriesPage } from "@/pages/admin/AdminCategoriesPage";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 import { ProfilePage } from "./pages/ProfilePage";
 
@@ -57,6 +58,7 @@ function AppContent() {
             <Route path="/admin" element={<AdminDashboardPage />}>
               <Route index element={<AdminOverviewPage />} />
               <Route path="products" element={<AdminProductsPage />} />
+              <Route path="categories" element={<AdminCategoriesPage />} />
               <Route path="orders" element={<AdminOrdersPage />} />
             </Route>
             <Route path="/produto/novo" element={<CreateProductPage />} />

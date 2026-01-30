@@ -8,7 +8,8 @@ import { getById as getProductById } from "@/services/product/getById";
 import { create as createImage } from "@/services/image/create";
 import { getAll as getCategories, type Category } from "@/services/category/getAll";
 import { getAll as getSizes, type Size } from "@/services/size/getAll";
-import { MoveLeft } from "lucide-react";
+import { MoveLeft, X, Loader2 } from "lucide-react";
+import { remove as deleteImage } from "@/services/image/delete";
 
 export function EditProductPage() {
     const { id } = useParams<{ id: string }>();
@@ -24,7 +25,8 @@ export function EditProductPage() {
 
     // Image State
     const [newImageUrl, setNewImageUrl] = useState("");
-    const [existingImages, setExistingImages] = useState<string[]>([]);
+    const [existingImages, setExistingImages] = useState<{ id: string; url: string }[]>([]);
+    const [deletingImageId, setDeletingImageId] = useState<string | null>(null);
 
     // Data State
     const [categories, setCategories] = useState<Category[]>([]);
@@ -85,6 +87,21 @@ export function EditProductPage() {
         );
     };
 
+    const handleImageDelete = async (imgId: string) => {
+        if (!confirm("Remover esta imagem?")) return;
+        setDeletingImageId(imgId);
+        try {
+            await deleteImage(imgId);
+            setExistingImages(prev => prev.filter(img => img.id !== imgId));
+            toast.success("Imagem removida");
+        } catch (error) {
+            console.error(error);
+            toast.error("Erro ao remover imagem");
+        } finally {
+            setDeletingImageId(null);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!id) return;
@@ -114,11 +131,18 @@ export function EditProductPage() {
             // 2. Add New Image if provided
             if (newImageUrl && newImageUrl.trim() !== "") {
                 try {
+                    // Create image returns the image object (assuming standard create response)
+                    // If it returns void, we can't get ID. Assuming it might need refetch 
+                    // or optimistic update with fake ID if user doesn't delete immediately.
+                    // Let's refetch to get consistency or verify create return type.
                     await createImage(id, newImageUrl);
                     toast.success("Imagem adicionada com sucesso!");
                     setNewImageUrl("");
-                    // Optimistically add to list
-                    setExistingImages([...existingImages, newImageUrl]);
+
+                    // Ideally we refetch just the images, but full reload is safer
+                    // to get the real ID for the new image in case user wants to delete it.
+                    const updatedProduct = await getProductById(id);
+                    setExistingImages(updatedProduct.images);
                 } catch (imgError) {
                     console.error("Failed to add image", imgError);
                     toast.error("Produto atualizado, mas erro ao adicionar nova imagem.");
@@ -244,9 +268,21 @@ export function EditProductPage() {
                         <div className="space-y-4 p-6 border rounded-lg bg-card">
                             <h2 className="text-xl font-semibold">Imagens Atuais</h2>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                {existingImages.map((img, idx) => (
-                                    <div key={idx} className="aspect-square relative rounded-md overflow-hidden border">
-                                        <img src={img} alt={`Produto ${idx}`} className="w-full h-full object-cover" />
+                                {existingImages.map((img) => (
+                                    <div key={img.id} className="aspect-square relative rounded-md overflow-hidden border group">
+                                        <img src={img.url} alt="Produto" className="w-full h-full object-cover" />
+                                        <button
+                                            type="button"
+                                            onClick={() => handleImageDelete(img.id)}
+                                            disabled={deletingImageId === img.id}
+                                            className="absolute top-2 right-2 p-1 bg-destructive text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50"
+                                        >
+                                            {deletingImageId === img.id ? (
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                            ) : (
+                                                <X className="w-4 h-4" />
+                                            )}
+                                        </button>
                                     </div>
                                 ))}
                             </div>

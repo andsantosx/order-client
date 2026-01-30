@@ -27,17 +27,17 @@ export function WishlistPage() {
     fetchWishlist()
   }, [user, setItems])
 
-  const handleRemove = async (id: string) => {
-    if (user) {
+  const handleRemove = async (productId: string, wishlistId?: string) => {
+    if (user && wishlistId) {
       try {
-        await removeFromWishlist(id)
+        await removeFromWishlist(wishlistId)
       } catch (error) {
         toast.error("Erro ao remover do backend")
-        return // Don't remove locally if backend failed? Or optimistic?
-        // Let's be optimistic usually, but here simple is fine
+        return
       }
     }
-    removeItem(id)
+    removeItem(productId)
+    toast.success("Removido da lista!")
   }
 
   const handleMoveToCart = (item: any) => {
@@ -48,7 +48,7 @@ export function WishlistPage() {
       quantity: 1,
       imageUrl: item.image,
     })
-    handleRemove(item.id)
+    handleRemove(item.id, item.wishlistId)
     toast.success("Movido para a sacola!")
   }
 
@@ -83,6 +83,14 @@ export function WishlistPage() {
                   key={item.id}
                   className="group rounded-2xl border border-border bg-card overflow-hidden hover:shadow-lg transition-all"
                 >
+                  {/* Image */}
+                  <div className="aspect-square relative bg-white">
+                    <img
+                      src={item.image || "https://placehold.co/400x400?text=No+Image"}
+                      alt={item.name}
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
                   {/* Content */}
                   <div className="p-6 space-y-3">
                     <h3 className="font-semibold text-foreground text-lg line-clamp-2">{item.name}</h3>
@@ -101,7 +109,7 @@ export function WishlistPage() {
                         Adicionar
                       </button>
                       <button
-                        onClick={() => handleRemove(item.id)}
+                        onClick={() => handleRemove(item.id, item.wishlistId)}
                         className="px-4 py-2 rounded-lg border border-border text-muted-foreground hover:text-destructive hover:border-destructive transition-colors"
                       >
                         <Trash2 className="h-4 w-4" />
