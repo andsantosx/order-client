@@ -1,53 +1,79 @@
-import { SlidersHorizontal, Plus, Minus, X, Check } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/cartStore";
 import toast from "react-hot-toast";
-import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 import { getAll as getAllProducts, type Product } from "@/services/product/getAll";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { FilterSidebar } from "@/components/shop/filter-sidebar";
+import { ActiveFilters } from "@/components/shop/active-filters";
 
 export function ShopPage() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Get search and category from URL params
-  const searchFromUrl = searchParams.get("search") || "";
-  const categoryFromUrl = searchParams.get("category") || "";
+  // Initialize filters from URL
+  const initialMinPrice = searchParams.get("minPrice") || "";
+  const initialMaxPrice = searchParams.get("maxPrice") || "";
+  const initialSortBy = searchParams.get("sort") || "newest";
 
-  // Filter States
-  const [minPrice, setMinPrice] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
-  const [activeMinPrice, setActiveMinPrice] = useState<number | undefined>(undefined);
-  const [activeMaxPrice, setActiveMaxPrice] = useState<number | undefined>(undefined);
-  const [sortBy, setSortBy] = useState("newest");
+  // Parse arrays from URL (comma separated)
+  const initialSizes = searchParams.get("sizes") ? searchParams.get("sizes")!.split(",") : [];
+  const initialCategories = searchParams.get("categories") ? searchParams.get("categories")!.split(",") : [];
+
+  // Local Filter States
+  const [minPrice, setMinPrice] = useState(initialMinPrice);
+  const [maxPrice, setMaxPrice] = useState(initialMaxPrice);
+
+  // Applied Filter States
+  const [activeMinPrice, setActiveMinPrice] = useState<number | undefined>(initialMinPrice ? Number(initialMinPrice) : undefined);
+  const [activeMaxPrice, setActiveMaxPrice] = useState<number | undefined>(initialMaxPrice ? Number(initialMaxPrice) : undefined);
+  const [selectedSizes, setSelectedSizes] = useState<string[]>(initialSizes);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(initialCategories);
+  const [sortBy, setSortBy] = useState(initialSortBy);
 
   const { addItem } = useCartStore();
 
-  // Collapsible sections state
-  const [openSections, setOpenSections] = useState({
-    price: true,
-    sort: true
-  });
+  // Sync state to URL
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams);
 
-  const toggleSection = (section: keyof typeof openSections) => {
-    setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
-  };
+    // Sort
+    if (sortBy !== "newest") params.set("sort", sortBy);
+    else params.delete("sort");
 
-  // Fetch when filters change
+    // Price
+    if (activeMinPrice) params.set("minPrice", activeMinPrice.toString());
+    else params.delete("minPrice");
+    if (activeMaxPrice) params.set("maxPrice", activeMaxPrice.toString());
+    else params.delete("maxPrice");
+
+    // Arrays
+    if (selectedSizes.length > 0) params.set("sizes", selectedSizes.join(","));
+    else params.delete("sizes");
+    if (selectedCategories.length > 0) params.set("categories", selectedCategories.join(","));
+    else params.delete("categories");
+
+    setSearchParams(params, { replace: true });
+  }, [sortBy, activeMinPrice, activeMaxPrice, selectedSizes, selectedCategories]);
+
+  // Fetch Products
   useEffect(() => {
     fetchProducts();
-  }, [searchFromUrl, categoryFromUrl, activeMinPrice, activeMaxPrice, sortBy]);
+  }, [searchParams]);
 
   const fetchProducts = async () => {
     setIsLoading(true);
+    const searchFromUrl = searchParams.get("search") || "";
+
     try {
       const data = await getAllProducts({
         search: searchFromUrl,
-        category: categoryFromUrl,
+        categories: selectedCategories,
+        sizes: selectedSizes,
         minPrice: activeMinPrice,
         maxPrice: activeMaxPrice,
         sortBy
@@ -66,139 +92,16 @@ export function ShopPage() {
     setActiveMaxPrice(maxPrice ? Number(maxPrice) : undefined);
   };
 
-  const clearFilters = () => {
+  const clearAllFilters = () => {
     setMinPrice("");
     setMaxPrice("");
     setActiveMinPrice(undefined);
     setActiveMaxPrice(undefined);
-    // Redirect to clear search param
-    window.location.href = "/loja";
+    setSelectedSizes([]);
+    setSelectedCategories([]);
+    setSortBy("newest");
+    // URL update handled by useEffect
   };
-
-  // Reusable filter content JSX
-  const renderFilters = (isMobile = false) => (
-    <div className="space-y-8 h-full flex flex-col">
-      {/* Label */}
-      <div className="flex items-center justify-between pb-4 border-b border-border shrink-0">
-        {isMobile && (
-          <SheetClose asChild>
-            <Button variant="ghost" size="icon">
-              <X className="w-5 h-5" />
-            </Button>
-          </SheetClose>
-        )}
-      </div>
-
-      <div className="overflow-y-auto flex-1 pr-2 space-y-6">
-
-        {/* Price Filter */}
-        <div className="space-y-6">
-          <button
-            onClick={() => toggleSection('price')}
-            className="flex items-center justify-between w-full text-sm font-bold uppercase tracking-wider hover:text-primary transition-colors"
-          >
-            Preço
-            {openSections.price ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-          </button>
-
-          {openSections.price && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <div className="flex-1">
-                  <Input
-                    type="number"
-                    placeholder="Mín"
-                    value={minPrice}
-                    onChange={(e) => setMinPrice(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && applyPriceFilter()}
-                    className="bg-secondary/20 border-border"
-                  />
-                </div>
-                <span className="text-muted-foreground">—</span>
-                <div className="flex-1">
-                  <Input
-                    type="number"
-                    placeholder="Máx"
-                    value={maxPrice}
-                    onChange={(e) => setMaxPrice(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && applyPriceFilter()}
-                    className="bg-secondary/20 border-border"
-                  />
-                </div>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full"
-                onClick={applyPriceFilter}
-              >
-                Aplicar Filtro
-              </Button>
-            </div>
-          )}
-        </div>
-
-        {/* Sort Filter */}
-        <div className="space-y-4">
-          <button
-            onClick={() => toggleSection('sort')}
-            className="flex items-center justify-between w-full text-sm font-bold uppercase tracking-wider hover:text-primary transition-colors"
-          >
-            Ordenar
-            {openSections.sort ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-          </button>
-
-          {openSections.sort && (
-            <div className="space-y-2">
-              {[
-                { label: "Mais Recentes", value: "newest" },
-                { label: "Preço: Menor para Maior", value: "price-low" },
-                { label: "Preço: Maior para Menor", value: "price-high" }
-              ].map((option) => (
-                <label key={option.value} className="flex items-center gap-3 cursor-pointer group p-2 rounded hover:bg-secondary/50 transition-colors">
-                  <div className={`w-4 h-4 border border-input rounded-sm flex items-center justify-center transition-colors ${sortBy === option.value ? 'bg-primary border-primary text-primary-foreground' : 'bg-transparent'}`}>
-                    {sortBy === option.value && <Check className="w-3 h-3" />}
-                  </div>
-                  <input
-                    type="radio"
-                    name="sort"
-                    value={option.value}
-                    checked={sortBy === option.value}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className="hidden"
-                  />
-                  <span className={`text-sm transition-colors ${sortBy === option.value ? 'text-foreground font-medium' : 'text-muted-foreground group-hover:text-foreground'}`}>
-                    {option.label}
-                  </span>
-                </label>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Clear Filters Button */}
-        <Button
-          variant="ghost"
-          size="sm"
-          className="w-full text-muted-foreground hover:text-foreground"
-          onClick={clearFilters}
-        >
-          Limpar Filtros
-        </Button>
-      </div>
-
-      {/* Mobile Footer Actions */}
-      {isMobile && (
-        <div className="pt-4 border-t border-border mt-auto">
-          <SheetClose asChild>
-            <Button className="w-full font-bold uppercase tracking-wider">
-              Ver {products.length} Resultados
-            </Button>
-          </SheetClose>
-        </div>
-      )}
-    </div>
-  );
 
   return (
     <div className="min-h-screen bg-background pt-24 pb-24">
@@ -222,8 +125,20 @@ export function ShopPage() {
         <div className="lg:grid lg:grid-cols-[280px_1fr] gap-12">
 
           {/* Desktop Sidebar */}
-          <aside className="hidden lg:block h-[calc(100vh-140px)] sticky top-32 overflow-hidden">
-            {renderFilters(false)}
+          <aside className="hidden lg:block">
+            <FilterSidebar
+              minPrice={minPrice}
+              maxPrice={maxPrice}
+              setMinPrice={setMinPrice}
+              setMaxPrice={setMaxPrice}
+              applyPriceFilter={applyPriceFilter}
+              selectedSizes={selectedSizes}
+              setSelectedSizes={setSelectedSizes}
+              selectedCategories={selectedCategories}
+              setSelectedCategories={setSelectedCategories}
+              sortBy={sortBy}
+              setSortBy={setSortBy}
+            />
           </aside>
 
           {/* Mobile Filter Toggle */}
@@ -236,20 +151,52 @@ export function ShopPage() {
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="w-[320px] sm:w-[380px] p-6">
-                {renderFilters(true)}
+                <FilterSidebar
+                  minPrice={minPrice}
+                  maxPrice={maxPrice}
+                  setMinPrice={setMinPrice}
+                  setMaxPrice={setMaxPrice}
+                  applyPriceFilter={applyPriceFilter}
+                  selectedSizes={selectedSizes}
+                  setSelectedSizes={setSelectedSizes}
+                  selectedCategories={selectedCategories}
+                  setSelectedCategories={setSelectedCategories}
+                  sortBy={sortBy}
+                  setSortBy={setSortBy}
+                  className="mt-6"
+                />
+                <div className="mt-8 pt-4 border-t border-border">
+                  <Button className="w-full font-bold uppercase tracking-wider">
+                    Ver {products.length} Resultados
+                  </Button>
+                </div>
               </SheetContent>
             </Sheet>
           </div>
 
-          {/* Product Grid */}
+          {/* Product Grid Area */}
           <div>
+            <ActiveFilters
+              selectedSizes={selectedSizes}
+              setSelectedSizes={setSelectedSizes}
+              selectedCategories={selectedCategories}
+              setSelectedCategories={setSelectedCategories}
+              minPrice={activeMinPrice}
+              maxPrice={activeMaxPrice}
+              setMinPrice={setMinPrice}
+              setMaxPrice={setMaxPrice}
+              setActiveMinPrice={setActiveMinPrice}
+              setActiveMaxPrice={setActiveMaxPrice}
+              clearAll={clearAllFilters}
+            />
+
             {isLoading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-12 gap-x-8">
                 {[1, 2, 3, 4, 5, 6].map(i => (
                   <div key={i} className="animate-pulse space-y-4">
-                    <div className="bg-secondary aspect-[3/4] w-full rounded-md" />
-                    <div className="h-4 bg-secondary w-2/3 rounded-full" />
-                    <div className="h-4 bg-secondary w-1/3 rounded-full" />
+                    <div className="bg-muted/20 aspect-[3/4] w-full rounded-md" />
+                    <div className="h-4 bg-muted/20 w-2/3 rounded-full" />
+                    <div className="h-4 bg-muted/20 w-1/3 rounded-full" />
                   </div>
                 ))}
               </div>
@@ -312,8 +259,8 @@ export function ShopPage() {
               <div className="py-24 text-center border rounded-xl border-dashed">
                 <p className="text-xl font-medium text-muted-foreground mb-2">Nenhum produto encontrado.</p>
                 <p className="text-sm text-muted-foreground mb-6">Tente ajustar seus filtros de busca.</p>
-                <Button variant="outline" onClick={clearFilters}>
-                  Limpar Filtros
+                <Button variant="outline" onClick={clearAllFilters}>
+                  Limpar Todos os Filtros
                 </Button>
               </div>
             )}
