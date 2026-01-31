@@ -4,6 +4,7 @@ import type { ProductResponse } from "./getAll";
 export interface CreateProductRequest {
     name: string;
     price_cents: number;
+    description?: string;
     currency: string;
     categoryId: number;
     sizeIds: number[];

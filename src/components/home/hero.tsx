@@ -24,7 +24,7 @@ export function Hero() {
         {/* CTA Esquerda - Mais para o centro e maior */}
         <a
           href="/loja"
-          className="absolute left-8 lg:left-24 xl:left-32 top-1/2 -translate-y-1/2 group z-10"
+          className="hidden md:block absolute left-8 lg:left-24 xl:left-32 top-1/2 -translate-y-1/2 group z-10"
         >
           <div className="text-white">
             <div className="flex items-center gap-4 mb-2">
@@ -38,7 +38,7 @@ export function Hero() {
         {/* CTA Direita - Mais para o centro e maior */}
         <a
           href="/loja?sort=newest"
-          className="absolute right-8 lg:right-24 xl:right-32 top-1/2 -translate-y-1/2 text-right group z-10"
+          className="hidden md:block absolute right-8 lg:right-24 xl:right-32 top-1/2 -translate-y-1/2 text-right group z-10"
         >
           <div className="text-white text-right">
             <div className="flex items-center justify-end gap-4 mb-2">

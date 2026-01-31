@@ -19,6 +19,7 @@ export function EditProductPage() {
 
     // Form State
     const [name, setName] = useState("");
+    const [description, setDescription] = useState("");
     const [price, setPrice] = useState("");
     const [categoryId, setCategoryId] = useState<string>("");
     const [selectedSizeIds, setSelectedSizeIds] = useState<number[]>([]);
@@ -48,6 +49,7 @@ export function EditProductPage() {
 
                 // Populate Form
                 setName(product.name);
+                setDescription(product.description || "");
                 setPrice(product.price.toString());
                 // Since getById might not return categoryId directly depending on backend, 
                 // we might need to adjust this if category isn't pre-filled correctly.
@@ -120,6 +122,7 @@ export function EditProductPage() {
             const productData = {
                 name,
                 price_cents: Math.round(parseFloat(price) * 100),
+                description,
                 // If categoryId is set, send it. If empty string (user didn't touch it and we didn't prefill), 
                 // backend might complain or ignore. Ideally we prefilled it.
                 ...(categoryId ? { categoryId: parseInt(categoryId) } : {}),
@@ -196,6 +199,18 @@ export function EditProductPage() {
                                 onChange={(e) => setName(e.target.value)}
                                 placeholder="Ex: Camiseta Básica"
                                 required
+                            />
+                        </div>
+
+                        <div>
+                            <label className="text-sm font-semibold text-foreground mb-2 block">
+                                Descrição (Opcional)
+                            </label>
+                            <textarea
+                                className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                placeholder="Detalhes do produto (opcional)"
                             />
                         </div>
 
@@ -317,7 +332,7 @@ export function EditProductPage() {
                         {loading ? "Salvando..." : "Salvar Alterações"}
                     </Button>
                 </form>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }

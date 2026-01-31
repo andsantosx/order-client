@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom"
 import { useState, useEffect } from "react"
 import { ShoppingBag, Heart, ArrowUpRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -15,6 +16,7 @@ export function Products() {
   const { addItem } = useCartStore()
   const { isInWishlist, addItem: addToWishlistStore, removeItem: removeFromWishlistStore, updateItem: updateWishlistStore, items: wishlistItems } = useWishlistStore()
   const { user } = useAuthStore()
+  const navigate = useNavigate()
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -28,7 +30,8 @@ export function Products() {
     loadProducts()
   }, [])
 
-  const toggleWishlist = async (product: Product) => {
+  const toggleWishlist = async (e: React.MouseEvent, product: Product) => {
+    e.stopPropagation() // Prevent navigation
     const isLoved = isInWishlist(product.id)
     const wishlistItem = wishlistItems.find(i => i.id === product.id)
 
@@ -65,6 +68,10 @@ export function Products() {
     }
   }
 
+  const handleProductClick = (productId: string) => {
+    navigate(`/produto/${productId}`)
+  }
+
   return (
     <section className="py-24 bg-background">
       <div className="mx-auto max-w-[1400px] px-6 lg:px-10">
@@ -88,15 +95,27 @@ export function Products() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
           {products.map((product, index) => (
             <AnimateOnScroll key={product.id} animation="fade-up" delay={index * 100}>
-              <div className="group cursor-pointer">
+              <div
+                className="group cursor-pointer"
+                onClick={() => handleProductClick(product.id)}
+              >
                 {/* Image Container */}
                 <div className="relative aspect-[3/4] mb-5 overflow-hidden bg-secondary">
                   {product.image ? (
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                    />
+                    <>
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                      />
+                      {product.images?.[1] && (
+                        <img
+                          src={product.images[1]}
+                          alt={product.name}
+                          className="absolute inset-0 h-full w-full object-cover transition-all duration-700 ease-out opacity-0 group-hover:opacity-100 group-hover:scale-105"
+                        />
+                      )}
+                    </>
                   ) : (
                     <div className="h-full w-full flex items-center justify-center text-muted-foreground text-xs uppercase tracking-widest">
                       Sem Imagem
@@ -106,7 +125,8 @@ export function Products() {
                   {/* Hover Actions */}
                   <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-20">
                     <Button
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation()
                         addItem({ ...product, imageUrl: product.image, quantity: 1 })
                         toast.success("Adicionado à sacola")
                       }}
@@ -119,7 +139,7 @@ export function Products() {
 
                   {/* Wishlist Button */}
                   <button
-                    onClick={() => toggleWishlist(product)}
+                    onClick={(e) => toggleWishlist(e, product)}
                     className="absolute top-3 right-3 p-2 rounded-full bg-white/0 hover:bg-white/20 transition-all text-white opacity-0 group-hover:opacity-100"
                   >
                     <Heart className={`w-6 h-6 ${isInWishlist(product.id) ? "fill-white text-white" : "text-white"}`} strokeWidth={1.5} />
