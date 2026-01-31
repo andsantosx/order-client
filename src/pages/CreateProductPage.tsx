@@ -14,6 +14,7 @@ export function CreateProductPage() {
 
   // Form State
   const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [categoryId, setCategoryId] = useState<string>("");
   const [selectedSizeIds, setSelectedSizeIds] = useState<number[]>([]);
@@ -58,6 +59,7 @@ export function CreateProductPage() {
       const productData = {
         name,
         price_cents: Math.round(parseFloat(price) * 100),
+        description,
         currency: "BRL",
         categoryId: parseInt(categoryId),
         sizeIds: selectedSizeIds,
@@ -114,6 +116,18 @@ export function CreateProductPage() {
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Ex: Camiseta Básica"
                 required
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-semibold text-foreground mb-2 block">
+                Descrição (Opcional)
+              </label>
+              <textarea
+                className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Detalhes do produto (opcional)"
               />
             </div>
 
@@ -209,7 +223,7 @@ export function CreateProductPage() {
             {loading ? "Criando..." : "Criar Produto"}
           </Button>
         </form>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }

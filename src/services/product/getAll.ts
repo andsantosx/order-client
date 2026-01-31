@@ -6,6 +6,7 @@ export interface Product {
     price: number;
     stock: number;
     image?: string;
+    images?: string[];
     category?: string;
 }
 
@@ -33,6 +34,7 @@ export interface PaginatedProductResponse {
     total: number;
     page: number;
     limit: number;
+
 }
 
 export const getAll = async (params: ProductQueryParams = {}): Promise<Product[]> => {
@@ -59,6 +61,7 @@ export const getAll = async (params: ProductQueryParams = {}): Promise<Product[]
         price: (item.price_cents || 0) / 100, // Convert cents to float, safe fallback
         stock: (item.sizes || []).reduce((acc, size) => acc + (size.quantity || 0), 0), // Sum stock from sizes, safe fallback
         image: item.images?.[0]?.url,
+        images: item.images?.map(img => img.url),
         category: item.category?.name
     }));
 };
