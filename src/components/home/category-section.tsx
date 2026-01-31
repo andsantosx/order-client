@@ -50,7 +50,7 @@ export function CategorySection() {
                                 className="group flex flex-col items-center gap-3"
                             >
                                 {/* Imagem circular */}
-                                <div className="w-16 h-16 lg:w-20 lg:h-20 rounded-full border-2 border-transparent group-hover:border-foreground/20 transition-all duration-300 overflow-hidden bg-secondary/30 flex items-center justify-center">
+                                <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-full border-2 border-transparent group-hover:border-foreground/20 transition-all duration-300 overflow-hidden bg-secondary/30 flex items-center justify-center">
                                     {category.image ? (
                                         <img
                                             src={category.image}
