@@ -5,11 +5,11 @@ export function Hero() {
       <div className="relative h-screen min-h-[600px] max-h-[750px] overflow-hidden">
 
         {/* Background Image */}
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage: `url('/home.png')`
-          }}
+        {/* Background Image */}
+        <img
+          src="/home.png"
+          alt="Hero Background"
+          className="absolute inset-0 w-full h-full object-cover object-center"
         />
 
         {/* Overlay muito sutil */}
