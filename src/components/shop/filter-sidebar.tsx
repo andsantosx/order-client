@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { getFilters } from "@/services/product/getFilters";
 
 interface FilterSidebarProps {
     minPrice: string;
@@ -26,11 +27,6 @@ interface FilterSidebarProps {
     className?: string;
 }
 
-const SIZES = ["PP", "P", "M", "G", "GG", "XG"];
-const CATEGORIES = [
-    "Camisetas", "Calças", "Vestidos", "Blusas",
-    "Saias", "Shorts", "Casacos", "Acessórios"
-];
 const SORT_OPTIONS = [
     { label: "Mais Recentes", value: "newest" },
     { label: "Preço: Menor para Maior", value: "price-low" },
@@ -57,6 +53,22 @@ export function FilterSidebar({
         category: true,
         sort: true
     });
+
+    const [availableCategories, setAvailableCategories] = useState<string[]>([]);
+    const [availableSizes, setAvailableSizes] = useState<string[]>([]);
+
+    useEffect(() => {
+        const fetchFilters = async () => {
+            try {
+                const data = await getFilters();
+                setAvailableCategories(data.categories);
+                setAvailableSizes(data.sizes);
+            } catch (error) {
+                console.error("Failed to fetch filters", error);
+            }
+        };
+        fetchFilters();
+    }, []);
 
     const toggleSection = (section: keyof typeof openSections) => {
         setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
@@ -113,6 +125,8 @@ export function FilterSidebar({
                                     onKeyDown={(e) => e.key === "Enter" && applyPriceFilter()}
                                     onBlur={applyPriceFilter}
                                     className="w-14 min-w-0 bg-transparent border-none h-auto p-0 shadow-none focus-visible:ring-0 text-left placeholder:text-muted-foreground/50"
+                                    // Remove arrows from input
+                                    style={{ MozAppearance: 'textfield' }}
                                 />
                             </div>
                         </div>
@@ -145,7 +159,7 @@ export function FilterSidebar({
                 onToggle={() => toggleSection('size')}
             >
                 <div className="grid grid-cols-3 gap-2 pt-4">
-                    {SIZES.map((size) => (
+                    {availableSizes.length > 0 ? availableSizes.map((size) => (
                         <Button
                             key={size}
                             variant={selectedSizes.includes(size) ? "default" : "outline"}
@@ -155,7 +169,9 @@ export function FilterSidebar({
                         >
                             {size}
                         </Button>
-                    ))}
+                    )) : (
+                        <p className="text-sm text-muted-foreground col-span-3">Carregando...</p>
+                    )}
                 </div>
             </CollapsibleSection>
 
@@ -165,7 +181,7 @@ export function FilterSidebar({
                 onToggle={() => toggleSection('category')}
             >
                 <div className="space-y-3 pt-4">
-                    {CATEGORIES.map((category) => (
+                    {availableCategories.length > 0 ? availableCategories.map((category) => (
                         <div key={category} className="flex items-center space-x-2">
                             <Checkbox
                                 id={`cat-${category}`}
@@ -179,7 +195,9 @@ export function FilterSidebar({
                                 {category}
                             </label>
                         </div>
-                    ))}
+                    )) : (
+                        <p className="text-sm text-muted-foreground">Carregando...</p>
+                    )}
                 </div>
             </CollapsibleSection>
 

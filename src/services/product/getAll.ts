@@ -40,11 +40,11 @@ export interface PaginatedProductResponse {
 export const getAll = async (params: ProductQueryParams = {}): Promise<Product[]> => {
     const queryParams: any = {};
     if (params.search) queryParams.search = params.search;
-    
+
     // Handle array filters
     if (params.category) queryParams.category = params.category;
-    if (params.categories && params.categories.length > 0) queryParams.categories = params.categories;
-    if (params.sizes && params.sizes.length > 0) queryParams.sizes = params.sizes;
+    if (params.categories && params.categories.length > 0) queryParams.categories = params.categories.join(',');
+    if (params.sizes && params.sizes.length > 0) queryParams.sizes = params.sizes.join(',');
 
     // API docs specify camelCase for price params
     if (params.minPrice !== undefined) queryParams.minPrice = params.minPrice * 100; // API expects cents

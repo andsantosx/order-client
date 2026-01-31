@@ -1,8 +1,12 @@
 import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Truck, CreditCard, ChevronDown, Ruler } from "lucide-react";
+import { Truck, CreditCard, ChevronDown, Ruler, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/cartStore";
+import { useWishlistStore } from "@/store/wishlistStore";
+import { useAuthStore } from "@/store/authStore";
+import { add as addToWishlist } from "@/services/wishlist/add";
+import { remove as removeFromWishlist } from "@/services/wishlist/remove";
 import toast from "react-hot-toast";
 import type { Product } from "@/services/product/getById";
 import { getById as getProductById } from "@/services/product/getById";
@@ -13,6 +17,8 @@ export function ProductDetailPage() {
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { addItem } = useCartStore();
+  const { isInWishlist, addItem: addLocalWishlist, removeItem: removeLocalWishlist, items: wishlistItems } = useWishlistStore();
+  const { user } = useAuthStore();
 
   const [openSections, setOpenSections] = useState({
     payment: false,
@@ -62,6 +68,48 @@ export function ProductDetailPage() {
       imageUrl: product.images[0]?.url,
     });
     toast.success("Adicionado à sacola");
+  };
+
+  const handleToggleWishlist = async () => {
+    if (!product) return;
+
+    if (!user) {
+      toast.error("Faça login para salvar favoritos");
+      return;
+    }
+
+    const isFavorite = isInWishlist(product.id);
+
+    if (isFavorite) {
+      // Remove
+      const item = wishlistItems.find(i => i.id === product.id);
+      removeLocalWishlist(product.id);
+      toast.success("Removido dos favoritos");
+      if (item?.wishlistId) {
+        try {
+          await removeFromWishlist(item.wishlistId);
+        } catch (error) {
+          console.error("Failed to remove from backend", error);
+        }
+      }
+    } else {
+      // Add
+      addLocalWishlist({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.images[0]?.url,
+        addedAt: Date.now()
+      });
+      toast.success("Adicionado aos favoritos");
+      try {
+        await addToWishlist(product.id);
+      } catch (error) {
+        console.error("Failed to add to backend", error);
+        removeLocalWishlist(product.id);
+        toast.error("Erro ao salvar favorito");
+      }
+    }
   };
 
   const toggleSection = (section: keyof typeof openSections) => {
@@ -159,12 +207,24 @@ export function ProductDetailPage() {
             )}
 
             {/* CTA */}
-            <Button
-              onClick={handleAddToCart}
-              className="w-full h-10 bg-primary hover:bg-primary/90 text-primary-foreground font-bold uppercase tracking-widest text-sm rounded-md transition-all active:scale-[0.99]"
-            >
-              Comprar
-            </Button>
+            <div className="flex gap-4">
+              <Button
+                onClick={handleAddToCart}
+                className="flex-1 h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-bold uppercase tracking-widest text-sm rounded-md transition-all active:scale-[0.99]"
+              >
+                Comprar
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleToggleWishlist}
+                className="h-12 w-12 border-input hover:border-red-500 hover:text-red-500 hover:bg-red-50 transition-colors"
+              >
+                <Heart
+                  className={`w-6 h-6 transition-all ${isInWishlist(product.id) ? "fill-red-500 text-red-500 scale-110" : "text-muted-foreground"}`}
+                />
+              </Button>
+            </div>
 
             {/* Accordions */}
             <div className="border-t border-gray-200 pt-2 space-y-2">

@@ -22,6 +22,7 @@ export function CheckoutPage() {
 
   const [step, setStep] = useState<"shipping" | "payment" | "pix">("shipping");
   const [guestEmail, setGuestEmail] = useState(user?.email || "");
+  const [cpf, setCpf] = useState("");
   const [shippingAddress, setShippingAddress] = useState({
     street: "",
     city: "",
@@ -35,13 +36,18 @@ export function CheckoutPage() {
     qrCode: string;
     expiration: string;
     orderId: string;
+    fullOrder: any;
   } | null>(null);
 
   // Load saved address
   useEffect(() => {
     const saved = localStorage.getItem("last_shipping_address");
+    const savedCpf = localStorage.getItem("last_cpf");
     if (saved) {
       setShippingAddress(JSON.parse(saved));
+    }
+    if (savedCpf) {
+      setCpf(savedCpf);
     }
   }, []);
 
@@ -69,6 +75,10 @@ export function CheckoutPage() {
             amount: getTotal(),
             payer: {
               email: guestEmail,
+              identification: {
+                type: 'CPF',
+                number: cpf.replace(/\D/g, '') // Clean CPF
+              }
             },
           },
           customization: {
@@ -95,28 +105,35 @@ export function CheckoutPage() {
                 const order = await createOrder({
                   items: items.map(i => ({ productId: i.id, quantity: i.quantity })),
                   guestEmail: user ? undefined : guestEmail,
+                  guestCpf: user ? undefined : cpf.replace(/\D/g, ''),
                   shippingAddress: shippingAddress
                 });
+
+                // Ensure we have the CPF. Priority: Brick > State
+                // But Brick might return valid empty object if pre-filled?
+                // Let's force our collected CPF if Brick lacks it.
+                const payerIdentification = paymentFormData.payer?.identification?.number
+                  ? paymentFormData.payer.identification
+                  : { type: 'CPF', number: cpf.replace(/\D/g, '') };
 
                 const paymentData = {
                   ...paymentFormData,
                   orderId: order.id,
                   description: `Order ${order.id}`,
-                  payer: { ...paymentFormData.payer, email: guestEmail }
+                  payer: {
+                    ...paymentFormData.payer,
+                    email: guestEmail,
+                    identification: payerIdentification
+                  }
                 };
 
-                console.log("=== PAYMENT DEBUG ===");
-                console.log("paymentFormData from Brick:", paymentFormData);
-                console.log("Final paymentData to API:", paymentData);
-                console.log("payment_method_id:", paymentData.payment_method_id || paymentFormData.payment_method_id);
-                console.log("=====================");
 
                 const paymentResponse = await processPayment(paymentData);
 
                 if (paymentResponse.status === 'approved') {
                   toast.success("Pagamento realizado com sucesso!");
                   clearCart();
-                  navigate("/order-confirmation", { state: { orderId: order.id } });
+                  navigate("/order-confirmation", { state: { orderId: order.id, order: order } });
                 } else if (paymentResponse.status === 'pending' && paymentResponse.status_detail === 'pending_waiting_transfer') {
                   // PIX payment - show QR code
                   const qrCodeBase64 = paymentResponse.point_of_interaction?.transaction_data?.qr_code_base64;
@@ -127,7 +144,8 @@ export function CheckoutPage() {
                       qrCodeBase64,
                       qrCode,
                       expiration: paymentResponse.date_of_expiration || '',
-                      orderId: order.id
+                      orderId: order.id,
+                      fullOrder: order
                     });
                     setStep("pix");
                     toast.success("QR Code PIX gerado! Escaneie para pagar.");
@@ -135,16 +153,40 @@ export function CheckoutPage() {
                     toast.error("Erro ao gerar QR Code PIX. Tente novamente.");
                   }
                 } else {
-                  toast.error(`Pagamento não aprovado: ${paymentResponse.status_detail || paymentResponse.status}`);
+                  // Advanced Error Handling
+                  const errorMap: Record<string, string> = {
+                    cc_rejected_bad_filled_card_number: "Verifique o número do cartão.",
+                    cc_rejected_bad_filled_date: "Verifique a data de validade.",
+                    cc_rejected_bad_filled_other: "Verifique os dados.",
+                    cc_rejected_bad_filled_security_code: "Verifique o código de segurança.",
+                    cc_rejected_blacklist: "Não pudemos processar seu pagamento.",
+                    cc_rejected_call_for_authorize: "Você deve autorizar o pagamento com seu banco.",
+                    cc_rejected_card_disabled: "Ligue para o seu banco para ativar seu cartão.",
+                    cc_rejected_card_error: "Não conseguimos processar seu pagamento.",
+                    cc_rejected_duplicated_payment: "Você já efetuou um pagamento com esse valor. Caso precise pagar novamente, utilize outro cartão ou outra forma de pagamento.",
+                    cc_rejected_high_risk: "Seu pagamento foi recusado. Escolha outra forma de pagamento. Recomendamos meios de pagamento em dinheiro.",
+                    cc_rejected_insufficient_amount: "Seu cartão possui saldo insuficiente.",
+                    cc_rejected_invalid_installments: "O cartão não processa pagamentos em tantas parcelas.",
+                    cc_rejected_max_attempts: "Você atingiu o limite de tentativas permitido. Escolha outro cartão ou outra forma de pagamento.",
+                    cc_rejected_other_reason: "O banco não processou o pagamento.",
+                  };
+
+                  const errorMessage = errorMap[paymentResponse.status_detail] || `Pagamento não aprovado: ${paymentResponse.status_detail || paymentResponse.status}`;
+                  toast.error(errorMessage);
                 }
-              } catch (error) {
+              } catch (error: any) {
                 console.error("Payment error:", error);
-                toast.error("Erro ao processar pagamento.");
+                const backendMessage = error.response?.data?.message || error.message;
+                if (backendMessage) {
+                  toast.error(backendMessage);
+                } else {
+                  toast.error("Erro ao processar pagamento. Verifique seus dados e tente novamente.");
+                }
               }
             },
             onError: (error: any) => {
               console.error(error);
-              toast.error("Erro no Mercado Pago.");
+              toast.error("Erro no Mercado Pago. Verifique os dados.");
             },
           },
         });
@@ -192,6 +234,24 @@ export function CheckoutPage() {
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold">CPF / CNPJ</label>
+                    <Input
+                      value={cpf}
+                      onChange={(e) => setCpf(e.target.value)}
+                      placeholder="000.000.000-00"
+                      className="bg-card border-border"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold">CEP</label>
+                    <Input
+                      value={shippingAddress.zipCode}
+                      onChange={(e) => setShippingAddress({ ...shippingAddress, zipCode: e.target.value })}
+                      placeholder="00000-000"
+                      className="bg-card border-border"
+                    />
+                  </div>
                   <div className="space-y-2 sm:col-span-2">
                     <label className="text-sm font-semibold">Endereço (Rua e Número)</label>
                     <Input
@@ -220,15 +280,6 @@ export function CheckoutPage() {
                       className="bg-card border-border uppercase"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold">CEP</label>
-                    <Input
-                      value={shippingAddress.zipCode}
-                      onChange={(e) => setShippingAddress({ ...shippingAddress, zipCode: e.target.value })}
-                      placeholder="00000-000"
-                      className="bg-card border-border"
-                    />
-                  </div>
                 </div>
               </div>
 
@@ -237,10 +288,11 @@ export function CheckoutPage() {
                   size="lg"
                   className="w-full h-12 rounded-full font-bold mt-6"
                   onClick={() => {
-                    if (!guestEmail || !shippingAddress.street || !shippingAddress.zipCode) {
-                      toast.error("Preencha os dados de entrega.");
+                    if (!guestEmail || !shippingAddress.street || !shippingAddress.zipCode || !cpf) {
+                      toast.error("Preencha todos os dados, incluindo CPF.");
                       return;
                     }
+                    localStorage.setItem("last_cpf", cpf);
                     setStep("payment");
                     window.scrollTo(0, 0); // Scroll top for mobile payment view
                   }}
@@ -318,7 +370,7 @@ export function CheckoutPage() {
                       className="w-full rounded-full"
                       onClick={() => {
                         clearCart();
-                        navigate("/order-confirmation", { state: { orderId: pixData.orderId } });
+                        navigate("/order-confirmation", { state: { orderId: pixData.orderId, order: pixData.fullOrder } });
                       }}
                     >
                       Já fiz o pagamento

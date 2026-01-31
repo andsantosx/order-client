@@ -18,7 +18,18 @@ export function OrderConfirmationPage() {
       const searchParams = new URLSearchParams(location.search);
       const paymentId = searchParams.get("payment_id"); // Mercado Pago adds this
       const statusParam = searchParams.get("status"); // Mercado Pago adds this
+      const orderState = location.state?.order;
       const orderIdState = location.state?.orderId;
+
+      // If we have an order object from state (passed from checkout), use it directly
+      // This avoids 401 errors for guest checkouts trying to fetch GET /orders/:id
+      if (orderState) {
+        setOrder(orderState);
+        setStatus("success");
+        clearCart();
+        setLoading(false);
+        return;
+      }
 
       // If we have an order ID from state, fetch it
       if (orderIdState) {

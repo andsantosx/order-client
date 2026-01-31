@@ -10,7 +10,7 @@ import {
 import { useWishlistStore } from "@/store/wishlistStore";
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
-import { Menu, Search, ShoppingBag, User as UserIcon, ChevronDown } from "lucide-react";
+import { Menu, Search, ShoppingBag, User as UserIcon, ChevronDown, Heart, X } from "lucide-react";
 
 // Mega menu structure - Categorias reais
 const megaMenuItems = [
@@ -22,32 +22,32 @@ const megaMenuItems = [
       {
         title: "PARTE SUPERIOR",
         items: [
-          { name: "Camisetas", href: "/loja?category=camisetas" },
-          { name: "Moletons", href: "/loja?category=moletons" },
-          { name: "Jaquetas", href: "/loja?category=jaquetas" },
+          { name: "Camisetas", href: "/loja?categories=Camisetas" },
+          { name: "Moletons", href: "/loja?categories=Moletons" },
+          { name: "Jaquetas", href: "/loja?categories=Jaquetas" },
         ]
       },
       {
         title: "PARTE INFERIOR",
         items: [
-          { name: "Calças", href: "/loja?category=calcas" },
-          { name: "Shorts", href: "/loja?category=shorts" },
-          { name: "Conjuntos", href: "/loja?category=conjuntos" },
+          { name: "Calças", href: "/loja?categories=Calças" },
+          { name: "Shorts", href: "/loja?categories=Shorts" },
+          { name: "Conjuntos", href: "/loja?categories=Conjuntos" },
         ]
       },
     ]
   },
   {
     name: "ACESSÓRIOS",
-    href: "/loja?category=acessorios",
+    href: "/loja?categories=Acessórios",
     hasDropdown: true,
     columns: [
       {
         title: "CATEGORIAS",
         items: [
-          { name: "Bonés", href: "/loja?category=bones" },
-          { name: "Bolsas", href: "/loja?category=bolsas" },
-          { name: "Ver Tudo", href: "/loja?category=acessorios" },
+          { name: "Bonés", href: "/loja?categories=Bonés" },
+          { name: "Bolsas", href: "/loja?categories=Bolsas" },
+          { name: "Ver Tudo", href: "/loja?categories=Acessórios" },
         ]
       },
     ]
@@ -63,6 +63,9 @@ export function Header() {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [mobileSearchTerm, setMobileSearchTerm] = useState("");
+  const [expandedMobileItems, setExpandedMobileItems] = useState<string[]>([]);
+
   const { items: wishlistItems } = useWishlistStore();
   const { items: cartItems, toggleCart } = useCartStore();
   const { user, logout } = useAuthStore();
@@ -71,6 +74,20 @@ export function Header() {
     if (searchTerm.trim()) {
       window.location.href = `/loja?search=${encodeURIComponent(searchTerm.trim())}`;
     }
+  };
+
+  const handleMobileSearch = () => {
+    if (mobileSearchTerm.trim()) {
+      window.location.href = `/loja?search=${encodeURIComponent(mobileSearchTerm.trim())}`;
+    }
+  };
+
+  const toggleMobileItem = (name: string) => {
+    setExpandedMobileItems(prev =>
+      prev.includes(name)
+        ? prev.filter(item => item !== name)
+        : [...prev, name]
+    );
   };
 
   useEffect(() => {
@@ -147,6 +164,13 @@ export function Header() {
                 >
                   <Search className="h-4 w-4" strokeWidth={1.5} />
                 </button>
+                <button
+                  type="button"
+                  onClick={() => setSearchOpen(false)}
+                  className="ml-1 text-foreground/60 hover:text-foreground transition-colors"
+                >
+                  <X className="h-4 w-4" strokeWidth={1.5} />
+                </button>
               </form>
             ) : (
               <button
@@ -157,6 +181,19 @@ export function Header() {
               </button>
             )}
           </div>
+
+          {/* Wishlist Link */}
+          <a
+            href="/favoritos"
+            className="relative flex items-center justify-center text-foreground/60 hover:text-foreground transition-colors"
+          >
+            <Heart className="h-[18px] w-[18px]" strokeWidth={1.5} />
+            {wishlistItems.length > 0 && (
+              <span className="absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-medium text-primary-foreground">
+                {wishlistItems.length}
+              </span>
+            )}
+          </a>
 
           {user ? (
             <div className="relative group">
@@ -219,37 +256,82 @@ export function Header() {
               className="w-full max-w-md bg-background border-border"
             >
               <SheetTitle className="sr-only">Menu de navegação</SheetTitle>
-              <div className="flex flex-col gap-8 pt-12">
-                <nav className="flex flex-col gap-1">
-                  {megaMenuItems.map((item) => (
-                    <div key={item.name}>
-                      <a
-                        href={item.href}
-                        className="flex items-center justify-between py-3 px-4 text-sm font-medium tracking-wide text-foreground/80 hover:text-foreground hover:bg-secondary/30 transition-colors"
-                      >
-                        {item.name}
-                        {item.hasDropdown && <ChevronDown className="w-4 h-4" />}
-                      </a>
-                      {item.hasDropdown && item.columns && (
-                        <div className="pl-4 border-l border-border ml-4">
-                          {item.columns.map((col) => (
-                            <div key={col.title} className="mb-3">
-                              <p className="text-[10px] font-bold text-foreground/50 uppercase tracking-wider px-4 py-1">{col.title}</p>
-                              {col.items.map((subItem) => (
-                                <a
-                                  key={subItem.name}
-                                  href={subItem.href}
-                                  className="block py-1.5 px-4 text-xs text-foreground/60 hover:text-foreground transition-colors"
-                                >
-                                  {subItem.name}
-                                </a>
+              <div className="flex flex-col gap-6 pt-10">
+                {/* Mobile Search */}
+                <form
+                  onSubmit={(e) => { e.preventDefault(); handleMobileSearch(); }}
+                  className="relative px-1"
+                >
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <input
+                    type="text"
+                    placeholder="BUSCAR PRODUTOS..."
+                    className="w-full h-10 pl-10 pr-4 rounded-md border border-input bg-secondary/20 text-sm outline-none focus:border-primary transition-colors uppercase placeholder:normal-case"
+                    value={mobileSearchTerm}
+                    onChange={(e) => setMobileSearchTerm(e.target.value)}
+                  />
+                </form>
+
+                <nav className="flex flex-col">
+                  {megaMenuItems.map((item) => {
+                    const isExpanded = expandedMobileItems.includes(item.name);
+
+                    return (
+                      <div key={item.name} className="border-b border-border/40 last:border-0">
+                        <div
+                          className="flex items-center justify-between py-4 px-2 cursor-pointer select-none hover:bg-secondary/20 transition-colors"
+                          onClick={() => item.hasDropdown ? toggleMobileItem(item.name) : (window.location.href = item.href)}
+                        >
+                          <a
+                            href={item.href}
+                            onClick={(e) => {
+                              if (item.hasDropdown) {
+                                e.preventDefault();
+                                toggleMobileItem(item.name);
+                              }
+                            }}
+                            className="text-sm font-bold tracking-wider text-foreground uppercase"
+                          >
+                            {item.name}
+                          </a>
+                          {item.hasDropdown && (
+                            <ChevronDown
+                              className={`w-4 h-4 text-muted-foreground transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
+                            />
+                          )}
+                        </div>
+
+                        {/* Collapsible Content */}
+                        <div
+                          className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-[500px] opacity-100 mb-4' : 'max-h-0 opacity-0'
+                            }`}
+                        >
+                          {item.hasDropdown && item.columns && (
+                            <div className="bg-secondary/10 rounded-md mx-2 p-4 space-y-4">
+                              {item.columns.map((col) => (
+                                <div key={col.title}>
+                                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2 border-b border-border/50 pb-1">
+                                    {col.title}
+                                  </p>
+                                  <div className="flex flex-col gap-2">
+                                    {col.items.map((subItem) => (
+                                      <a
+                                        key={subItem.name}
+                                        href={subItem.href}
+                                        className="text-sm text-foreground/80 hover:text-foreground pl-2 border-l-2 border-transparent hover:border-primary transition-all"
+                                      >
+                                        {subItem.name}
+                                      </a>
+                                    ))}
+                                  </div>
+                                </div>
                               ))}
                             </div>
-                          ))}
+                          )}
                         </div>
-                      )}
-                    </div>
-                  ))}
+                      </div>
+                    );
+                  })}
                 </nav>
               </div>
             </SheetContent>

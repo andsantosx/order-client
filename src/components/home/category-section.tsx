@@ -5,32 +5,32 @@ const categories = [
     {
         name: "Camisetas",
         image: "/camiseta.png",
-        href: "/loja?category=camisetas"
+        href: "/loja?categories=Camisetas"
     },
     {
         name: "Calças",
         image: "/calca.png",
-        href: "/loja?category=calcas"
+        href: "/loja?categories=Calças"
     },
     {
         name: "Shorts",
         image: "/short.png",
-        href: "/loja?category=shorts"
+        href: "/loja?categories=Shorts"
     },
     {
         name: "Moletons",
         image: "/moletom.png",
-        href: "/loja?category=moletons"
+        href: "/loja?categories=Moletons"
     },
     {
         name: "Jaquetas",
         image: "/jaqueta.png",
-        href: "/loja?category=jaquetas"
+        href: "/loja?categories=Jaquetas"
     },
     {
         name: "Bonés",
         image: "/bone.png",
-        href: "/loja?category=bones"
+        href: "/loja?categories=Bonés"
     },
 ];
 

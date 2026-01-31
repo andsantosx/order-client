@@ -6,12 +6,13 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 import { getAll as getAllProducts, type Product } from "@/services/product/getAll";
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import { FilterSidebar } from "@/components/shop/filter-sidebar";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { ActiveFilters } from "@/components/shop/active-filters";
+import { FilterSidebar } from "@/components/shop/filter-sidebar";
 
 export function ShopPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -203,15 +204,28 @@ export function ShopPage() {
             ) : products.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-12 gap-x-8">
                 {products.map((product) => (
-                  <div key={product.id} className="group cursor-pointer">
+                  <div
+                    key={product.id}
+                    className="group cursor-pointer"
+                    onClick={() => navigate(`/produto/${product.id}`)}
+                  >
                     {/* Image Container */}
                     <div className="relative aspect-[3/4] mb-4 bg-secondary overflow-hidden rounded-md">
                       {product.image ? (
-                        <img
-                          src={product.image}
-                          alt={product.name}
-                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                        />
+                        <>
+                          <img
+                            src={product.image}
+                            alt={product.name}
+                            className={`h-full w-full object-cover transition-all duration-700 ${product.images && product.images[1] ? 'group-hover:opacity-0' : 'group-hover:scale-105'}`}
+                          />
+                          {product.images && product.images[1] && (
+                            <img
+                              src={product.images[1]}
+                              alt={`${product.name} view 2`}
+                              className="absolute inset-0 h-full w-full object-cover transition-all duration-700 opacity-0 group-hover:opacity-100 scale-105"
+                            />
+                          )}
+                        </>
                       ) : (
                         <div className="h-full w-full flex items-center justify-center text-muted-foreground text-xs uppercase tracking-widest bg-secondary/50">
                           Sem Imagem
@@ -219,9 +233,10 @@ export function ShopPage() {
                       )}
 
                       {/* Overlay / Quick Add */}
-                      <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                      <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-10">
                         <Button
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent navigation when clicking 'add'
                             addItem({
                               id: product.id,
                               name: product.name,
@@ -240,7 +255,7 @@ export function ShopPage() {
 
                     {/* Product Info */}
                     <div className="space-y-1">
-                      <h3 className="font-bold text-sm uppercase tracking-wide text-foreground line-clamp-1">
+                      <h3 className="font-bold text-sm uppercase tracking-wide text-foreground line-clamp-1 group-hover:text-primary transition-colors">
                         {product.name}
                       </h3>
                       <div className="flex items-center justify-between">
