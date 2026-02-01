@@ -43,8 +43,8 @@ export function PromoBanner() {
             ref={videoRef}
             className="h-full w-full object-cover"
             src="/home-animation.mp4"
-            poster="/home.png"
             muted
+            autoPlay
             playsInline
             loop
           />
