@@ -73,7 +73,7 @@ export function Products() {
   }
 
   return (
-    <section className="py-24 bg-background">
+    <section className="bg-background">
       <div className="mx-auto max-w-[1400px] px-6 lg:px-10">
         <AnimateOnScroll animation="fade-up" delay={0}>
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">

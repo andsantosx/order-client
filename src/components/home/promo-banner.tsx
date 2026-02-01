@@ -19,7 +19,7 @@ export function PromoBanner() {
           }
         })
       },
-      { threshold: 0.5 } // Play when 50% visible
+      { threshold: 0.2 } // Play when 20% visible (better for mobile)
     )
 
     observer.observe(video)
@@ -38,11 +38,12 @@ export function PromoBanner() {
           {/* If user wants text here later, they can add it. Currently empty as per previous state, but adding margin for spacing if needed. */}
         </div>
 
-        <div className="relative aspect-video w-full max-w-7xl mx-auto overflow-hidden rounded-2xl bg-gray-100">
+        <div className="relative aspect-video w-full max-w-7xl mx-auto overflow-hidden rounded-2xl">
           <video
             ref={videoRef}
             className="h-full w-full object-cover"
             src="/home-animation.mp4"
+            poster="/home.png"
             muted
             playsInline
             loop
