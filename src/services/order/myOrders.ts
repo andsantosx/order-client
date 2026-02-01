@@ -25,7 +25,7 @@ interface ShippingAddress {
 export interface Order {
     id: string;
     total_amount: number;
-    status: 'PENDING' | 'PAID' | 'SHIPPED' | 'DELIVERED' | 'CANCELED';
+    status: 'PENDING' | 'PAID' | 'SHIPPED' | 'DELIVERED' | 'CANCELED' | 'REFUNDED';
     created_at: string;
     shippingAddress?: ShippingAddress;
     items?: OrderItem[];

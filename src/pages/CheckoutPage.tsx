@@ -87,12 +87,17 @@ export function CheckoutPage() {
               bankTransfer: "all",
               creditCard: "all",
               debitCard: "all",
+              mercadoPago: "all",
+              wallet_purchase: "all", // Enable Mercado Pago Wallet (Saldo)
+              onboarding_credits: "all", // Enable Mercado Crédito
+              excludedPaymentMethods: ["debelo"], // Exclude the specific Caixa branded option
               maxInstallments: 12
             },
             visual: {
               style: {
                 theme: 'light', // 'default' | 'dark' | 'bootstrap' | 'flat'
-              }
+              },
+              hidePaymentButton: false
             }
           },
           callbacks: {
@@ -110,8 +115,6 @@ export function CheckoutPage() {
                 });
 
                 // Ensure we have the CPF. Priority: Brick > State
-                // But Brick might return valid empty object if pre-filled?
-                // Let's force our collected CPF if Brick lacks it.
                 const payerIdentification = paymentFormData.payer?.identification?.number
                   ? paymentFormData.payer.identification
                   : { type: 'CPF', number: cpf.replace(/\D/g, '') };
@@ -124,7 +127,8 @@ export function CheckoutPage() {
                     ...paymentFormData.payer,
                     email: guestEmail,
                     identification: payerIdentification
-                  }
+                  },
+                  // Backend handles installments safety logic
                 };
 
 
@@ -135,7 +139,7 @@ export function CheckoutPage() {
                   clearCart();
                   navigate("/order-confirmation", { state: { orderId: order.id, order: order } });
                 } else if (paymentResponse.status === 'pending' && paymentResponse.status_detail === 'pending_waiting_transfer') {
-                  // PIX payment - show QR code
+                  // PIX payment
                   const qrCodeBase64 = paymentResponse.point_of_interaction?.transaction_data?.qr_code_base64;
                   const qrCode = paymentResponse.point_of_interaction?.transaction_data?.qr_code;
 
@@ -153,7 +157,7 @@ export function CheckoutPage() {
                     toast.error("Erro ao gerar QR Code PIX. Tente novamente.");
                   }
                 } else {
-                  // Advanced Error Handling
+                  // Error Handling
                   const errorMap: Record<string, string> = {
                     cc_rejected_bad_filled_card_number: "Verifique o número do cartão.",
                     cc_rejected_bad_filled_date: "Verifique a data de validade.",
@@ -163,11 +167,11 @@ export function CheckoutPage() {
                     cc_rejected_call_for_authorize: "Você deve autorizar o pagamento com seu banco.",
                     cc_rejected_card_disabled: "Ligue para o seu banco para ativar seu cartão.",
                     cc_rejected_card_error: "Não conseguimos processar seu pagamento.",
-                    cc_rejected_duplicated_payment: "Você já efetuou um pagamento com esse valor. Caso precise pagar novamente, utilize outro cartão ou outra forma de pagamento.",
-                    cc_rejected_high_risk: "Seu pagamento foi recusado. Escolha outra forma de pagamento. Recomendamos meios de pagamento em dinheiro.",
+                    cc_rejected_duplicated_payment: "Você já efetuou um pagamento.",
+                    cc_rejected_high_risk: "Seu pagamento foi recusado.",
                     cc_rejected_insufficient_amount: "Seu cartão possui saldo insuficiente.",
                     cc_rejected_invalid_installments: "O cartão não processa pagamentos em tantas parcelas.",
-                    cc_rejected_max_attempts: "Você atingiu o limite de tentativas permitido. Escolha outro cartão ou outra forma de pagamento.",
+                    cc_rejected_max_attempts: "Você atingiu o limite de tentativas permitido.",
                     cc_rejected_other_reason: "O banco não processou o pagamento.",
                   };
 
@@ -180,7 +184,7 @@ export function CheckoutPage() {
                 if (backendMessage) {
                   toast.error(backendMessage);
                 } else {
-                  toast.error("Erro ao processar pagamento. Verifique seus dados e tente novamente.");
+                  toast.error("Erro ao processar pagamento.");
                 }
               }
             },
@@ -191,7 +195,12 @@ export function CheckoutPage() {
           },
         });
       };
+
       renderPaymentBrick();
+
+      return () => {
+        // Cleanup
+      };
     }
   }, [mp, step, getTotal, guestEmail, items, shippingAddress, navigate, clearCart]);
 

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/store/authStore";
+import { apiClient } from "@/lib/api-client";
 import { getProfile, updateProfile } from "@/services/auth/profile";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -200,7 +201,7 @@ export function ProfilePage() {
                     </div>
 
                     {/* Content */}
-                    <div className="bg-card border border-border p-8 min-h-[500px]">
+                    <div className="bg-card border border-border p-4 md:p-8 min-h-[500px]">
                         {activeTab === 'profile' && (
                             <div className="max-w-xl space-y-8">
                                 <div>
@@ -268,7 +269,7 @@ export function ProfilePage() {
                                 ) : (
                                     <div className="space-y-4">
                                         {orders.map((order) => (
-                                            <div key={order.id} className="group border border-border p-6 hover:border-primary transition-colors bg-background">
+                                            <div key={order.id} className="group border border-border p-4 md:p-6 hover:border-primary transition-colors bg-background rounded-lg shadow-sm">
                                                 <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-4">
                                                     <div>
                                                         <p className="font-bold text-lg">Order #{order.id.slice(0, 8).toUpperCase()}</p>
@@ -308,6 +309,33 @@ export function ProfilePage() {
                                             <LogOut className="w-5 h-5 rotate-180" />
                                         </button>
                                     </div>
+
+                                    {/* Action Buttons */}
+                                    {selectedOrder.status !== 'PAID' &&
+                                        selectedOrder.status !== 'SHIPPED' &&
+                                        selectedOrder.status !== 'DELIVERED' &&
+                                        selectedOrder.status !== 'CANCELED' &&
+                                        selectedOrder.status !== 'REFUNDED' && (
+                                            <div className="mb-6 pb-4 border-b border-border flex justify-end">
+                                                <Button
+                                                    variant="destructive"
+                                                    onClick={async () => {
+                                                        if (!confirm('Tem certeza que deseja cancelar este pedido?')) return;
+                                                        try {
+                                                            await apiClient.post(`/api/orders/${selectedOrder.id}/cancel`); // Assuming apiClient is available or imported if not using hook
+                                                            toast.success("Pedido cancelado");
+                                                            // Update local state
+                                                            setOrders(orders.map(o => o.id === selectedOrder.id ? { ...o, status: 'CANCELED' } : o));
+                                                            setSelectedOrder({ ...selectedOrder, status: 'CANCELED' });
+                                                        } catch (error) {
+                                                            toast.error("Erro ao cancelar pedido");
+                                                        }
+                                                    }}
+                                                >
+                                                    Cancelar Pedido
+                                                </Button>
+                                            </div>
+                                        )}
 
                                     <div className="space-y-8">
                                         {/* Items */}
