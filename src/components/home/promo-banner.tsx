@@ -9,16 +9,23 @@ export function PromoBanner() {
     const video = videoRef.current
     if (!video) return
 
-    // Force strict requirements for mobile autoplay
-    video.setAttribute('playsinline', 'true')
-    video.muted = true
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            video.play().catch((error) => console.log("Video autoplay failed:", error))
+          } else {
+            video.pause()
+          }
+        })
+      },
+      { threshold: 0.5 } // Play when 50% visible
+    )
 
-    // Attempt playback immediately
-    const playPromise = video.play()
-    if (playPromise !== undefined) {
-      playPromise.catch((error) => {
-        console.log("Auto-play failed:", error)
-      })
+    observer.observe(video)
+
+    return () => {
+      observer.disconnect()
     }
   }, [])
 
@@ -31,13 +38,12 @@ export function PromoBanner() {
           {/* If user wants text here later, they can add it. Currently empty as per previous state, but adding margin for spacing if needed. */}
         </div>
 
-        <div className="relative aspect-video w-full max-w-7xl mx-auto overflow-hidden rounded-2xl">
+        <div className="relative aspect-video w-full max-w-7xl mx-auto overflow-hidden rounded-2xl bg-gray-100">
           <video
             ref={videoRef}
             className="h-full w-full object-cover"
             src="/home-animation.mp4"
             muted
-            autoPlay
             playsInline
             loop
           />
