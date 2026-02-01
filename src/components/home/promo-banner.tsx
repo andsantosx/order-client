@@ -1,29 +1,52 @@
-import { AnimateOnScroll } from '@/hooks/useScrollAnimation';
+"use client"
+
+import { useEffect, useRef } from "react"
 
 export function PromoBanner() {
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            video.play().catch((error) => console.log("Video autoplay failed:", error))
+          } else {
+            video.pause()
+          }
+        })
+      },
+      { threshold: 0.5 } // Play when 50% visible
+    )
+
+    observer.observe(video)
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [])
+
   return (
-    <section className="py-24 bg-foreground text-background">
+    <section className="py-24">
       <div className="mx-auto max-w-[1400px] px-6 lg:px-10">
 
-        {/* Header */}
-        <div className="text-center">
-          <AnimateOnScroll animation="fade-in" delay={0}>
-            <p className="text-xs font-medium uppercase tracking-[0.3em] text-background/50 mb-4">
-              FAÇA PARTE DO MOVIMENTO
-            </p>
-          </AnimateOnScroll>
-          <AnimateOnScroll animation="fade-up" delay={100}>
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight leading-none mb-6">
-              Vista sua<br />
-              <span className="text-background/70">autenticidade</span>
-            </h2>
-          </AnimateOnScroll>
-          <AnimateOnScroll animation="fade-up" delay={200}>
-            <p className="max-w-xl mx-auto text-background/60 text-lg">
-              Cada peça ORDER é pensada para quem não segue, mas define tendências.
-              Para aqueles que entendem que estilo é sobre ser, não parecer.
-            </p>
-          </AnimateOnScroll>
+        {/* Helper text/header (optional, kept empty as per original component logic if intended, or removed if strictly just video asked) */}
+        <div className="text-center mb-12">
+          {/* If user wants text here later, they can add it. Currently empty as per previous state, but adding margin for spacing if needed. */}
+        </div>
+
+        <div className="relative aspect-video w-full max-w-7xl mx-auto overflow-hidden rounded-2xl bg-gray-100">
+          <video
+            ref={videoRef}
+            className="h-full w-full object-cover"
+            src="/home-animation.mp4"
+            muted
+            playsInline
+            loop
+          />
         </div>
 
       </div>
