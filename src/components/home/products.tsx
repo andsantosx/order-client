@@ -159,9 +159,6 @@ export function Products() {
                       }).format(product.price)}
                     </span>
                   </div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider">
-                    {product.stock > 0 ? 'Em Estoque' : 'Indisponível'}
-                  </p>
                 </div>
               </div>
             </AnimateOnScroll>
