@@ -9,34 +9,16 @@ export function PromoBanner() {
     const video = videoRef.current
     if (!video) return
 
-    // Ensure properties are set for mobile support
+    // Force strict requirements for mobile autoplay
+    video.setAttribute('playsinline', 'true')
     video.muted = true
-    video.playsInline = true
-    video.loop = true
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            // Attempt to play, handling the promise catch for low-power mode blocking
-            const playPromise = video.play()
-            if (playPromise !== undefined) {
-              playPromise.catch((error) => {
-                console.log("Video autoplay blocked or failed:", error)
-              })
-            }
-          } else {
-            video.pause()
-          }
-        })
-      },
-      { threshold: 0.1 } // Reduced threshold for earlier triggering
-    )
-
-    observer.observe(video)
-
-    return () => {
-      observer.disconnect()
+    // Attempt playback immediately
+    const playPromise = video.play()
+    if (playPromise !== undefined) {
+      playPromise.catch((error) => {
+        console.log("Auto-play failed:", error)
+      })
     }
   }, [])
 

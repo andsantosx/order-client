@@ -7,7 +7,7 @@ export function Hero() {
         {/* Background Image */}
         {/* Background Image - Desktop */}
         <img
-          src="/home.png"
+          src="/home.jpg"
           alt="Hero Background"
           className="hidden md:block absolute inset-0 w-full h-full object-cover object-top"
         />
