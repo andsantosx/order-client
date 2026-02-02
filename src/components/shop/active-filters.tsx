@@ -53,7 +53,7 @@ export function ActiveFilters({
 
             {/* Categories */}
             {selectedCategories.map(cat => (
-                <Badge key={`cat-${cat}`} variant="secondary" className="gap-1 pl-2 pr-1 py-1">
+                <Badge key={`cat-${cat}`} variant="secondary" className="gap-1 pl-2 pr-1 py-1 capitalize">
                     {cat}
                     <Button
                         variant="ghost"

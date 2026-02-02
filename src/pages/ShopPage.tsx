@@ -3,8 +3,10 @@ import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/cartStore";
 import toast from "react-hot-toast";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import { getAll as getAllProducts, type Product } from "@/services/product/getAll";
+import { getFilters } from "@/services/product/getFilters";
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { ActiveFilters } from "@/components/shop/active-filters";
@@ -23,7 +25,14 @@ export function ShopPage() {
 
   // Parse arrays from URL (comma separated)
   const initialSizes = searchParams.get("sizes") ? searchParams.get("sizes")!.split(",") : [];
-  const initialCategories = searchParams.get("categories") ? searchParams.get("categories")!.split(",") : [];
+
+  // Support both 'category' (singular, preferred for single links) and 'categories' (plural)
+  const singularCategory = searchParams.get("category");
+  const pluralCategories = searchParams.get("categories") ? searchParams.get("categories")!.split(",") : [];
+
+  const initialCategories = singularCategory
+    ? [...pluralCategories, singularCategory].filter((v, i, a) => a.indexOf(v) === i) // unique
+    : pluralCategories;
 
   // Local Filter States
   const [minPrice, setMinPrice] = useState(initialMinPrice);
@@ -35,6 +44,9 @@ export function ShopPage() {
   const [selectedSizes, setSelectedSizes] = useState<string[]>(initialSizes);
   const [selectedCategories, setSelectedCategories] = useState<string[]>(initialCategories);
   const [sortBy, setSortBy] = useState(initialSortBy);
+
+  const [availableCategories, setAvailableCategories] = useState<{ name: string; slug: string }[]>([]);
+  const [availableSizes, setAvailableSizes] = useState<string[]>([]);
 
   const { addItem } = useCartStore();
 
@@ -55,16 +67,39 @@ export function ShopPage() {
     // Arrays
     if (selectedSizes.length > 0) params.set("sizes", selectedSizes.join(","));
     else params.delete("sizes");
-    if (selectedCategories.length > 0) params.set("categories", selectedCategories.join(","));
-    else params.delete("categories");
+
+    // Check if we have a single category to use the cleaner '?category=' param
+    if (selectedCategories.length === 1) {
+      params.set("category", selectedCategories[0]);
+      params.delete("categories"); // Remove plural if it exists
+    } else if (selectedCategories.length > 1) {
+      params.set("categories", selectedCategories.join(","));
+      params.delete("category"); // Remove singular
+    } else {
+      params.delete("categories");
+      params.delete("category");
+    }
 
     setSearchParams(params, { replace: true });
   }, [sortBy, activeMinPrice, activeMaxPrice, selectedSizes, selectedCategories]);
 
-  // Fetch Products
+  // Fetch Products & Filters
   useEffect(() => {
     fetchProducts();
   }, [searchParams]);
+
+  useEffect(() => {
+    const fetchFilters = async () => {
+      try {
+        const data = await getFilters();
+        setAvailableCategories(data.categories);
+        setAvailableSizes(data.sizes);
+      } catch (error) {
+        console.error("Failed to fetch filters", error);
+      }
+    };
+    fetchFilters();
+  }, []);
 
   const fetchProducts = async () => {
     setIsLoading(true);
@@ -139,6 +174,8 @@ export function ShopPage() {
               setSelectedCategories={setSelectedCategories}
               sortBy={sortBy}
               setSortBy={setSortBy}
+              availableCategories={availableCategories}
+              availableSizes={availableSizes}
             />
           </aside>
 
@@ -164,6 +201,8 @@ export function ShopPage() {
                   setSelectedCategories={setSelectedCategories}
                   sortBy={sortBy}
                   setSortBy={setSortBy}
+                  availableCategories={availableCategories}
+                  availableSizes={availableSizes}
                   className="mt-6"
                 />
                 <div className="mt-8 pt-4 border-t border-border">
@@ -194,10 +233,10 @@ export function ShopPage() {
             {isLoading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-12 gap-x-8">
                 {[1, 2, 3, 4, 5, 6].map(i => (
-                  <div key={i} className="animate-pulse space-y-4">
-                    <div className="bg-muted/20 aspect-[3/4] w-full rounded-md" />
-                    <div className="h-4 bg-muted/20 w-2/3 rounded-full" />
-                    <div className="h-4 bg-muted/20 w-1/3 rounded-full" />
+                  <div key={i} className="space-y-4">
+                    <Skeleton className="aspect-[3/4] w-full rounded-md" />
+                    <Skeleton className="h-4 w-2/3 rounded-full" />
+                    <Skeleton className="h-4 w-1/3 rounded-full" />
                   </div>
                 ))}
               </div>
