@@ -37,7 +37,7 @@ export function Hero() {
 
         {/* CTA Direita - Mais para o centro e maior */}
         <a
-          href="/loja?sort=newest"
+          href="/loja"
           className="hidden md:block absolute right-8 lg:right-24 xl:right-32 top-1/2 -translate-y-1/2 text-right group z-10"
         >
           <div className="text-white text-right">

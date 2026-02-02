@@ -10,31 +10,31 @@ const categories = [
   {
     name: "Jaquetas",
     id: "jaquetas",
-    image: "featured-jaqueta.png",
+    image: "/featured-jaqueta.png",
     link: "/loja?category=jaquetas",
     className: "md:col-span-1 md:row-span-2"
   },
   {
     name: "Novidades",
     id: "new",
-    image: "featured-novidade.png",
+    image: "/featured-novidade.png",
     link: "/loja?sort=newest",
     className: "md:col-span-2 md:row-span-1"
   },
   {
     name: "Moletons",
     id: "moletons",
-    image: "featured-moletom.png",
+    image: "/featured-moletom.png",
     link: "/loja?category=moletons",
     className: "md:col-span-1 md:row-span-1"
   },
-{
+  {
     name: "Camisetas",
     id: "camisetas",
-    image: "featured-camiseta.webp",
+    image: "/featured-camiseta.webp",
     link: "/loja?category=camisetas",
     className: "md:col-span-1 md:row-span-1"
-}
+  }
 ]
 
 export function Featured() {

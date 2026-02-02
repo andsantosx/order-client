@@ -4,9 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { getFilters } from "@/services/product/getFilters";
 
 interface FilterSidebarProps {
     minPrice: string;
@@ -23,6 +22,9 @@ interface FilterSidebarProps {
 
     sortBy: string;
     setSortBy: (value: string) => void;
+
+    availableCategories: { name: string; slug: string }[];
+    availableSizes: string[];
 
     className?: string;
 }
@@ -45,6 +47,8 @@ export function FilterSidebar({
     setSelectedCategories,
     sortBy,
     setSortBy,
+    availableCategories,
+    availableSizes,
     className
 }: FilterSidebarProps) {
     const [openSections, setOpenSections] = useState({
@@ -53,22 +57,6 @@ export function FilterSidebar({
         category: true,
         sort: true
     });
-
-    const [availableCategories, setAvailableCategories] = useState<string[]>([]);
-    const [availableSizes, setAvailableSizes] = useState<string[]>([]);
-
-    useEffect(() => {
-        const fetchFilters = async () => {
-            try {
-                const data = await getFilters();
-                setAvailableCategories(data.categories);
-                setAvailableSizes(data.sizes);
-            } catch (error) {
-                console.error("Failed to fetch filters", error);
-            }
-        };
-        fetchFilters();
-    }, []);
 
     const toggleSection = (section: keyof typeof openSections) => {
         setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
@@ -82,11 +70,11 @@ export function FilterSidebar({
         }
     };
 
-    const toggleCategory = (category: string) => {
-        if (selectedCategories.includes(category)) {
-            setSelectedCategories(selectedCategories.filter(c => c !== category));
+    const toggleCategory = (slug: string) => {
+        if (selectedCategories.includes(slug)) {
+            setSelectedCategories(selectedCategories.filter(c => c !== slug));
         } else {
-            setSelectedCategories([...selectedCategories, category]);
+            setSelectedCategories([...selectedCategories, slug]);
         }
     };
 
@@ -182,17 +170,17 @@ export function FilterSidebar({
             >
                 <div className="space-y-3 pt-4">
                     {availableCategories.length > 0 ? availableCategories.map((category) => (
-                        <div key={category} className="flex items-center space-x-2">
+                        <div key={category.slug} className="flex items-center space-x-2">
                             <Checkbox
-                                id={`cat-${category}`}
-                                checked={selectedCategories.includes(category)}
-                                onCheckedChange={() => toggleCategory(category)}
+                                id={`cat-${category.slug}`}
+                                checked={selectedCategories.includes(category.slug)}
+                                onCheckedChange={() => toggleCategory(category.slug)}
                             />
                             <label
-                                htmlFor={`cat-${category}`}
+                                htmlFor={`cat-${category.slug}`}
                                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                             >
-                                {category}
+                                {category.name}
                             </label>
                         </div>
                     )) : (

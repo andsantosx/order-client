@@ -1,7 +1,7 @@
 import { apiClient } from "@/lib/api-client";
 
 export interface FiltersResponse {
-    categories: string[];
+    categories: { name: string; slug: string }[];
     sizes: string[];
 }
 

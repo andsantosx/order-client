@@ -46,6 +46,7 @@ export function PromoBanner() {
             muted
             playsInline
             loop
+            preload="auto"
           />
         </div>
 

@@ -1,36 +1,35 @@
 import { AnimateOnScroll } from '@/hooks/useScrollAnimation';
 
-// Categorias com imagens
 const categories = [
     {
         name: "Camisetas",
         image: "/camiseta.png",
-        href: "/loja?categories=Camisetas"
+        href: "/loja?category=camisetas"
     },
     {
         name: "Calças",
         image: "/calca.png",
-        href: "/loja?categories=Calças"
+        href: "/loja?category=calcas"
     },
     {
         name: "Shorts",
         image: "/short.png",
-        href: "/loja?categories=Shorts"
+        href: "/loja?category=shorts"
     },
     {
         name: "Moletons",
         image: "/moletom.png",
-        href: "/loja?categories=Moletons"
+        href: "/loja?category=moletons"
     },
     {
         name: "Jaquetas",
         image: "/jaqueta.png",
-        href: "/loja?categories=Jaquetas"
+        href: "/loja?category=jaquetas"
     },
     {
         name: "Bonés",
         image: "/bone.png",
-        href: "/loja?categories=Bonés"
+        href: "/loja?category=bones"
     },
 ];
 

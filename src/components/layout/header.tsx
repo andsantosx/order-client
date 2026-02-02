@@ -22,32 +22,32 @@ const megaMenuItems = [
       {
         title: "PARTE SUPERIOR",
         items: [
-          { name: "Camisetas", href: "/loja?categories=Camisetas" },
-          { name: "Moletons", href: "/loja?categories=Moletons" },
-          { name: "Jaquetas", href: "/loja?categories=Jaquetas" },
+          { name: "Camisetas", href: "/loja?category=camisetas" },
+          { name: "Moletons", href: "/loja?category=moletons" },
+          { name: "Jaquetas", href: "/loja?category=jaquetas" },
         ]
       },
       {
         title: "PARTE INFERIOR",
         items: [
-          { name: "Calças", href: "/loja?categories=Calças" },
-          { name: "Shorts", href: "/loja?categories=Shorts" },
-          { name: "Conjuntos", href: "/loja?categories=Conjuntos" },
+          { name: "Calças", href: "/loja?category=calcas" },
+          { name: "Shorts", href: "/loja?category=shorts" },
+          { name: "Conjuntos", href: "/loja?category=conjuntos" },
         ]
       },
     ]
   },
   {
     name: "ACESSÓRIOS",
-    href: "/loja?categories=Acessórios",
+    href: "/loja?category=acessorios",
     hasDropdown: true,
     columns: [
       {
         title: "CATEGORIAS",
         items: [
-          { name: "Bonés", href: "/loja?categories=Bonés" },
-          { name: "Bolsas", href: "/loja?categories=Bolsas" },
-          { name: "Ver Tudo", href: "/loja?categories=Acessórios" },
+          { name: "Bonés", href: "/loja?category=bones" },
+          { name: "Bolsas", href: "/loja?category=bolsas" },
+          { name: "Ver Tudo", href: "/loja?category=acessorios" },
         ]
       },
     ]
