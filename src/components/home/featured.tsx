@@ -18,7 +18,7 @@ const categories = [
     name: "Novidades",
     id: "new",
     image: "/featured-novidade.png",
-    link: "/loja?sort=newest",
+    link: "/loja",
     className: "md:col-span-2 md:row-span-1"
   },
   {

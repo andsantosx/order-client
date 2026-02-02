@@ -6,7 +6,7 @@
 
 @layer base {
   :root {
-    /* Order Store Payload - User Specified Palette */
+    /* Order Payload - User Specified Palette */
     /* Background: #F3EFE8 - Off-white / Beige */
     --background: 40 20% 93%;
 
