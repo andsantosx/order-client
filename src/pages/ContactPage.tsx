@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { MapPin, Phone, Mail, Clock } from "lucide-react"
+import { MapPin, Phone, Mail, Clock, Instagram } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { create as createContactMessage } from "@/services/contact/create"
@@ -62,8 +62,7 @@ export function ContactPage() {
                   <div>
                     <h3 className="font-semibold text-foreground mb-1">Endereço</h3>
                     <p className="text-muted-foreground">
-                      Rua das Flores, 123<br />
-                      São Paulo, SP 01234-567<br />
+                      Criciúma - SC<br />
                       Brasil
                     </p>
                   </div>
@@ -72,8 +71,12 @@ export function ContactPage() {
                 <div className="flex gap-4">
                   <Phone className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
                   <div>
-                    <h3 className="font-semibold text-foreground mb-1">Telefone</h3>
-                    <p className="text-muted-foreground">(11) 98765-4321</p>
+                    <h3 className="font-semibold text-foreground mb-1">WhatsApp</h3>
+                    <p className="text-muted-foreground">
+                      <a href="https://wa.me/554898192343" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
+                        +55 48 9819-2343
+                      </a>
+                    </p>
                   </div>
                 </div>
 
@@ -81,7 +84,11 @@ export function ContactPage() {
                   <Mail className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
                   <div>
                     <h3 className="font-semibold text-foreground mb-1">Email</h3>
-                    <p className="text-muted-foreground">contato@orderstore.com</p>
+                    <p className="text-muted-foreground">
+                      <a href="mailto:orderstoreco@gmail.com" className="hover:text-primary transition-colors">
+                        orderstoreco@gmail.com
+                      </a>
+                    </p>
                   </div>
                 </div>
 
@@ -103,14 +110,16 @@ export function ContactPage() {
             <div>
               <h3 className="font-semibold text-foreground mb-4">Siga-nos</h3>
               <div className="flex gap-3">
-                <a href="#" className="px-4 py-2 rounded-lg bg-card border border-border hover:bg-secondary transition-colors">
-                  Instagram
-                </a>
-                <a href="#" className="px-4 py-2 rounded-lg bg-card border border-border hover:bg-secondary transition-colors">
-                  Twitter
-                </a>
-                <a href="#" className="px-4 py-2 rounded-lg bg-card border border-border hover:bg-secondary transition-colors">
-                  Facebook
+                <a
+                  href="https://www.instagram.com/orderstore.co?igsh=MXhmdGZvemgyYjFvMA%3D%3D&utm_source=qr"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-6 py-3 rounded-full bg-card border border-border hover:border-primary/50 transition-all group"
+                >
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                    <Instagram className="h-5 w-5" />
+                  </div>
+                  <span className="font-medium">@orderstore.co</span>
                 </a>
               </div>
             </div>
@@ -141,7 +150,7 @@ export function ContactPage() {
               <div>
                 <label className="block text-sm font-semibold text-foreground mb-2">Telefone</label>
                 <Input
-                  placeholder="(11) 98765-4321"
+                  placeholder="+55 48 9819-2343"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 />
@@ -184,19 +193,19 @@ export function ContactPage() {
             {[
               {
                 q: "Qual é o tempo de entrega?",
-                a: "Entregamos em todo o Brasil em 2-10 dias úteis, dependendo da localidade.",
+                a: "Nossos produtos são importados e entregues em todo o Brasil com prazo médio de 15 a 45 dias úteis.",
               },
               {
                 q: "Como rastrear meu pedido?",
-                a: "Você receberá um código de rastreamento por email após o envio.",
+                a: "Você receberá o código por email. O rastreio internacional pode levar de 3 a 5 dias para atualizar no sistema.",
               },
               {
                 q: "Qual é a política de devolução?",
-                a: "Aceitamos devoluções em até 30 dias após a compra, sem taxas adicionais.",
+                a: "Aceitamos devoluções em até 7 dias corridos após o recebimento, conforme o Código de Defesa do Consumidor.",
               },
               {
                 q: "Quais são as formas de pagamento?",
-                a: "Aceitamos cartão de crédito, débito, PIX e boleto bancário.",
+                a: "Aceitamos Cartão de Crédito (até 12x), PIX e Boleto Bancário via Mercado Pago.",
               },
             ].map((faq, i) => (
               <div key={i} className="p-6 rounded-lg bg-card border border-border">

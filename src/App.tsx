@@ -13,7 +13,10 @@ import { CheckoutPage } from "@/pages/CheckoutPage";
 import { OrderConfirmationPage } from "@/pages/OrderConfirmationPage";
 import { CreateProductPage } from "@/pages/CreateProductPage";
 import { EditProductPage } from "@/pages/EditProductPage";
-
+import { PoliciesPage } from "@/pages/PoliciesPage";
+import { ExchangesReturnsPage } from "@/pages/ExchangesReturnsPage";
+import { PaymentsPage } from "@/pages/PaymentsPage";
+import { DeliveryPage } from "@/pages/DeliveryPage";
 import { LoginPage } from "@/pages/LoginPage";
 import { RegisterPage } from "@/pages/RegisterPage";
 import { AdminDashboardPage } from "@/pages/admin/AdminDashboardPage";
@@ -22,7 +25,7 @@ import { AdminProductsPage } from "@/pages/admin/AdminProductsPage";
 import { AdminOrdersPage } from "@/pages/admin/AdminOrdersPage";
 import { AdminCategoriesPage } from "@/pages/admin/AdminCategoriesPage";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
-import { ProfilePage } from "./pages/ProfilePage";
+import { ProfilePage } from "@/pages/ProfilePage";
 
 function AppContent() {
   const location = useLocation();
@@ -41,6 +44,10 @@ function AppContent() {
           <Route path="/loja" element={<ShopPage />} />
           <Route path="/produto/:id" element={<ProductDetailPage />} />
           <Route path="/sobre" element={<AboutPage />} />
+          <Route path="/politicas" element={<PoliciesPage />} />
+          <Route path="/trocas-devolucoes" element={<ExchangesReturnsPage />} />
+          <Route path="/pagamentos" element={<PaymentsPage />} />
+          <Route path="/entregas" element={<DeliveryPage />} />
           <Route path="/contato" element={<ContactPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/order-confirmation" element={<OrderConfirmationPage />} />

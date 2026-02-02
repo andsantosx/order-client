@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -52,12 +53,13 @@ const megaMenuItems = [
       },
     ]
   },
-  { name: "NOVIDADES", href: "/loja?sort=newest" },
+  { name: "NOVIDADES", href: "/loja" },
   { name: "CONTATO", href: "/contato" },
-  { name: "POLÍTICAS", href: "/sobre" },
+  { name: "SOBRE", href: "/sobre" },
 ];
 
 export function Header() {
+  const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -72,13 +74,15 @@ export function Header() {
 
   const handleSearch = () => {
     if (searchTerm.trim()) {
-      window.location.href = `/loja?search=${encodeURIComponent(searchTerm.trim())}`;
+      navigate(`/loja?search=${encodeURIComponent(searchTerm.trim())}`);
+      setSearchOpen(false); // Close search bar after search
     }
   };
 
   const handleMobileSearch = () => {
     if (mobileSearchTerm.trim()) {
-      window.location.href = `/loja?search=${encodeURIComponent(mobileSearchTerm.trim())}`;
+      navigate(`/loja?search=${encodeURIComponent(mobileSearchTerm.trim())}`);
+      setSearchOpen(false);
     }
   };
 
