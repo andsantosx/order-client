@@ -7,6 +7,7 @@ export interface CreateProductRequest {
     description?: string;
     currency: string;
     categoryId: number;
+    brandId?: number;
     sizeIds: number[];
     images?: string[];
 }

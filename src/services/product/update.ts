@@ -5,6 +5,7 @@ export interface UpdateProductRequest {
     price_cents?: number;
     description?: string;
     categoryId?: number;
+    brandId?: number;
     sizeIds?: number[];
 }
 

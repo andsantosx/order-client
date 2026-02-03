@@ -22,9 +22,11 @@ export function ShopPage() {
   const initialMinPrice = searchParams.get("minPrice") || "";
   const initialMaxPrice = searchParams.get("maxPrice") || "";
   const initialSortBy = searchParams.get("sort") || "newest";
+  const initialSearch = searchParams.get("search") || "";
 
   // Parse arrays from URL (comma separated)
   const initialSizes = searchParams.get("sizes") ? searchParams.get("sizes")!.split(",") : [];
+  const initialBrands = searchParams.get("brands") ? searchParams.get("brands")!.split(",") : [];
 
   // Support both 'category' (singular, preferred for single links) and 'categories' (plural)
   const singularCategory = searchParams.get("category");
@@ -43,9 +45,12 @@ export function ShopPage() {
   const [activeMaxPrice, setActiveMaxPrice] = useState<number | undefined>(initialMaxPrice ? Number(initialMaxPrice) : undefined);
   const [selectedSizes, setSelectedSizes] = useState<string[]>(initialSizes);
   const [selectedCategories, setSelectedCategories] = useState<string[]>(initialCategories);
+  const [selectedBrands, setSelectedBrands] = useState<string[]>(initialBrands);
   const [sortBy, setSortBy] = useState(initialSortBy);
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
 
   const [availableCategories, setAvailableCategories] = useState<{ name: string; slug: string }[]>([]);
+  const [availableBrands, setAvailableBrands] = useState<{ name: string; slug: string }[]>([]);
   const [availableSizes, setAvailableSizes] = useState<string[]>([]);
 
   const { addItem } = useCartStore();
@@ -68,6 +73,9 @@ export function ShopPage() {
     if (selectedSizes.length > 0) params.set("sizes", selectedSizes.join(","));
     else params.delete("sizes");
 
+    if (selectedBrands.length > 0) params.set("brands", selectedBrands.join(","));
+    else params.delete("brands");
+
     // Check if we have a single category to use the cleaner '?category=' param
     if (selectedCategories.length === 1) {
       params.set("category", selectedCategories[0]);
@@ -80,8 +88,20 @@ export function ShopPage() {
       params.delete("category");
     }
 
+    // Search
+    if (searchQuery) params.set("search", searchQuery);
+    else params.delete("search");
+
     setSearchParams(params, { replace: true });
-  }, [sortBy, activeMinPrice, activeMaxPrice, selectedSizes, selectedCategories]);
+  }, [sortBy, activeMinPrice, activeMaxPrice, selectedSizes, selectedCategories, selectedBrands, searchQuery]);
+
+  // Sync from URL to State (handle external searches, e.g. Header)
+  useEffect(() => {
+    const s = searchParams.get("search") || "";
+    if (s !== searchQuery) {
+      setSearchQuery(s);
+    }
+  }, [searchParams]);
 
   // Fetch Products & Filters
   useEffect(() => {
@@ -93,6 +113,7 @@ export function ShopPage() {
       try {
         const data = await getFilters();
         setAvailableCategories(data.categories);
+        setAvailableBrands(data.brands);
         setAvailableSizes(data.sizes);
       } catch (error) {
         console.error("Failed to fetch filters", error);
@@ -109,6 +130,7 @@ export function ShopPage() {
       const data = await getAllProducts({
         search: searchFromUrl,
         categories: selectedCategories,
+        brands: selectedBrands,
         sizes: selectedSizes,
         minPrice: activeMinPrice,
         maxPrice: activeMaxPrice,
@@ -135,7 +157,9 @@ export function ShopPage() {
     setActiveMaxPrice(undefined);
     setSelectedSizes([]);
     setSelectedCategories([]);
+    setSelectedBrands([]);
     setSortBy("newest");
+    setSearchQuery("");
     // URL update handled by useEffect
   };
 
@@ -175,7 +199,10 @@ export function ShopPage() {
               sortBy={sortBy}
               setSortBy={setSortBy}
               availableCategories={availableCategories}
+              availableBrands={availableBrands}
               availableSizes={availableSizes}
+              selectedBrands={selectedBrands}
+              setSelectedBrands={setSelectedBrands}
             />
           </aside>
 
@@ -202,7 +229,10 @@ export function ShopPage() {
                   sortBy={sortBy}
                   setSortBy={setSortBy}
                   availableCategories={availableCategories}
+                  availableBrands={availableBrands}
                   availableSizes={availableSizes}
+                  selectedBrands={selectedBrands}
+                  setSelectedBrands={setSelectedBrands}
                   className="mt-6"
                 />
                 <div className="mt-8 pt-4 border-t border-border">
@@ -221,6 +251,8 @@ export function ShopPage() {
               setSelectedSizes={setSelectedSizes}
               selectedCategories={selectedCategories}
               setSelectedCategories={setSelectedCategories}
+              selectedBrands={selectedBrands}
+              setSelectedBrands={setSelectedBrands}
               minPrice={activeMinPrice}
               maxPrice={activeMaxPrice}
               setMinPrice={setMinPrice}
@@ -228,6 +260,8 @@ export function ShopPage() {
               setActiveMinPrice={setActiveMinPrice}
               setActiveMaxPrice={setActiveMaxPrice}
               clearAll={clearAllFilters}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
             />
 
             {isLoading ? (

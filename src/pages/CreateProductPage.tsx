@@ -5,7 +5,60 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { create as createProduct } from "@/services/product/create";
 import { getAll as getCategories, type Category } from "@/services/category/getAll";
+import { getAll as getBrands, type Brand } from "@/services/brand";
 import { getAll as getSizes, type Size } from "@/services/size/getAll";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  rectSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+function SortableImage({ url, onRemove }: { url: string; onRemove: (url: string) => void }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id: url });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className="relative group aspect-square rounded-md overflow-hidden border border-border bg-muted touch-none"
+    >
+      <img src={url} alt="Preview" className="w-full h-full object-cover pointer-events-none" />
+      <button
+        type="button"
+        onPointerDown={(e) => e.stopPropagation()} // Prevent drag start when clicking remove
+        onClick={() => onRemove(url)}
+        className="absolute top-1 right-1 p-1 bg-destructive text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+      </button>
+    </div>
+  );
+}
 
 export function CreateProductPage() {
   const navigate = useNavigate();
@@ -16,6 +69,7 @@ export function CreateProductPage() {
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [categoryId, setCategoryId] = useState<string>("");
+  const [brandId, setBrandId] = useState<string>("");
   const [selectedSizeIds, setSelectedSizeIds] = useState<number[]>([]);
 
   // Image State
@@ -24,13 +78,23 @@ export function CreateProductPage() {
 
   // Data State
   const [categories, setCategories] = useState<Category[]>([]);
+  const [brands, setBrands] = useState<Brand[]>([]);
   const [sizes, setSizes] = useState<Size[]>([]);
 
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
   useEffect(() => {
-    Promise.all([getCategories(), getSizes()])
-      .then(([cats, szs]) => {
+    Promise.all([getCategories(), getBrands(), getSizes()])
+      .then(([cats, brs, szs]) => {
         setCategories(cats);
-        setSizes(szs);
+        setBrands(brs);
+        // Ensure sizes are sorted by ID or logically if needed
+        setSizes(szs.sort((a, b) => a.id - b.id));
       })
       .catch(() => toast.error("Erro ao carregar dados iniciais"));
   }, []);
@@ -57,6 +121,18 @@ export function CreateProductPage() {
     setImageUrls(imageUrls.filter(url => url !== urlToRemove));
   };
 
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (active.id !== over?.id) {
+      setImageUrls((items) => {
+        const oldIndex = items.indexOf(active.id as string);
+        const newIndex = items.indexOf(over?.id as string);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!categoryId) {
@@ -77,6 +153,7 @@ export function CreateProductPage() {
         description,
         currency: "BRL",
         categoryId: parseInt(categoryId),
+        brandId: brandId ? parseInt(brandId) : undefined,
         sizeIds: selectedSizeIds,
         images: imageUrls.length > 0 ? imageUrls : undefined
       };
@@ -151,23 +228,42 @@ export function CreateProductPage() {
                   required
                 />
               </div>
-              <div>
-                <label className="text-sm font-semibold text-foreground mb-2 block">
-                  Categoria
-                </label>
-                <select
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  value={categoryId}
-                  onChange={(e) => setCategoryId(e.target.value)}
-                  required
-                >
-                  <option value="">Selecione...</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </option>
-                  ))}
-                </select>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-semibold text-foreground mb-2 block">
+                    Categoria
+                  </label>
+                  <select
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={categoryId}
+                    onChange={(e) => setCategoryId(e.target.value)}
+                    required
+                  >
+                    <option value="">Selecione...</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-foreground mb-2 block">
+                    Marca
+                  </label>
+                  <select
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={brandId}
+                    onChange={(e) => setBrandId(e.target.value)}
+                  >
+                    <option value="">Selecione...</option>
+                    {brands.map((brand) => (
+                      <option key={brand.id} value={brand.id}>
+                        {brand.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
           </div>
@@ -204,6 +300,9 @@ export function CreateProductPage() {
           {/* Images */}
           <div className="space-y-4 p-6 border rounded-lg bg-card">
             <h2 className="text-xl font-semibold">Imagens do Produto</h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Arraste as imagens para reordenar. A primeira imagem será a capa.
+            </p>
 
             {/* Input Area */}
             <div>
@@ -233,20 +332,22 @@ export function CreateProductPage() {
 
             {/* List */}
             {imageUrls.length > 0 && (
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 mt-4">
-                {imageUrls.map((url, index) => (
-                  <div key={index} className="relative group aspect-square rounded-md overflow-hidden border border-border bg-muted">
-                    <img src={url} alt={`Preview ${index}`} className="w-full h-full object-cover" />
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveImage(url)}
-                      className="absolute top-1 right-1 p-1 bg-destructive text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
-                    </button>
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext
+                  items={imageUrls}
+                  strategy={rectSortingStrategy}
+                >
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 mt-4">
+                    {imageUrls.map((url) => (
+                      <SortableImage key={url} url={url} onRemove={handleRemoveImage} />
+                    ))}
                   </div>
-                ))}
-              </div>
+                </SortableContext>
+              </DndContext>
             )}
           </div>
 

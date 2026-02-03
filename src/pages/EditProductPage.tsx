@@ -7,6 +7,7 @@ import { update as updateProduct } from "@/services/product/update";
 import { getById as getProductById } from "@/services/product/getById";
 import { create as createImage } from "@/services/image/create";
 import { getAll as getCategories, type Category } from "@/services/category/getAll";
+import { getAll as getBrands, type Brand } from "@/services/brand";
 import { getAll as getSizes, type Size } from "@/services/size/getAll";
 import { MoveLeft, X, Loader2 } from "lucide-react";
 import { remove as deleteImage } from "@/services/image/delete";
@@ -22,6 +23,7 @@ export function EditProductPage() {
     const [description, setDescription] = useState("");
     const [price, setPrice] = useState("");
     const [categoryId, setCategoryId] = useState<string>("");
+    const [brandId, setBrandId] = useState<string>("");
     const [selectedSizeIds, setSelectedSizeIds] = useState<number[]>([]);
 
     // Image State
@@ -31,6 +33,7 @@ export function EditProductPage() {
 
     // Data State
     const [categories, setCategories] = useState<Category[]>([]);
+    const [brands, setBrands] = useState<Brand[]>([]);
     const [sizes, setSizes] = useState<Size[]>([]);
 
     useEffect(() => {
@@ -38,13 +41,15 @@ export function EditProductPage() {
             try {
                 if (!id) return;
 
-                const [cats, szs, product] = await Promise.all([
+                const [cats, brs, szs, product] = await Promise.all([
                     getCategories(),
+                    getBrands(),
                     getSizes(),
                     getProductById(id)
                 ]);
 
                 setCategories(cats);
+                setBrands(brs);
                 setSizes(szs);
 
                 // Populate Form
@@ -58,6 +63,8 @@ export function EditProductPage() {
                 // NOTE: The current getById return type structure usually flattens data. 
                 // If category ID is missing in getById response, we might need to update getById service.
                 // For now, we will try to safe cast or handle it.
+                if (product.category) setCategoryId(product.category.id.toString());
+                if (product.brand) setBrandId(product.brand.id.toString());
 
                 // If product.sizes exists, map to IDs
                 if (product.sizes) {
@@ -126,6 +133,7 @@ export function EditProductPage() {
                 // If categoryId is set, send it. If empty string (user didn't touch it and we didn't prefill), 
                 // backend might complain or ignore. Ideally we prefilled it.
                 ...(categoryId ? { categoryId: parseInt(categoryId) } : {}),
+                ...(brandId ? { brandId: parseInt(brandId) } : {}),
                 sizeIds: selectedSizeIds,
             };
 
@@ -228,23 +236,42 @@ export function EditProductPage() {
                                     required
                                 />
                             </div>
-                            <div>
-                                <label className="text-sm font-semibold text-foreground mb-2 block">
-                                    Categoria
-                                </label>
-                                <select
-                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                    value={categoryId}
-                                    onChange={(e) => setCategoryId(e.target.value)}
-                                // Not required here to allow keeping existing if we can't fetch it
-                                >
-                                    <option value="">Selecione (ou mantenha atual)...</option>
-                                    {categories.map((cat) => (
-                                        <option key={cat.id} value={cat.id}>
-                                            {cat.name}
-                                        </option>
-                                    ))}
-                                </select>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-sm font-semibold text-foreground mb-2 block">
+                                        Categoria
+                                    </label>
+                                    <select
+                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        value={categoryId}
+                                        onChange={(e) => setCategoryId(e.target.value)}
+                                    // Not required here to allow keeping existing if we can't fetch it
+                                    >
+                                        <option value="">Selecione (ou mantenha atual)...</option>
+                                        {categories.map((cat) => (
+                                            <option key={cat.id} value={cat.id}>
+                                                {cat.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="text-sm font-semibold text-foreground mb-2 block">
+                                        Marca
+                                    </label>
+                                    <select
+                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        value={brandId}
+                                        onChange={(e) => setBrandId(e.target.value)}
+                                    >
+                                        <option value="">Selecione...</option>
+                                        {brands.map((brand) => (
+                                            <option key={brand.id} value={brand.id}>
+                                                {brand.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     </div>

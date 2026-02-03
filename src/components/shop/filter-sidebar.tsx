@@ -20,10 +20,14 @@ interface FilterSidebarProps {
     selectedCategories: string[];
     setSelectedCategories: (categories: string[]) => void;
 
+    selectedBrands?: string[];
+    setSelectedBrands?: (brands: string[]) => void;
+
     sortBy: string;
     setSortBy: (value: string) => void;
 
     availableCategories: { name: string; slug: string }[];
+    availableBrands?: { name: string; slug: string }[];
     availableSizes: string[];
 
     className?: string;
@@ -45,9 +49,12 @@ export function FilterSidebar({
     setSelectedSizes,
     selectedCategories,
     setSelectedCategories,
+    selectedBrands,
+    setSelectedBrands,
     sortBy,
     setSortBy,
     availableCategories,
+    availableBrands,
     availableSizes,
     className
 }: FilterSidebarProps) {
@@ -55,6 +62,7 @@ export function FilterSidebar({
         price: true,
         size: true,
         category: true,
+        brand: true,
         sort: true
     });
 
@@ -75,6 +83,15 @@ export function FilterSidebar({
             setSelectedCategories(selectedCategories.filter(c => c !== slug));
         } else {
             setSelectedCategories([...selectedCategories, slug]);
+        }
+    };
+
+    const toggleBrand = (slug: string) => {
+        if (!selectedBrands || !setSelectedBrands) return;
+        if (selectedBrands.includes(slug)) {
+            setSelectedBrands(selectedBrands.filter(b => b !== slug));
+        } else {
+            setSelectedBrands([...selectedBrands, slug]);
         }
     };
 
@@ -181,6 +198,32 @@ export function FilterSidebar({
                                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                             >
                                 {category.name}
+                            </label>
+                        </div>
+                    )) : (
+                        <p className="text-sm text-muted-foreground">Carregando...</p>
+                    )}
+                </div>
+            </CollapsibleSection>
+
+            <CollapsibleSection
+                title="Marcas"
+                isOpen={openSections.brand}
+                onToggle={() => toggleSection('brand')}
+            >
+                <div className="space-y-3 pt-4">
+                    {availableBrands && availableBrands.length > 0 ? availableBrands.map((brand) => (
+                        <div key={brand.slug} className="flex items-center space-x-2">
+                            <Checkbox
+                                id={`brand-${brand.slug}`}
+                                checked={selectedBrands && selectedBrands.includes(brand.slug)}
+                                onCheckedChange={() => toggleBrand && toggleBrand(brand.slug)}
+                            />
+                            <label
+                                htmlFor={`brand-${brand.slug}`}
+                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                            >
+                                {brand.name}
                             </label>
                         </div>
                     )) : (

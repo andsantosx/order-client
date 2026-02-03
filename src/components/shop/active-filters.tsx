@@ -7,6 +7,8 @@ interface ActiveFiltersProps {
     setSelectedSizes: (sizes: string[]) => void;
     selectedCategories: string[];
     setSelectedCategories: (categories: string[]) => void;
+    selectedBrands?: string[];
+    setSelectedBrands?: (brands: string[]) => void;
     minPrice?: number;
     maxPrice?: number;
     setMinPrice: (value: string) => void;
@@ -14,6 +16,8 @@ interface ActiveFiltersProps {
     setActiveMinPrice: (val?: number) => void;
     setActiveMaxPrice: (val?: number) => void;
     clearAll: () => void;
+    searchQuery?: string;
+    setSearchQuery?: (query: string) => void;
 }
 
 export function ActiveFilters({
@@ -21,15 +25,19 @@ export function ActiveFilters({
     setSelectedSizes,
     selectedCategories,
     setSelectedCategories,
+    selectedBrands,
+    setSelectedBrands,
     minPrice,
     maxPrice,
     setMinPrice,
     setMaxPrice,
     setActiveMinPrice,
     setActiveMaxPrice,
-    clearAll
+    clearAll,
+    searchQuery,
+    setSearchQuery
 }: ActiveFiltersProps) {
-    const hasFilters = selectedSizes.length > 0 || selectedCategories.length > 0 || minPrice !== undefined || maxPrice !== undefined;
+    const hasFilters = selectedSizes.length > 0 || selectedCategories.length > 0 || (selectedBrands && selectedBrands.length > 0) || minPrice !== undefined || maxPrice !== undefined || !!searchQuery;
 
     if (!hasFilters) return null;
 
@@ -66,6 +74,21 @@ export function ActiveFilters({
                 </Badge>
             ))}
 
+            {/* Brands */}
+            {selectedBrands && selectedBrands.map(brand => (
+                <Badge key={`brand-${brand}`} variant="secondary" className="gap-1 pl-2 pr-1 py-1 capitalize">
+                    {brand}
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-4 w-4 ml-1 hover:bg-transparent"
+                        onClick={() => setSelectedBrands?.(selectedBrands.filter(b => b !== brand))}
+                    >
+                        <X className="h-3 w-3" />
+                    </Button>
+                </Badge>
+            ))}
+
             {/* Price */}
             {(minPrice !== undefined || maxPrice !== undefined) && (
                 <Badge variant="secondary" className="gap-1 pl-2 pr-1 py-1">
@@ -79,7 +102,23 @@ export function ActiveFilters({
                             setMaxPrice("");
                             setActiveMinPrice(undefined);
                             setActiveMaxPrice(undefined);
+                            if (setSelectedBrands) setSelectedBrands([]);
                         }}
+                    >
+                        <X className="h-3 w-3" />
+                    </Button>
+                </Badge>
+            )}
+
+            {/* Search Query */}
+            {searchQuery && (
+                <Badge variant="secondary" className="gap-1 pl-2 pr-1 py-1">
+                    Busca: {searchQuery}
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-4 w-4 ml-1 hover:bg-transparent"
+                        onClick={() => setSearchQuery?.("")}
                     >
                         <X className="h-3 w-3" />
                     </Button>

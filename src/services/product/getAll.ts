@@ -23,6 +23,7 @@ export interface ProductQueryParams {
     search?: string;
     category?: string; // Legacy/Single
     categories?: string[]; // Multiple
+    brands?: string[];
     sizes?: string[];
     minPrice?: number;
     maxPrice?: number;
@@ -44,6 +45,7 @@ export const getAll = async (params: ProductQueryParams = {}): Promise<Product[]
     // Handle array filters
     if (params.category) queryParams.category = params.category;
     if (params.categories && params.categories.length > 0) queryParams.categories = params.categories.join(',');
+    if (params.brands && params.brands.length > 0) queryParams.brands = params.brands.join(',');
     if (params.sizes && params.sizes.length > 0) queryParams.sizes = params.sizes.join(',');
 
     // API docs specify camelCase for price params

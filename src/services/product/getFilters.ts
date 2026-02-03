@@ -2,6 +2,7 @@ import { apiClient } from "@/lib/api-client";
 
 export interface FiltersResponse {
     categories: { name: string; slug: string }[];
+    brands: { name: string; slug: string }[];
     sizes: string[];
 }
 

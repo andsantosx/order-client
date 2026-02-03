@@ -21,6 +21,7 @@ export function CheckoutPage() {
   const navigate = useNavigate();
 
   const [step, setStep] = useState<"shipping" | "payment" | "pix">("shipping");
+  const [guestName, setGuestName] = useState(user?.name || "");
   const [guestEmail, setGuestEmail] = useState(user?.email || "");
   const [cpf, setCpf] = useState("");
   const [shippingAddress, setShippingAddress] = useState({
@@ -51,9 +52,10 @@ export function CheckoutPage() {
     }
   }, []);
 
-  // Sync user email
+  // Sync user email and name
   useEffect(() => {
     if (user?.email) setGuestEmail(user.email);
+    if (user?.name) setGuestName(user.name);
   }, [user]);
 
   // Init Mercado Pago
@@ -109,6 +111,7 @@ export function CheckoutPage() {
 
                 const order = await createOrder({
                   items: items.map(i => ({ productId: i.id, quantity: i.quantity })),
+                  guestName: user ? undefined : guestName,
                   guestEmail: user ? undefined : guestEmail,
                   guestCpf: user ? undefined : cpf.replace(/\D/g, ''),
                   shippingAddress: shippingAddress
@@ -231,6 +234,18 @@ export function CheckoutPage() {
 
               <div className="space-y-4">
                 <div className="space-y-2">
+                  <label className="text-sm font-semibold">Nome Completo</label>
+                  <Input
+                    value={guestName}
+                    onChange={(e) => setGuestName(e.target.value)}
+                    placeholder="Seu nome completo"
+                    type="text"
+                    disabled={!!user}
+                    className="bg-card border-border"
+                  />
+                </div>
+
+                <div className="space-y-2">
                   <label className="text-sm font-semibold">Email de Contato</label>
                   <Input
                     value={guestEmail}
@@ -297,8 +312,8 @@ export function CheckoutPage() {
                   size="lg"
                   className="w-full h-12 rounded-full font-bold mt-6"
                   onClick={() => {
-                    if (!guestEmail || !shippingAddress.street || !shippingAddress.zipCode || !cpf) {
-                      toast.error("Preencha todos os dados, incluindo CPF.");
+                    if (!guestName || !guestEmail || !shippingAddress.street || !shippingAddress.zipCode || !cpf) {
+                      toast.error("Preencha todos os dados, incluindo Nome e CPF.");
                       return;
                     }
                     localStorage.setItem("last_cpf", cpf);

@@ -7,6 +7,8 @@ export interface Product {
     description?: string;
     images: { id: string; url: string }[];
     sizes: { id: string; name: string }[];
+    category?: { id: number; name: string };
+    brand?: { id: number; name: string };
 }
 
 export const getById = async (id: string): Promise<Product> => {
@@ -24,6 +26,8 @@ export const getById = async (id: string): Promise<Product> => {
         sizes: data.sizes?.map((s: any) => ({
             id: s.size.id,
             name: s.size.name
-        })) || []
+        })) || [],
+        category: data.category ? { id: data.category.id, name: data.category.name } : undefined,
+        brand: data.brand ? { id: data.brand.id, name: data.brand.name } : undefined
     };
 };
