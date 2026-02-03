@@ -4,7 +4,7 @@ import { useAuthStore } from "@/store/authStore";
 import { updateStatus as updateOrderStatus } from "@/services/order/updateStatus";
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
-import { Package, Truck, CheckCircle, Clock, XCircle, RotateCcw, Eye, CreditCard, MapPin, User, Calendar as CalendarIcon } from "lucide-react";
+import { Package, Truck, CheckCircle, Clock, XCircle, RotateCcw, Eye, CreditCard, MapPin, User } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
     Sheet,
