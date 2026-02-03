@@ -4,7 +4,6 @@ import { Input } from "@/components/ui/input";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { create as createProduct } from "@/services/product/create";
-import { create as createImage } from "@/services/image/create";
 import { getAll as getCategories, type Category } from "@/services/category/getAll";
 import { getAll as getSizes, type Size } from "@/services/size/getAll";
 
@@ -18,7 +17,10 @@ export function CreateProductPage() {
   const [price, setPrice] = useState("");
   const [categoryId, setCategoryId] = useState<string>("");
   const [selectedSizeIds, setSelectedSizeIds] = useState<number[]>([]);
-  const [imageUrl, setImageUrl] = useState("");
+
+  // Image State
+  const [currentInfoUrl, setCurrentInfoUrl] = useState(""); // Input field
+  const [imageUrls, setImageUrls] = useState<string[]>([]); // List of added images
 
   // Data State
   const [categories, setCategories] = useState<Category[]>([]);
@@ -41,6 +43,20 @@ export function CreateProductPage() {
     );
   };
 
+  const handleAddImage = () => {
+    if (!currentInfoUrl.trim()) return;
+    if (imageUrls.includes(currentInfoUrl.trim())) {
+      toast.error("Imagem já adicionada");
+      return;
+    }
+    setImageUrls([...imageUrls, currentInfoUrl.trim()]);
+    setCurrentInfoUrl("");
+  };
+
+  const handleRemoveImage = (urlToRemove: string) => {
+    setImageUrls(imageUrls.filter(url => url !== urlToRemove));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!categoryId) {
@@ -55,7 +71,6 @@ export function CreateProductPage() {
     setLoading(true);
 
     try {
-      // 1. Create Product
       const productData = {
         name,
         price_cents: Math.round(parseFloat(price) * 100),
@@ -63,22 +78,13 @@ export function CreateProductPage() {
         currency: "BRL",
         categoryId: parseInt(categoryId),
         sizeIds: selectedSizeIds,
+        images: imageUrls.length > 0 ? imageUrls : undefined
       };
 
-      const newProduct = await createProduct(productData);
-
-      // 2. Add Image if provided
-      if (imageUrl && imageUrl.trim() !== "") {
-        try {
-          await createImage(newProduct.id, imageUrl);
-        } catch (imgError) {
-          console.error("Failed to add image", imgError);
-          toast.error("Produto criado, mas erro ao adicionar imagem.");
-        }
-      }
+      await createProduct(productData);
 
       toast.success("Produto criado com sucesso!");
-      navigate(`/admin/products`); // Go back to list
+      navigate(`/admin/products`);
     } catch (error) {
       console.error("Failed to create product:", error);
       toast.error("Erro ao criar o produto.");
@@ -87,7 +93,7 @@ export function CreateProductPage() {
     }
   };
 
-  // Group sizes by type for better UI
+  // Group sizes by type
   const sizesByType = sizes.reduce((acc, size) => {
     const type = size.type || 'Outros';
     if (!acc[type]) acc[type] = [];
@@ -197,24 +203,49 @@ export function CreateProductPage() {
 
           {/* Images */}
           <div className="space-y-4 p-6 border rounded-lg bg-card">
-            <h2 className="text-xl font-semibold">Imagens</h2>
+            <h2 className="text-xl font-semibold">Imagens do Produto</h2>
+
+            {/* Input Area */}
             <div>
               <label className="text-sm font-semibold text-foreground mb-2 block">
-                URL da Imagem Principal
+                Adicionar Nova Imagem
               </label>
-              <Input
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                placeholder="https://exemplo.com/imagem.jpg"
-              />
+              <div className="flex gap-2">
+                <Input
+                  value={currentInfoUrl}
+                  onChange={(e) => setCurrentInfoUrl(e.target.value)}
+                  placeholder="https://exemplo.com/imagem.jpg"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleAddImage();
+                    }
+                  }}
+                />
+                <Button type="button" onClick={handleAddImage} variant="secondary">
+                  Adicionar
+                </Button>
+              </div>
               <p className="text-xs text-muted-foreground mt-1">
-                Copie o link da imagem (ou use um placeholder como via.placeholder.com)
+                Cole o link e pressione Enter ou clique em Adicionar.
               </p>
             </div>
-            {imageUrl && (
-              <div className="mt-4">
-                <p className="text-sm text-muted-foreground mb-2">Preview:</p>
-                <img src={imageUrl} alt="Preview" className="h-40 w-40 object-cover rounded-md border" />
+
+            {/* List */}
+            {imageUrls.length > 0 && (
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 mt-4">
+                {imageUrls.map((url, index) => (
+                  <div key={index} className="relative group aspect-square rounded-md overflow-hidden border border-border bg-muted">
+                    <img src={url} alt={`Preview ${index}`} className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveImage(url)}
+                      className="absolute top-1 right-1 p-1 bg-destructive text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
           </div>

@@ -8,6 +8,7 @@ export interface CreateProductRequest {
     currency: string;
     categoryId: number;
     sizeIds: number[];
+    images?: string[];
 }
 
 export const create = async (product: CreateProductRequest): Promise<ProductResponse> => {
