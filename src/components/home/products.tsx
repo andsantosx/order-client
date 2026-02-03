@@ -127,7 +127,14 @@ export function Products() {
                     <Button
                       onClick={(e) => {
                         e.stopPropagation()
-                        addItem({ ...product, imageUrl: product.image, quantity: 1 })
+                        addItem({
+                          productId: product.id,
+                          name: product.name,
+                          price: product.price,
+                          imageUrl: product.image,
+                          quantity: 1,
+                          size: "M" // Default size for quick add
+                        })
                         toast.success("Adicionado à sacola")
                       }}
                       className="w-full h-12 bg-white text-black hover:bg-white/90 font-bold uppercase tracking-widest text-xs shadow-lg rounded-none"

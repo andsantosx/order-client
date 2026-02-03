@@ -311,10 +311,11 @@ export function ShopPage() {
                           onClick={(e) => {
                             e.stopPropagation(); // Prevent navigation when clicking 'add'
                             addItem({
-                              id: product.id,
+                              productId: product.id,
                               name: product.name,
                               price: product.price,
                               quantity: 1,
+                              size: "M", // Default size for quick add
                               imageUrl: product.image,
                             });
                             toast.success("Adicionado à sacola");

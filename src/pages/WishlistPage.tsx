@@ -42,10 +42,11 @@ export function WishlistPage() {
 
   const handleMoveToCart = (item: any) => {
     addItem({
-      id: item.id,
+      productId: item.id,
       name: item.name,
       price: item.price,
       quantity: 1,
+      size: "M", // Default size
       imageUrl: item.image,
     })
     handleRemove(item.id, item.wishlistId)
