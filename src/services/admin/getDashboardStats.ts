@@ -13,7 +13,11 @@ export interface DashboardStats {
     }[];
 }
 
-export const getDashboardStats = async (): Promise<DashboardStats> => {
-    const { data } = await apiClient.get<DashboardStats>("/api/admin/dashboard-stats");
+export const getDashboardStats = async (startDate?: string, endDate?: string): Promise<DashboardStats> => {
+    const params = new URLSearchParams();
+    if (startDate) params.append("start_date", startDate);
+    if (endDate) params.append("end_date", endDate);
+
+    const { data } = await apiClient.get<DashboardStats>(`/api/admin/dashboard-stats?${params.toString()}`);
     return data;
 };

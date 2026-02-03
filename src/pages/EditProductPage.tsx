@@ -5,12 +5,62 @@ import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
 import { update as updateProduct } from "@/services/product/update";
 import { getById as getProductById } from "@/services/product/getById";
-import { create as createImage } from "@/services/image/create";
 import { getAll as getCategories, type Category } from "@/services/category/getAll";
 import { getAll as getBrands, type Brand } from "@/services/brand";
 import { getAll as getSizes, type Size } from "@/services/size/getAll";
-import { MoveLeft, X, Loader2 } from "lucide-react";
-import { remove as deleteImage } from "@/services/image/delete";
+import { MoveLeft } from "lucide-react";
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    type DragEndEvent
+} from '@dnd-kit/core';
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    useSortable,
+    rectSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+function SortableImage({ url, onRemove }: { url: string; onRemove: (url: string) => void }) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+    } = useSortable({ id: url });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+    };
+
+    return (
+        <div
+            ref={setNodeRef}
+            style={style}
+            {...attributes}
+            {...listeners}
+            className="relative group aspect-square rounded-md overflow-hidden border border-border bg-muted touch-none"
+        >
+            <img src={url} alt="Preview" className="w-full h-full object-cover pointer-events-none" />
+            <button
+                type="button"
+                onPointerDown={(e) => e.stopPropagation()} // Prevent drag start when clicking remove
+                onClick={() => onRemove(url)}
+                className="absolute top-1 right-1 p-1 bg-destructive text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+            </button>
+        </div>
+    );
+}
 
 export function EditProductPage() {
     const { id } = useParams<{ id: string }>();
@@ -27,14 +77,20 @@ export function EditProductPage() {
     const [selectedSizeIds, setSelectedSizeIds] = useState<number[]>([]);
 
     // Image State
-    const [newImageUrl, setNewImageUrl] = useState("");
-    const [existingImages, setExistingImages] = useState<{ id: string; url: string }[]>([]);
-    const [deletingImageId, setDeletingImageId] = useState<string | null>(null);
+    const [currentInfoUrl, setCurrentInfoUrl] = useState(""); // Input field
+    const [imageUrls, setImageUrls] = useState<string[]>([]); // List of ALL images (existing + new)
 
     // Data State
     const [categories, setCategories] = useState<Category[]>([]);
     const [brands, setBrands] = useState<Brand[]>([]);
     const [sizes, setSizes] = useState<Size[]>([]);
+
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
 
     useEffect(() => {
         const loadData = async () => {
@@ -56,13 +112,6 @@ export function EditProductPage() {
                 setName(product.name);
                 setDescription(product.description || "");
                 setPrice(product.price.toString());
-                // Since getById might not return categoryId directly depending on backend, 
-                // we might need to adjust this if category isn't pre-filled correctly.
-                // Assuming product object has category_id or we can infer it. 
-                // For now, let's leave category unset if not available or assume valid default.
-                // NOTE: The current getById return type structure usually flattens data. 
-                // If category ID is missing in getById response, we might need to update getById service.
-                // For now, we will try to safe cast or handle it.
                 if (product.category) setCategoryId(product.category.id.toString());
                 if (product.brand) setBrandId(product.brand.id.toString());
 
@@ -71,10 +120,12 @@ export function EditProductPage() {
                     setSelectedSizeIds(product.sizes.map(s => parseInt(s.id) || 0).filter(id => id !== 0));
                 }
 
-                setExistingImages(product.images || []);
-
-                // Note: We might be missing the categoryId from getById. 
-                // We will assume for now user must re-select or we'll add it later if needed.
+                // Populate Images - Assuming product.images is array of { id, url, position } or similar
+                // We just need URLs for the new logic, as we will replace the whole list on save.
+                if (product.images) {
+                    const urls = product.images.map(img => img.url);
+                    setImageUrls(urls);
+                }
 
             } catch (error) {
                 console.error("Error loading data", error);
@@ -96,18 +147,29 @@ export function EditProductPage() {
         );
     };
 
-    const handleImageDelete = async (imgId: string) => {
-        if (!confirm("Remover esta imagem?")) return;
-        setDeletingImageId(imgId);
-        try {
-            await deleteImage(imgId);
-            setExistingImages(prev => prev.filter(img => img.id !== imgId));
-            toast.success("Imagem removida");
-        } catch (error) {
-            console.error(error);
-            toast.error("Erro ao remover imagem");
-        } finally {
-            setDeletingImageId(null);
+    const handleAddImage = () => {
+        if (!currentInfoUrl.trim()) return;
+        if (imageUrls.includes(currentInfoUrl.trim())) {
+            toast.error("Imagem já adicionada");
+            return;
+        }
+        setImageUrls([...imageUrls, currentInfoUrl.trim()]);
+        setCurrentInfoUrl("");
+    };
+
+    const handleRemoveImage = (urlToRemove: string) => {
+        setImageUrls(imageUrls.filter(url => url !== urlToRemove));
+    };
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+
+        if (active.id !== over?.id) {
+            setImageUrls((items) => {
+                const oldIndex = items.indexOf(active.id as string);
+                const newIndex = items.indexOf(over?.id as string);
+                return arrayMove(items, oldIndex, newIndex);
+            });
         }
     };
 
@@ -115,8 +177,6 @@ export function EditProductPage() {
         e.preventDefault();
         if (!id) return;
 
-        // Check validation if needed (e.g. category)
-        // For update, we might allow partial updates, but good to be strict.
         if (selectedSizeIds.length === 0) {
             toast.error("Selecione pelo menos um tamanho");
             return;
@@ -130,35 +190,13 @@ export function EditProductPage() {
                 name,
                 price_cents: Math.round(parseFloat(price) * 100),
                 description,
-                // If categoryId is set, send it. If empty string (user didn't touch it and we didn't prefill), 
-                // backend might complain or ignore. Ideally we prefilled it.
                 ...(categoryId ? { categoryId: parseInt(categoryId) } : {}),
                 ...(brandId ? { brandId: parseInt(brandId) } : {}),
                 sizeIds: selectedSizeIds,
+                images: imageUrls.length > 0 ? imageUrls : undefined
             };
 
             await updateProduct(id, productData);
-
-            // 2. Add New Image if provided
-            if (newImageUrl && newImageUrl.trim() !== "") {
-                try {
-                    // Create image returns the image object (assuming standard create response)
-                    // If it returns void, we can't get ID. Assuming it might need refetch 
-                    // or optimistic update with fake ID if user doesn't delete immediately.
-                    // Let's refetch to get consistency or verify create return type.
-                    await createImage(id, newImageUrl);
-                    toast.success("Imagem adicionada com sucesso!");
-                    setNewImageUrl("");
-
-                    // Ideally we refetch just the images, but full reload is safer
-                    // to get the real ID for the new image in case user wants to delete it.
-                    const updatedProduct = await getProductById(id);
-                    setExistingImages(updatedProduct.images);
-                } catch (imgError) {
-                    console.error("Failed to add image", imgError);
-                    toast.error("Produto atualizado, mas erro ao adicionar nova imagem.");
-                }
-            }
 
             toast.success("Produto atualizado com sucesso!");
         } catch (error) {
@@ -169,7 +207,7 @@ export function EditProductPage() {
         }
     };
 
-    // Group sizes by type for better UI (copied from CreateProductPage)
+    // Group sizes by type
     const sizesByType = sizes.reduce((acc, size) => {
         const type = size.type || 'Outros';
         if (!acc[type]) acc[type] = [];
@@ -245,9 +283,8 @@ export function EditProductPage() {
                                         className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                         value={categoryId}
                                         onChange={(e) => setCategoryId(e.target.value)}
-                                    // Not required here to allow keeping existing if we can't fetch it
                                     >
-                                        <option value="">Selecione (ou mantenha atual)...</option>
+                                        <option value="">Selecione...</option>
                                         {categories.map((cat) => (
                                             <option key={cat.id} value={cat.id}>
                                                 {cat.name}
@@ -305,58 +342,62 @@ export function EditProductPage() {
                         ))}
                     </div>
 
-                    {/* Reference Existing Images */}
-                    {existingImages.length > 0 && (
-                        <div className="space-y-4 p-6 border rounded-lg bg-card">
-                            <h2 className="text-xl font-semibold">Imagens Atuais</h2>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                {existingImages.map((img) => (
-                                    <div key={img.id} className="aspect-square relative rounded-md overflow-hidden border group">
-                                        <img src={img.url} alt="Produto" className="w-full h-full object-cover" />
-                                        <button
-                                            type="button"
-                                            onClick={() => handleImageDelete(img.id)}
-                                            disabled={deletingImageId === img.id}
-                                            className="absolute top-2 right-2 p-1 bg-destructive text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50"
-                                        >
-                                            {deletingImageId === img.id ? (
-                                                <Loader2 className="w-4 h-4 animate-spin" />
-                                            ) : (
-                                                <X className="w-4 h-4" />
-                                            )}
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Add New Image */}
+                    {/* Images */}
                     <div className="space-y-4 p-6 border rounded-lg bg-card">
-                        <h2 className="text-xl font-semibold">Adicionar Nova Imagem</h2>
+                        <h2 className="text-xl font-semibold">Imagens do Produto</h2>
+                        <p className="text-sm text-muted-foreground mb-4">
+                            Arraste as imagens para reordenar. A primeira imagem será a capa.
+                        </p>
+
+                        {/* Input Area */}
                         <div>
                             <label className="text-sm font-semibold text-foreground mb-2 block">
-                                URL da Imagem
+                                Adicionar Nova Imagem
                             </label>
-                            <Input
-                                value={newImageUrl}
-                                onChange={(e) => setNewImageUrl(e.target.value)}
-                                placeholder="https://exemplo.com/imagem.jpg"
-                            />
+                            <div className="flex gap-2">
+                                <Input
+                                    value={currentInfoUrl}
+                                    onChange={(e) => setCurrentInfoUrl(e.target.value)}
+                                    placeholder="https://exemplo.com/imagem.jpg"
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            handleAddImage();
+                                        }
+                                    }}
+                                />
+                                <Button type="button" onClick={handleAddImage} variant="secondary">
+                                    Adicionar
+                                </Button>
+                            </div>
                             <p className="text-xs text-muted-foreground mt-1">
-                                Cole o link de uma nova imagem para adicionar à galeria.
+                                Cole o link e pressione Enter ou clique em Adicionar.
                             </p>
                         </div>
-                        {newImageUrl && (
-                            <div className="mt-4">
-                                <p className="text-sm text-muted-foreground mb-2">Preview:</p>
-                                <img src={newImageUrl} alt="Preview" className="h-40 w-40 object-cover rounded-md border" />
-                            </div>
+
+                        {/* List */}
+                        {imageUrls.length > 0 && (
+                            <DndContext
+                                sensors={sensors}
+                                collisionDetection={closestCenter}
+                                onDragEnd={handleDragEnd}
+                            >
+                                <SortableContext
+                                    items={imageUrls}
+                                    strategy={rectSortingStrategy}
+                                >
+                                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 mt-4">
+                                        {imageUrls.map((url) => (
+                                            <SortableImage key={url} url={url} onRemove={handleRemoveImage} />
+                                        ))}
+                                    </div>
+                                </SortableContext>
+                            </DndContext>
                         )}
                     </div>
 
                     <Button type="submit" className="w-full h-12 text-lg" disabled={loading}>
-                        {loading ? "Salvando..." : "Salvar Alterações"}
+                        {loading ? "Salvar Alterações" : "Salvar Alterações"}
                     </Button>
                 </form>
             </div >

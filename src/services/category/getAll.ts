@@ -1,7 +1,7 @@
 import { apiClient } from "@/lib/api-client";
 
 export interface Category {
-    id: string;
+    id: number;
     name: string;
     slug: string;
 }

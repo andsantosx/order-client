@@ -2,29 +2,55 @@ import { useEffect, useState } from "react";
 import { getDashboardStats, type DashboardStats } from "@/services/admin/getDashboardStats";
 import { DollarSign, ShoppingBag, Package, Calendar } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 
 export function AdminOverviewPage() {
     const [stats, setStats] = useState<DashboardStats | null>(null);
     const [loading, setLoading] = useState(true);
+    const [period, setPeriod] = useState("all"); // all, 7d, 30d, month, year
+
+    const fetchStats = async () => {
+        setLoading(true);
+        try {
+            let start: Date | undefined;
+            const end = new Date(); // now
+
+            if (period === '7d') {
+                start = new Date();
+                start.setDate(end.getDate() - 7);
+            } else if (period === '30d') {
+                start = new Date();
+                start.setDate(end.getDate() - 30);
+            } else if (period === 'month') {
+                start = new Date(end.getFullYear(), end.getMonth(), 1);
+            }
+
+            // For "all", we don't send dates so backend uses defaults (global totals)
+            // Or if backend requires dates for consistency, we could send a very old date.
+            // My backend implementation handles missing dates as "All Time" for totals.
+
+            const startDate = start ? start.toISOString().split('T')[0] : undefined;
+            const endDate = start ? end.toISOString().split('T')[0] : undefined;
+
+            const data = await getDashboardStats(startDate, endDate);
+            setStats(data);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchStats = async () => {
-            try {
-                const data = await getDashboardStats();
-                setStats(data);
-            } catch (error) {
-                // Fallback or just empty for now until backend deploy
-                console.error(error);
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchStats();
-    }, []);
+    }, [period]);
 
-    if (loading) {
+    if (loading && !stats) { // Show skeleton only on first load or if stats are null
         return (
             <div className="space-y-8">
+                <div className="flex justify-end mb-4">
+                    <Skeleton className="w-[180px] h-10" />
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {[1, 2, 3].map(i => (
                         <div key={i} className="p-6 bg-card border rounded-xl shadow-sm space-y-3">
@@ -39,56 +65,58 @@ export function AdminOverviewPage() {
                     ))}
                 </div>
                 <div>
-                    <div className="flex gap-2 mb-4">
-                        <Skeleton className="w-5 h-5" />
-                        <Skeleton className="w-32 h-6" />
-                    </div>
-                    {/* Desktop Table Skeleton */}
+                    <Skeleton className="w-24 h-6 mb-4" />
                     <div className="hidden md:block bg-card border rounded-xl overflow-hidden p-4 space-y-4">
-                        {[1, 2, 3, 4, 5].map(i => (
-                            <div key={i} className="flex justify-between items-center">
-                                <Skeleton className="w-20 h-4" />
-                                <Skeleton className="w-32 h-4" />
-                                <Skeleton className="w-24 h-4" />
-                                <Skeleton className="w-24 h-4" />
-                                <Skeleton className="w-16 h-6 rounded-md" />
-                            </div>
-                        ))}
-                    </div>
-                    {/* Mobile Cards Skeleton */}
-                    <div className="md:hidden space-y-4">
-                        {[1, 2, 3, 4, 5].map(i => (
-                            <div key={i} className="bg-card border border-border rounded-xl p-5 shadow-sm space-y-3">
-                                <div className="flex justify-between">
-                                    <div className="space-y-2">
-                                        <Skeleton className="w-16 h-3" />
-                                        <Skeleton className="w-32 h-4" />
-                                    </div>
-                                    <Skeleton className="w-16 h-6 rounded-full" />
-                                </div>
-                                <div className="pt-2 border-t border-border flex justify-between">
-                                    <Skeleton className="w-20 h-4" />
-                                    <Skeleton className="w-24 h-5" />
-                                </div>
-                            </div>
-                        ))}
+                        {[1, 2, 3].map(i => (<Skeleton key={i} className="w-full h-12" />))}
                     </div>
                 </div>
             </div>
         );
     }
 
-    if (!stats) {
-        return (
-            <div className="text-center py-10">
-                <h2 className="text-xl font-semibold">Welcome Admin</h2>
-                <p className="text-muted-foreground">Stats will appear here once orders populate.</p>
-            </div>
-        );
-    }
+    if (!stats) return <div className="text-center py-10">No data available.</div>;
 
     return (
         <div className="space-y-8">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <h1 className="text-3xl font-bold">Visão Geral</h1>
+
+                <div className="flex items-center bg-card border rounded-lg p-1">
+                    <Button
+                        variant={period === 'all' ? 'secondary' : 'ghost'}
+                        size="sm"
+                        onClick={() => setPeriod('all')}
+                        className="text-xs"
+                    >
+                        Tudo
+                    </Button>
+                    <Button
+                        variant={period === '7d' ? 'secondary' : 'ghost'}
+                        size="sm"
+                        onClick={() => setPeriod('7d')}
+                        className="text-xs"
+                    >
+                        7 Dias
+                    </Button>
+                    <Button
+                        variant={period === '30d' ? 'secondary' : 'ghost'}
+                        size="sm"
+                        onClick={() => setPeriod('30d')}
+                        className="text-xs"
+                    >
+                        30 Dias
+                    </Button>
+                    <Button
+                        variant={period === 'month' ? 'secondary' : 'ghost'}
+                        size="sm"
+                        onClick={() => setPeriod('month')}
+                        className="text-xs"
+                    >
+                        Este Mês
+                    </Button>
+                </div>
+            </div>
+
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="p-6 bg-card border rounded-xl shadow-sm">
@@ -97,10 +125,11 @@ export function AdminOverviewPage() {
                             <DollarSign className="w-6 h-6" />
                         </div>
                         <div>
-                            <p className="text-sm font-medium text-muted-foreground">Total Revenue</p>
+                            <p className="text-sm font-medium text-muted-foreground">Receita Total</p>
                             <h3 className="text-2xl font-bold">
                                 {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(stats.totalRevenue / 100)}
                             </h3>
+                            {period !== 'all' && <span className="text-xs text-muted-foreground">no período selecionado</span>}
                         </div>
                     </div>
                 </div>
@@ -111,8 +140,9 @@ export function AdminOverviewPage() {
                             <ShoppingBag className="w-6 h-6" />
                         </div>
                         <div>
-                            <p className="text-sm font-medium text-muted-foreground">Total Orders</p>
+                            <p className="text-sm font-medium text-muted-foreground">Pedidos</p>
                             <h3 className="text-2xl font-bold">{stats.totalOrders}</h3>
+                            {period !== 'all' && <span className="text-xs text-muted-foreground">no período selecionado</span>}
                         </div>
                     </div>
                 </div>
@@ -123,8 +153,9 @@ export function AdminOverviewPage() {
                             <Package className="w-6 h-6" />
                         </div>
                         <div>
-                            <p className="text-sm font-medium text-muted-foreground">Total Products</p>
+                            <p className="text-sm font-medium text-muted-foreground">Produtos Ativos</p>
                             <h3 className="text-2xl font-bold">{stats.totalProducts}</h3>
+                            <span className="text-xs text-muted-foreground">Total geral</span>
                         </div>
                     </div>
                 </div>
@@ -133,16 +164,16 @@ export function AdminOverviewPage() {
             {/* Recent Orders */}
             <div>
                 <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-                    <Calendar className="w-5 h-5" /> Recent Orders
+                    <Calendar className="w-5 h-5" /> Pedidos Recentes
                 </h2>
                 <div className="hidden md:block bg-card border rounded-xl overflow-hidden">
                     <table className="w-full text-left">
                         <thead className="bg-muted border-b border-border text-foreground text-sm uppercase">
                             <tr>
                                 <th className="px-6 py-4 font-semibold">ID</th>
-                                <th className="px-6 py-4 font-semibold">Customer</th>
-                                <th className="px-6 py-4 font-semibold">Date</th>
-                                <th className="px-6 py-4 font-semibold">Amount</th>
+                                <th className="px-6 py-4 font-semibold">Cliente</th>
+                                <th className="px-6 py-4 font-semibold">Data</th>
+                                <th className="px-6 py-4 font-semibold">Valor</th>
                                 <th className="px-6 py-4 font-semibold">Status</th>
                             </tr>
                         </thead>
@@ -194,7 +225,7 @@ export function AdminOverviewPage() {
                 </div>
 
                 {stats.recentOrders.length === 0 && (
-                    <div className="p-8 text-center text-muted-foreground bg-card border rounded-xl">No recent orders</div>
+                    <div className="p-8 text-center text-muted-foreground bg-card border rounded-xl">Sem pedidos recentes neste período.</div>
                 )}
             </div>
         </div>
