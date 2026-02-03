@@ -61,6 +61,11 @@ export function CartSidebar() {
                         <div className="flex justify-between items-start gap-2">
                           <h3 className="font-semibold leading-tight line-clamp-2">
                             {item.name}
+                            {item.size && (
+                              <span className="ml-2 text-sm font-normal text-muted-foreground">
+                                ({item.size})
+                              </span>
+                            )}
                           </h3>
                           <button
                             onClick={() => removeItem(item.id)}

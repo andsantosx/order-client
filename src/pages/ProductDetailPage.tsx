@@ -163,11 +163,14 @@ export function ProductDetailPage() {
       return;
     }
 
+    const sizeObj = product.sizes.find(s => s.id === selectedSize);
+
     addItem({
-      id: product.id,
+      productId: product.id,
       name: product.name,
       price: product.price,
       quantity: 1,
+      size: sizeObj ? sizeObj.name : "N/A",
       imageUrl: product.images[0]?.url,
     });
     toast.success("Adicionado à sacola");

@@ -110,7 +110,11 @@ export function CheckoutPage() {
                 localStorage.setItem("last_shipping_address", JSON.stringify(shippingAddress));
 
                 const order = await createOrder({
-                  items: items.map(i => ({ productId: i.id, quantity: i.quantity })),
+                  items: items.map(i => ({
+                    productId: i.productId || i.id,
+                    quantity: i.quantity,
+                    size: i.size || "Único" // Fallback for old items or if not set
+                  })),
                   guestName: user ? undefined : guestName,
                   guestEmail: user ? undefined : guestEmail,
                   guestCpf: user ? undefined : cpf.replace(/\D/g, ''),

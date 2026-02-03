@@ -2,19 +2,21 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 export interface CartItem {
-  id: string;
+  id: string; // Unique ID for cart entry (e.g. "productId-size")
+  productId: string; // Original Product ID
   name: string;
   price: number;
   quantity: number;
+  size: string;
   imageUrl?: string;
 }
 
 interface CartStore {
   items: CartItem[];
-  isCartOpen: boolean; // Estado de visibilidade
-  toggleCart: () => void; // Ação para abrir/fechar
-  closeCart: () => void; // Ação para fechar
-  addItem: (item: CartItem) => void;
+  isCartOpen: boolean;
+  toggleCart: () => void;
+  closeCart: () => void;
+  addItem: (item: Omit<CartItem, "id">) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
@@ -31,17 +33,18 @@ export const useCartStore = create<CartStore>()(
       closeCart: () => set({ isCartOpen: false }),
       addItem: (item) =>
         set((state) => {
-          const existingItem = state.items.find((i) => i.id === item.id);
+          const cartId = `${item.productId}-${item.size}`;
+          const existingItem = state.items.find((i) => i.id === cartId);
           if (existingItem) {
             return {
               items: state.items.map((i) =>
-                i.id === item.id
+                i.id === cartId
                   ? { ...i, quantity: i.quantity + item.quantity }
                   : i
               ),
             };
           }
-          return { items: [...state.items, item] };
+          return { items: [...state.items, { ...item, id: cartId }] };
         }),
       removeItem: (id) =>
         set((state) => ({

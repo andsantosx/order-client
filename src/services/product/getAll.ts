@@ -4,7 +4,6 @@ export interface Product {
     id: string;
     name: string;
     price: number;
-    stock: number;
     image?: string;
     images?: string[];
     category?: string;
@@ -61,7 +60,6 @@ export const getAll = async (params: ProductQueryParams = {}): Promise<Product[]
         id: item.id,
         name: item.name,
         price: (item.price_cents || 0) / 100, // Convert cents to float, safe fallback
-        stock: (item.sizes || []).reduce((acc, size) => acc + (size.quantity || 0), 0), // Sum stock from sizes, safe fallback
         image: item.images?.[0]?.url,
         images: item.images?.map(img => img.url),
         category: item.category?.name

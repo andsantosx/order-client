@@ -37,6 +37,7 @@ interface Order {
         id: string;
         quantity: number;
         unit_price: number;
+        size?: string;
         product: {
             name: string;
             images: { image_url: string }[];
@@ -47,12 +48,18 @@ interface Order {
 export function AdminOrdersPage() {
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
+    const [statusFilter, setStatusFilter] = useState<string>('ALL');
     const { token } = useAuthStore();
 
-    const loadOrders = async () => {
+    const loadOrders = async (status?: string) => {
         setLoading(true);
         try {
-            const { data } = await apiClient.get<Order[]>("/api/orders?isAdmin=true", {
+            const params = new URLSearchParams({ isAdmin: 'true' });
+            if (status && status !== 'ALL') {
+                params.append('status', status);
+            }
+
+            const { data } = await apiClient.get<Order[]>(`/api/orders?${params.toString()}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setOrders(data);
@@ -66,9 +73,9 @@ export function AdminOrdersPage() {
 
     useEffect(() => {
         if (token) {
-            loadOrders();
+            loadOrders(statusFilter);
         }
-    }, [token]);
+    }, [token, statusFilter]);
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -126,7 +133,27 @@ export function AdminOrdersPage() {
 
     return (
         <div className="space-y-6">
-            <h1 className="text-3xl font-bold tracking-tight">Gerenciar Pedidos</h1>
+            <div className="flex items-center justify-between">
+                <h1 className="text-3xl font-bold tracking-tight">Gerenciar Pedidos</h1>
+
+                {/* Status Filter */}
+                <div className="flex items-center gap-2">
+                    <label className="text-sm font-medium text-muted-foreground">Filtrar por:</label>
+                    <select
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        className="px-4 py-2 rounded-md border border-border bg-background text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    >
+                        <option value="ALL">Todos os Status</option>
+                        <option value="PENDING">⏳ Pendente</option>
+                        <option value="PAID">✅ Pago</option>
+                        <option value="SHIPPED">🚚 Enviado</option>
+                        <option value="DELIVERED">📦 Entregue</option>
+                        <option value="CANCELED">❌ Cancelado</option>
+                        <option value="REFUNDED">🔄 Reembolsado</option>
+                    </select>
+                </div>
+            </div>
 
             {/* Desktop Table */}
             <div className="hidden md:block rounded-xl border border-border bg-card shadow-sm overflow-hidden">
@@ -274,7 +301,14 @@ export function AdminOrdersPage() {
                                                                         />
                                                                     </div>
                                                                     <div className="flex-1 min-w-0">
-                                                                        <p className="text-sm font-medium truncate">{item.product.name}</p>
+                                                                        <p className="text-sm font-medium truncate">
+                                                                            {item.product.name}
+                                                                            {item.size && (
+                                                                                <span className="ml-2 text-xs text-muted-foreground font-normal">
+                                                                                    (Tamanho: {item.size})
+                                                                                </span>
+                                                                            )}
+                                                                        </p>
                                                                         <p className="text-xs text-muted-foreground">
                                                                             {item.quantity}x {formatCurrency(item.unit_price)}
                                                                         </p>

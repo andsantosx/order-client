@@ -20,6 +20,7 @@ export interface OrderRequest {
 export interface OrderRequestItem {
     productId: string;
     quantity: number;
+    size: string;
 }
 
 interface ApiOrderResponse {
