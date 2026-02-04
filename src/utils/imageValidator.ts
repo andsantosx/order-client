@@ -8,6 +8,8 @@ const ALLOWED_DOMAINS = [
     'cdn.shopify.com',
     'storage.googleapis.com',
     'postimages.org',
+    'postimg.cc',
+    'i.postimg.cc',
 ];
 
 /**
@@ -17,7 +19,7 @@ const ALLOWED_DOMAINS = [
  */
 export const validateImageUrl = (url: string): { valid: boolean; error?: string } => {
     if (!url.trim()) {
-        return { valid: false, error: 'URL não pode estar vazia' };
+        return { valid: false, error: 'URL de imagem inválida' };
     }
 
     try {
@@ -25,7 +27,7 @@ export const validateImageUrl = (url: string): { valid: boolean; error?: string 
 
         // Deve usar HTTPS
         if (parsed.protocol !== 'https:') {
-            return { valid: false, error: 'URL deve usar HTTPS' };
+            return { valid: false, error: 'URL de imagem inválida' };
         }
 
         // Verificar se o domínio é permitido
@@ -35,13 +37,13 @@ export const validateImageUrl = (url: string): { valid: boolean; error?: string 
         if (!isAllowed) {
             return {
                 valid: false,
-                error: `Domínio não permitido. Use apenas: ${ALLOWED_DOMAINS.join(', ')}`
+                error: 'URL de imagem inválida'
             };
         }
 
         return { valid: true };
     } catch {
-        return { valid: false, error: 'URL inválida' };
+        return { valid: false, error: 'URL de imagem inválida' };
     }
 };
 
