@@ -9,6 +9,7 @@ import { getAll as getCategories, type Category } from "@/services/category/getA
 import { getAll as getBrands, type Brand } from "@/services/brand";
 import { getAll as getSizes, type Size } from "@/services/size/getAll";
 import { MoveLeft } from "lucide-react";
+import { validateImageUrl, getAllowedDomains } from "@/utils/imageValidator";
 import {
     DndContext,
     closestCenter,
@@ -149,6 +150,14 @@ export function EditProductPage() {
 
     const handleAddImage = () => {
         if (!currentInfoUrl.trim()) return;
+
+        // Validar domínio permitido
+        const validation = validateImageUrl(currentInfoUrl.trim());
+        if (!validation.valid) {
+            toast.error(validation.error || "URL de imagem inválida");
+            return;
+        }
+
         if (imageUrls.includes(currentInfoUrl.trim())) {
             toast.error("Imagem já adicionada");
             return;
@@ -371,7 +380,7 @@ export function EditProductPage() {
                                 </Button>
                             </div>
                             <p className="text-xs text-muted-foreground mt-1">
-                                Cole o link e pressione Enter ou clique em Adicionar.
+                                Cole o link (HTTPS) de um domínio permitido: {getAllowedDomains().join(', ')}
                             </p>
                         </div>
 
