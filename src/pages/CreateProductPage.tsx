@@ -335,7 +335,7 @@ export function CreateProductPage() {
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                Cole o link (HTTPS) de um domínio permitido: {getAllowedDomains().join(', ')}
+                Cole o link (HTTPS) de um domínio permitido
               </p>
             </div>
 
