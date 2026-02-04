@@ -7,7 +7,7 @@ import { create as createProduct } from "@/services/product/create";
 import { getAll as getCategories, type Category } from "@/services/category/getAll";
 import { getAll as getBrands, type Brand } from "@/services/brand";
 import { getAll as getSizes, type Size } from "@/services/size/getAll";
-import { validateImageUrl, getAllowedDomains } from "@/utils/imageValidator";
+import { validateImageUrl } from "@/utils/imageValidator";
 import {
   DndContext,
   closestCenter,

@@ -9,7 +9,7 @@ import { getAll as getCategories, type Category } from "@/services/category/getA
 import { getAll as getBrands, type Brand } from "@/services/brand";
 import { getAll as getSizes, type Size } from "@/services/size/getAll";
 import { MoveLeft } from "lucide-react";
-import { validateImageUrl, getAllowedDomains } from "@/utils/imageValidator";
+import { validateImageUrl } from "@/utils/imageValidator";
 import {
     DndContext,
     closestCenter,
