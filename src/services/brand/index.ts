@@ -7,7 +7,7 @@ export interface Brand {
 }
 
 export const getAll = async (): Promise<Brand[]> => {
-    const { data } = await apiClient.get<Brand[]>("/api/brands");
+    const { data } = await apiClient.get<Brand[]>("/brands");
     return data;
 };
 
@@ -17,7 +17,7 @@ export interface CreateBrandRequest {
 }
 
 export const create = async (brand: CreateBrandRequest): Promise<Brand> => {
-    const { data } = await apiClient.post<Brand>("/api/brands", brand);
+    const { data } = await apiClient.post<Brand>("/brands", brand);
     return data;
 };
 
@@ -27,10 +27,10 @@ export interface UpdateBrandRequest {
 }
 
 export const update = async (id: number, brand: UpdateBrandRequest): Promise<Brand> => {
-    const { data } = await apiClient.put<Brand>(`/api/brands/${id}`, brand);
+    const { data } = await apiClient.put<Brand>(`/brands/${id}`, brand);
     return data;
 };
 
 export const remove = async (id: number): Promise<void> => {
-    await apiClient.delete(`/api/brands/${id}`);
+    await apiClient.delete(`/brands/${id}`);
 };

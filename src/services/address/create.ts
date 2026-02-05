@@ -10,6 +10,6 @@ export interface CreateAddressData {
 }
 
 export const create = async (data: CreateAddressData): Promise<Address> => {
-    const response = await apiClient.post<Address>("/api/profile/addresses", data);
+    const response = await apiClient.post<Address>("/profile/addresses", data);
     return response.data;
 };

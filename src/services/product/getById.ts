@@ -12,7 +12,7 @@ export interface Product {
 }
 
 export const getById = async (id: string): Promise<Product> => {
-    const { data } = await apiClient.get<any>(`/api/products/${id}`);
+    const { data } = await apiClient.get<any>(`/products/${id}`);
 
     return {
         id: data.id,

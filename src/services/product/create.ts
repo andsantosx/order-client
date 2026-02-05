@@ -13,6 +13,6 @@ export interface CreateProductRequest {
 }
 
 export const create = async (product: CreateProductRequest): Promise<ProductResponse> => {
-    const { data } = await apiClient.post<ProductResponse>("/api/products", product);
+    const { data } = await apiClient.post<ProductResponse>("/products", product);
     return data;
 };

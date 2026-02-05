@@ -9,16 +9,16 @@ export interface UserProfile {
 
 export interface UpdateProfileDTO {
     name?: string;
-    email?: string; // Optional if you want to allow email updates
+    email?: string;
     password?: string;
 }
 
 export const getProfile = async (): Promise<UserProfile> => {
-    const { data } = await apiClient.get<UserProfile>("/api/auth/me");
+    const { data } = await apiClient.get<UserProfile>("/auth/me");
     return data;
 };
 
 export const updateProfile = async (data: UpdateProfileDTO): Promise<UserProfile> => {
-    const response = await apiClient.put<UserProfile>("/api/auth/me", data);
+    const response = await apiClient.put<UserProfile>("/auth/me", data);
     return response.data;
 };

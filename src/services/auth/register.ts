@@ -8,6 +8,6 @@ export interface RegisterRequest {
 }
 
 export const register = async (userData: RegisterRequest): Promise<LoginResponse> => {
-    const { data } = await apiClient.post<LoginResponse>("/api/auth/register", userData);
+    const { data } = await apiClient.post<LoginResponse>("/auth/register", userData);
     return data;
 };

@@ -10,5 +10,5 @@ export interface UpdateProductRequest {
 }
 
 export const update = async (id: string, data: UpdateProductRequest): Promise<void> => {
-    await apiClient.put(`/api/products/${id}`, data);
+    await apiClient.put(`/products/${id}`, data);
 };

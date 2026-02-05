@@ -7,6 +7,6 @@ export interface FiltersResponse {
 }
 
 export const getFilters = async (): Promise<FiltersResponse> => {
-    const { data } = await apiClient.get<FiltersResponse>("/api/products/filters");
+    const { data } = await apiClient.get<FiltersResponse>("/products/filters");
     return data;
 };

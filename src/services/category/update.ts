@@ -7,6 +7,6 @@ export interface UpdateCategoryRequest {
 }
 
 export const update = async (id: number, data: UpdateCategoryRequest): Promise<Category> => {
-    const response = await apiClient.put<Category>(`/api/categories/${id}`, data);
+    const response = await apiClient.put<Category>(`/categories/${id}`, data);
     return response.data;
 };

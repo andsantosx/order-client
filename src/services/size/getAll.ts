@@ -7,6 +7,6 @@ export interface Size {
 }
 
 export const getAll = async (): Promise<Size[]> => {
-    const { data } = await apiClient.get<Size[]>("/api/sizes");
+    const { data } = await apiClient.get<Size[]>("/sizes");
     return data;
 };

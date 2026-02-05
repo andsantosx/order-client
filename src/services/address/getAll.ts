@@ -10,6 +10,6 @@ export interface Address {
 }
 
 export const getAll = async (): Promise<Address[]> => {
-    const { data } = await apiClient.get<Address[]>("/api/profile/addresses");
+    const { data } = await apiClient.get<Address[]>("/profile/addresses");
     return data;
 };

@@ -50,9 +50,9 @@ export const getAll = async (params: ProductQueryParams = {}): Promise<Product[]
     // API docs specify camelCase for price params
     if (params.minPrice !== undefined) queryParams.minPrice = params.minPrice * 100; // API expects cents
     if (params.maxPrice !== undefined) queryParams.maxPrice = params.maxPrice * 100; // API expects cents
-    if (params.sortBy) queryParams.sort = params.sortBy;
+    if (params.sortBy) queryParams.sortBy = params.sortBy; // ← FIXED: backend expects sortBy not sort
 
-    const { data } = await apiClient.get<PaginatedProductResponse>("/api/products", {
+    const { data } = await apiClient.get<PaginatedProductResponse>("/products", {
         params: queryParams
     });
 
@@ -65,3 +65,4 @@ export const getAll = async (params: ProductQueryParams = {}): Promise<Product[]
         category: item.category?.name
     }));
 };
+

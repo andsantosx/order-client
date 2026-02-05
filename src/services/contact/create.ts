@@ -20,6 +20,6 @@ export interface ContactMessageResponse {
 }
 
 export const create = async (data: ContactMessageRequest): Promise<ContactMessageResponse> => {
-    const response = await apiClient.post<ContactMessageResponse>("/api/contact", data);
+    const response = await apiClient.post<ContactMessageResponse>("/contact", data);
     return response.data;
 };

@@ -12,7 +12,7 @@ export interface WishlistItem {
 // Adapting the response to match what the UI expects (Product-like)
 export const getAll = async (): Promise<WishlistItem[]> => {
     // The endpoint returns list of products in wishlist
-    const { data } = await apiClient.get<any[]>("/api/profile/wishlist");
+    const { data } = await apiClient.get<any[]>("/profile/wishlist");
 
     // Map response if necessary. Assuming backend returns an array of objects that contain 'product' info
     // or the list of products directly.

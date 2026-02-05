@@ -47,6 +47,6 @@ function mapOrderResponse(data: ApiOrderResponse): OrderResponse {
 }
 
 export const create = async (orderData: OrderRequest): Promise<OrderResponse> => {
-    const { data } = await apiClient.post<ApiOrderResponse>("/api/orders", orderData);
+    const { data } = await apiClient.post<ApiOrderResponse>("/orders", orderData);
     return mapOrderResponse(data);
 };

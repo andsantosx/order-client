@@ -51,6 +51,6 @@ function mapOrderResponse(data: ApiOrderResponse): OrderResponse {
 }
 
 export const getById = async (id: string): Promise<OrderResponse> => {
-    const { data } = await apiClient.get<ApiOrderResponse>(`/api/orders/${id}`);
+    const { data } = await apiClient.get<ApiOrderResponse>(`/orders/${id}`);
     return mapOrderResponse(data);
 };

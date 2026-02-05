@@ -5,7 +5,7 @@ export interface CreatePaymentIntentResponse {
 }
 
 export const create = async (orderId: string): Promise<CreatePaymentIntentResponse> => {
-    const { data } = await apiClient.post<CreatePaymentIntentResponse>("/api/payments/create-intent", {
+    const { data } = await apiClient.post<CreatePaymentIntentResponse>("/payments/create-intent", {
         orderId,
     });
     return data;

@@ -7,6 +7,6 @@ export interface CreateCategoryRequest {
 }
 
 export const create = async (data: CreateCategoryRequest): Promise<Category> => {
-    const response = await apiClient.post<Category>("/api/categories", data);
+    const response = await apiClient.post<Category>("/categories", data);
     return response.data;
 };
