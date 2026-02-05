@@ -7,6 +7,7 @@ export interface UpdateProductRequest {
     categoryId?: number;
     brandId?: number;
     sizeIds?: number[];
+    images?: string[];
 }
 
 export const update = async (id: string, data: UpdateProductRequest): Promise<void> => {
