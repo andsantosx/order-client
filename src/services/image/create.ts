@@ -11,6 +11,6 @@ export interface ImageResponse {
 }
 
 export const create = async (productId: string, url: string): Promise<ImageResponse> => {
-    const { data } = await apiClient.post<ImageResponse>(`/api/images/product/${productId}`, { url });
+    const { data } = await apiClient.post<ImageResponse>(`/images/product/${productId}`, { url });
     return data;
 };

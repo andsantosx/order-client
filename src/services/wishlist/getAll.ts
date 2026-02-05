@@ -16,7 +16,7 @@ export const getAll = async (): Promise<WishlistItem[]> => {
 
     // Map response if necessary. Assuming backend returns an array of objects that contain 'product' info
     // or the list of products directly.
-    // Based on "Get /api/orders" returns "items.product", maybe wishlist returns "items" too?
+    // Based on "Get /orders" returns "items.product", maybe wishlist returns "items" too?
     // Let's assume it returns an array of Products for now based on typical implementation.
     // If user followed common sense, it returns the user's wishlist items.
 

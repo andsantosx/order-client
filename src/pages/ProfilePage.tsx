@@ -322,7 +322,7 @@ export function ProfilePage() {
                                                     onClick={async () => {
                                                         if (!confirm('Tem certeza que deseja cancelar este pedido?')) return;
                                                         try {
-                                                            await apiClient.post(`/api/orders/${selectedOrder.id}/cancel`); // Assuming apiClient is available or imported if not using hook
+                                                            await apiClient.post(`/orders/${selectedOrder.id}/cancel`); // Assuming apiClient is available or imported if not using hook
                                                             toast.success("Pedido cancelado");
                                                             // Update local state
                                                             setOrders(orders.map(o => o.id === selectedOrder.id ? { ...o, status: 'CANCELED' } : o));

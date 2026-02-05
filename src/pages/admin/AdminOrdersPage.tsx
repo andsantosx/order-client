@@ -59,7 +59,7 @@ export function AdminOrdersPage() {
                 params.append('status', status);
             }
 
-            const { data } = await apiClient.get<Order[]>(`/api/orders?${params.toString()}`, {
+            const { data } = await apiClient.get<Order[]>(`/orders?${params.toString()}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setOrders(data);

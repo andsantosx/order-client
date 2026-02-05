@@ -26,13 +26,13 @@ export const getDashboardStats = async (startDate?: string, endDate?: string): P
         const queryString = params.toString() ? `?${params.toString()}` : '';
 
         // Get overview stats from new endpoint
-        const { data: overview } = await apiClient.get(`/api/admin/stats/overview${queryString}`);
+        const { data: overview } = await apiClient.get(`/admin/stats/overview${queryString}`);
 
         // Get recent orders (using existing orders endpoint with limit)
-        const { data: orders } = await apiClient.get('/api/orders?isAdmin=true&limit=10');
+        const { data: orders } = await apiClient.get('/orders?isAdmin=true&limit=10');
 
         // Get product count
-        const { data: products } = await apiClient.get('/api/products?page=1&limit=1');
+        const { data: products } = await apiClient.get('/products?page=1&limit=1');
 
         return {
             totalRevenue: overview.totalRevenue || 0,
