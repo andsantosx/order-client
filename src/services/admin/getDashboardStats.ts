@@ -26,7 +26,7 @@ export const getDashboardStats = async (startDate?: string, endDate?: string): P
         const queryString = params.toString() ? `?${params.toString()}` : '';
 
         // Get overview stats from new endpoint
-        const { data: overview } = await apiClient.get(`/admin/stats/overview${queryString}`);
+        const { data: overview } = await apiClient.get(`/admin/stats${queryString}`);
 
         // Get recent orders (using existing orders endpoint with limit)
         const { data: orders } = await apiClient.get('/orders?isAdmin=true&limit=10');
