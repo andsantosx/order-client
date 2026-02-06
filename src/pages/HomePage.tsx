@@ -2,7 +2,7 @@ import { Hero } from "@/components/home/hero"
 import { CookieBanner } from "@/components/ui/cookie-banner"
 import { CategorySection } from "@/components/home/category-section"
 import { useEffect, Suspense, lazy } from "react"
-import { Skeleton } from "@/components/ui/skeleton"
+import { InteractiveLoader } from "@/components/ui/interactive-loader"
 
 const BrandNarrative = lazy(() => import("@/components/home/brand-narrative").then(m => ({ default: m.BrandNarrative })));
 const Featured = lazy(() => import("@/components/home/featured").then(m => ({ default: m.Featured })));
@@ -22,26 +22,34 @@ export function HomePage() {
       <CategorySection />
 
       <Suspense fallback={<div className="py-24 lg:py-32 bg-background border-t border-border">
-        <div className="mx-auto max-w-[1200px] px-6 lg:px-10">
-          <Skeleton className="h-[300px] w-full rounded-2xl" />
+        <div className="mx-auto max-w-[1200px] px-6 lg:px-10 flex items-center justify-center min-h-[300px]">
+          <InteractiveLoader size="lg" variant="spinner" />
         </div>
       </div>}>
         <BrandNarrative />
       </Suspense>
 
-      <Suspense fallback={<Skeleton className="h-[600px] w-full" />}>
+      <Suspense fallback={<div className="min-h-[600px] flex items-center justify-center">
+        <InteractiveLoader size="lg" variant="pulse" />
+      </div>}>
         <Featured />
       </Suspense>
 
-      <Suspense fallback={<Skeleton className="h-[600px] w-full" />}>
+      <Suspense fallback={<div className="min-h-[600px] flex items-center justify-center">
+        <InteractiveLoader size="lg" variant="dots" />
+      </div>}>
         <Products />
       </Suspense>
 
-      <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
+      <Suspense fallback={<div className="min-h-[400px] flex items-center justify-center">
+        <InteractiveLoader size="lg" variant="spinner" />
+      </div>}>
         <PromoBanner />
       </Suspense>
 
-      <Suspense fallback={<div className="h-64 bg-secondary/10" />}>
+      <Suspense fallback={<div className="h-64 bg-secondary/10 flex items-center justify-center">
+        <InteractiveLoader size="md" variant="pulse" />
+      </div>}>
         <FooterLazy />
       </Suspense>
       <CookieBanner />
