@@ -30,17 +30,20 @@ const AdminBrandsPage = lazy(() => import("@/pages/admin/AdminBrandsPage").then(
 const ProfilePage = lazy(() => import("@/pages/ProfilePage").then(m => ({ default: m.ProfilePage })));
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 
+import { useUIStore } from "@/store/uiStore";
+
 function AppContent() {
   const location = useLocation();
   const isHomePage = location.pathname === "/";
   // Hide footer on admin pages
   const isAdminPage = location.pathname.startsWith("/admin");
+  const isRouteLoading = useUIStore((state) => state.isRouteLoading);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
       <CartSidebar />
-      <div className="flex-1">
+      <div className="flex-1 flex flex-col">
         <Suspense fallback={<RouteSkeleton />}>
           <Routes>
             {/* Public Routes */}
@@ -80,7 +83,7 @@ function AppContent() {
           </Routes>
         </Suspense>
       </div>
-      {!isHomePage && !isAdminPage && <Footer />}
+      {!isHomePage && !isAdminPage && !isRouteLoading && <Footer />}
     </div>
   );
 }

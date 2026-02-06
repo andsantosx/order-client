@@ -69,7 +69,7 @@ export function InteractiveLoader({
 // Full page loader
 export function PageLoader({ message }: { message?: string }) {
     return (
-        <div className="min-h-[60vh] flex flex-col items-center justify-center gap-6">
+        <div className="flex-1 min-h-[calc(100vh-3.5rem)] flex flex-col items-center justify-center gap-6">
             <InteractiveLoader size="lg" variant="spinner" />
             {message && (
                 <p className="text-sm text-muted-foreground font-medium tracking-wide uppercase animate-pulse">
