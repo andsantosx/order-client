@@ -7,10 +7,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import { getAll as getAllProducts, type Product } from "@/services/product/getAll";
 import { getFilters } from "@/services/product/getFilters";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useRef, Suspense, lazy } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { ActiveFilters } from "@/components/shop/active-filters";
-import { FilterSidebar } from "@/components/shop/filter-sidebar";
+import { generateProductCacheKey } from "@/lib/cacheKey";
+const ActiveFilters = lazy(() => import("@/components/shop/active-filters").then(m => ({ default: m.ActiveFilters })));
+const FilterSidebar = lazy(() => import("@/components/shop/filter-sidebar").then(m => ({ default: m.FilterSidebar })));
+import { useProductStore } from "@/store/productStore";
 
 export function ShopPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -49,11 +51,29 @@ export function ShopPage() {
   const [sortBy, setSortBy] = useState(initialSortBy);
   const [searchQuery, setSearchQuery] = useState(initialSearch);
 
-  const [availableCategories, setAvailableCategories] = useState<{ name: string; slug: string }[]>([]);
-  const [availableBrands, setAvailableBrands] = useState<{ name: string; slug: string }[]>([]);
-  const [availableSizes, setAvailableSizes] = useState<string[]>([]);
+  const {
+    availableCategories,
+    availableBrands,
+    availableSizes,
+    filtersLoaded,
+    setFilters,
+    getCachedProducts,
+    setCachedProducts
+  } = useProductStore();
 
   const { addItem } = useCartStore();
+  const requestIdRef = useRef(0);
+
+  // Create a unique key for the current set of filters (DETERMINISTIC)
+  const cacheKey = useMemo(() => generateProductCacheKey({
+    search: searchParams.get("search") || "",
+    categories: selectedCategories,
+    brands: selectedBrands,
+    sizes: selectedSizes,
+    minPrice: activeMinPrice,
+    maxPrice: activeMaxPrice,
+    sortBy
+  }), [searchParams, selectedCategories, selectedBrands, selectedSizes, activeMinPrice, activeMaxPrice, sortBy]);
 
   // Sync state to URL
   useEffect(() => {
@@ -106,25 +126,37 @@ export function ShopPage() {
   // Fetch Products & Filters
   useEffect(() => {
     fetchProducts();
-  }, [searchParams]);
+  }, [cacheKey]); // Use cacheKey as dependency instead of whole searchParams for better control
 
   useEffect(() => {
     const fetchFilters = async () => {
+      if (filtersLoaded) return; // ORCHESTRATION: Don't fetch if already in store
+
       try {
         const data = await getFilters();
-        setAvailableCategories(data.categories);
-        setAvailableBrands(data.brands);
-        setAvailableSizes(data.sizes);
+        setFilters(data);
       } catch (error) {
         console.error("Failed to fetch filters", error);
       }
     };
     fetchFilters();
-  }, []);
+  }, [filtersLoaded, setFilters]);
 
   const fetchProducts = async () => {
+    // 1. Check if we have this specific query cached
+    const cached = getCachedProducts(cacheKey);
+    if (cached) {
+      setProducts(cached);
+      setIsLoading(false);
+      return; // ORCHESTRATION: Satisfied from cache
+    }
+
+    // 2. Race condition protection: increment request ID
+    requestIdRef.current += 1;
+    const currentRequestId = requestIdRef.current;
+
     setIsLoading(true);
-    const searchFromUrl = searchParams.get("search") || "";
+    const searchFromUrl = (searchParams.get("search") || "").trim();
 
     try {
       const data = await getAllProducts({
@@ -136,12 +168,23 @@ export function ShopPage() {
         maxPrice: activeMaxPrice,
         sortBy
       });
-      setProducts(data);
+
+      // 3. Only update state if this is still the latest request
+      if (currentRequestId === requestIdRef.current) {
+        setProducts(data);
+        setCachedProducts(cacheKey, data); // ORCHESTRATION: Save to cache
+      }
     } catch (error) {
-      console.error("Failed to fetch products:", error);
-      toast.error("Unable to load products");
+      // Only show error if this is still the latest request
+      if (currentRequestId === requestIdRef.current) {
+        console.error("Failed to fetch products:", error);
+        toast.error("Unable to load products");
+      }
     } finally {
-      setIsLoading(false);
+      // Only update loading state if this is still the latest request
+      if (currentRequestId === requestIdRef.current) {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -186,24 +229,26 @@ export function ShopPage() {
 
           {/* Desktop Sidebar */}
           <aside className="hidden lg:block">
-            <FilterSidebar
-              minPrice={minPrice}
-              maxPrice={maxPrice}
-              setMinPrice={setMinPrice}
-              setMaxPrice={setMaxPrice}
-              applyPriceFilter={applyPriceFilter}
-              selectedSizes={selectedSizes}
-              setSelectedSizes={setSelectedSizes}
-              selectedCategories={selectedCategories}
-              setSelectedCategories={setSelectedCategories}
-              sortBy={sortBy}
-              setSortBy={setSortBy}
-              availableCategories={availableCategories}
-              availableBrands={availableBrands}
-              availableSizes={availableSizes}
-              selectedBrands={selectedBrands}
-              setSelectedBrands={setSelectedBrands}
-            />
+            <Suspense fallback={<Skeleton className="h-[600px] w-full rounded-lg" />}>
+              <FilterSidebar
+                minPrice={minPrice}
+                maxPrice={maxPrice}
+                setMinPrice={setMinPrice}
+                setMaxPrice={setMaxPrice}
+                applyPriceFilter={applyPriceFilter}
+                selectedSizes={selectedSizes}
+                setSelectedSizes={setSelectedSizes}
+                selectedCategories={selectedCategories}
+                setSelectedCategories={setSelectedCategories}
+                sortBy={sortBy}
+                setSortBy={setSortBy}
+                availableCategories={availableCategories}
+                availableBrands={availableBrands}
+                availableSizes={availableSizes}
+                selectedBrands={selectedBrands}
+                setSelectedBrands={setSelectedBrands}
+              />
+            </Suspense>
           </aside>
 
           {/* Mobile Filter Toggle */}
@@ -216,25 +261,27 @@ export function ShopPage() {
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="w-[320px] sm:w-[380px] p-6">
-                <FilterSidebar
-                  minPrice={minPrice}
-                  maxPrice={maxPrice}
-                  setMinPrice={setMinPrice}
-                  setMaxPrice={setMaxPrice}
-                  applyPriceFilter={applyPriceFilter}
-                  selectedSizes={selectedSizes}
-                  setSelectedSizes={setSelectedSizes}
-                  selectedCategories={selectedCategories}
-                  setSelectedCategories={setSelectedCategories}
-                  sortBy={sortBy}
-                  setSortBy={setSortBy}
-                  availableCategories={availableCategories}
-                  availableBrands={availableBrands}
-                  availableSizes={availableSizes}
-                  selectedBrands={selectedBrands}
-                  setSelectedBrands={setSelectedBrands}
-                  className="mt-6"
-                />
+                <Suspense fallback={<Skeleton className="h-[500px] w-full" />}>
+                  <FilterSidebar
+                    minPrice={minPrice}
+                    maxPrice={maxPrice}
+                    setMinPrice={setMinPrice}
+                    setMaxPrice={setMaxPrice}
+                    applyPriceFilter={applyPriceFilter}
+                    selectedSizes={selectedSizes}
+                    setSelectedSizes={setSelectedSizes}
+                    selectedCategories={selectedCategories}
+                    setSelectedCategories={setSelectedCategories}
+                    sortBy={sortBy}
+                    setSortBy={setSortBy}
+                    availableCategories={availableCategories}
+                    availableBrands={availableBrands}
+                    availableSizes={availableSizes}
+                    selectedBrands={selectedBrands}
+                    setSelectedBrands={setSelectedBrands}
+                    className="mt-6"
+                  />
+                </Suspense>
                 <div className="mt-8 pt-4 border-t border-border">
                   <Button className="w-full font-bold uppercase tracking-wider">
                     Ver {products.length} Resultados
@@ -246,23 +293,25 @@ export function ShopPage() {
 
           {/* Product Grid Area */}
           <div>
-            <ActiveFilters
-              selectedSizes={selectedSizes}
-              setSelectedSizes={setSelectedSizes}
-              selectedCategories={selectedCategories}
-              setSelectedCategories={setSelectedCategories}
-              selectedBrands={selectedBrands}
-              setSelectedBrands={setSelectedBrands}
-              minPrice={activeMinPrice}
-              maxPrice={activeMaxPrice}
-              setMinPrice={setMinPrice}
-              setMaxPrice={setMaxPrice}
-              setActiveMinPrice={setActiveMinPrice}
-              setActiveMaxPrice={setActiveMaxPrice}
-              clearAll={clearAllFilters}
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-            />
+            <Suspense fallback={<Skeleton className="h-20 w-full mb-8" />}>
+              <ActiveFilters
+                selectedSizes={selectedSizes}
+                setSelectedSizes={setSelectedSizes}
+                selectedCategories={selectedCategories}
+                setSelectedCategories={setSelectedCategories}
+                selectedBrands={selectedBrands}
+                setSelectedBrands={setSelectedBrands}
+                minPrice={activeMinPrice}
+                maxPrice={activeMaxPrice}
+                setMinPrice={setMinPrice}
+                setMaxPrice={setMaxPrice}
+                setActiveMinPrice={setActiveMinPrice}
+                setActiveMaxPrice={setActiveMaxPrice}
+                clearAll={clearAllFilters}
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+              />
+            </Suspense>
 
             {isLoading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-12 gap-x-8">
@@ -289,12 +338,14 @@ export function ShopPage() {
                           <img
                             src={product.image}
                             alt={product.name}
+                            loading="lazy"
                             className={`h-full w-full object-cover transition-all duration-700 ${product.images && product.images[1] ? 'group-hover:opacity-0' : 'group-hover:scale-105'}`}
                           />
                           {product.images && product.images[1] && (
                             <img
                               src={product.images[1]}
                               alt={`${product.name} view 2`}
+                              loading="lazy"
                               className="absolute inset-0 h-full w-full object-cover transition-all duration-700 opacity-0 group-hover:opacity-100 scale-105"
                             />
                           )}

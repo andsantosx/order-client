@@ -1,22 +1,34 @@
 import { useState, useEffect } from "react"
 import { getAll as getAllProducts, type Product } from "@/services/product/getAll"
+import { useProductStore } from "@/store/productStore"
+import { generateProductCacheKey } from "@/lib/cacheKey"
 
 export function ProductCarousel() {
     const [products, setProducts] = useState<Product[]>([])
     const [hoveredId, setHoveredId] = useState<string | null>(null)
+    const { getCachedProducts, setCachedProducts } = useProductStore()
 
     useEffect(() => {
         const loadProducts = async () => {
+            // Use centralized cache to avoid redundant fetches
+            const cacheKey = generateProductCacheKey();
+            const cached = getCachedProducts(cacheKey);
+
+            if (cached) {
+                setProducts(cached.slice(0, 6));
+                return;
+            }
+
             try {
                 const data = await getAllProducts()
-                // Pegar 6 produtos para o carousel
                 setProducts(data.slice(0, 6))
+                setCachedProducts(cacheKey, data); // Save to cache
             } catch (error) {
                 console.error("Failed to load products", error)
             }
         }
         loadProducts()
-    }, [])
+    }, [getCachedProducts, setCachedProducts])
 
     return (
         <section className="py-12 bg-background border-t border-border">

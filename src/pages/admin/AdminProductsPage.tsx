@@ -6,19 +6,33 @@ import { Button } from "@/components/ui/button";
 import { Edit, Trash } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import toast from "react-hot-toast";
+import { useProductStore } from "@/store/productStore";
+import { generateProductCacheKey } from "@/lib/cacheKey";
 
 export function AdminProductsPage() {
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
+    const { getCachedProducts, setCachedProducts, invalidateProducts } = useProductStore();
 
     useEffect(() => {
         loadProducts();
     }, []);
 
     const loadProducts = async () => {
+        // Use cache for admin too (invalidate on CRUD)
+        const cacheKey = generateProductCacheKey();
+        const cached = getCachedProducts(cacheKey);
+
+        if (cached) {
+            setProducts(cached);
+            setLoading(false);
+            return;
+        }
+
         try {
             const data = await getAllProducts();
             setProducts(data);
+            setCachedProducts(cacheKey, data);
         } catch (error) {
             console.error("Failed to load products:", error);
             toast.error("Erro ao carregar produtos");
@@ -32,7 +46,8 @@ export function AdminProductsPage() {
         try {
             await deleteProduct(id);
             toast.success("Produto excluído");
-            loadProducts();
+            invalidateProducts(); // Clear cache after mutation
+            loadProducts(); // Refetch
         } catch (error) {
             console.error(error);
             toast.error("Erro ao excluir");

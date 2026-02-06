@@ -10,25 +10,39 @@ import { add as addToWishlistApi } from "@/services/wishlist/add"
 import { remove as removeFromWishlistApi } from "@/services/wishlist/remove"
 import toast from "react-hot-toast"
 import { AnimateOnScroll } from '@/hooks/useScrollAnimation';
+import { useProductStore } from "@/store/productStore";
+import { generateProductCacheKey } from "@/lib/cacheKey"
 
 export function Products() {
   const [products, setProducts] = useState<Product[]>([])
   const { addItem } = useCartStore()
   const { isInWishlist, addItem: addToWishlistStore, removeItem: removeFromWishlistStore, updateItem: updateWishlistStore, items: wishlistItems } = useWishlistStore()
   const { user } = useAuthStore()
+  const { getCachedProducts, setCachedProducts } = useProductStore()
   const navigate = useNavigate()
+
+  // Use centralized cache key utility for consistency
+  const cacheKey = generateProductCacheKey();
 
   useEffect(() => {
     const loadProducts = async () => {
+      // Rule 3: Deduplicate fetches using the store cache
+      const cached = getCachedProducts(cacheKey);
+      if (cached) {
+        setProducts(cached.slice(0, 6));
+        return;
+      }
+
       try {
         const data = await getAllProducts()
         setProducts(data.slice(0, 6))
+        setCachedProducts(cacheKey, data); // Save to cache for Shop page later
       } catch (error) {
         console.error("Failed to load featured products", error)
       }
     }
     loadProducts()
-  }, [])
+  }, [cacheKey, getCachedProducts, setCachedProducts])
 
   const toggleWishlist = async (e: React.MouseEvent, product: Product) => {
     e.stopPropagation() // Prevent navigation
@@ -106,12 +120,14 @@ export function Products() {
                       <img
                         src={product.image}
                         alt={product.name}
+                        loading="lazy"
                         className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                       />
                       {product.images?.[1] && (
                         <img
                           src={product.images[1]}
                           alt={product.name}
+                          loading="lazy"
                           className="absolute inset-0 h-full w-full object-cover transition-all duration-700 ease-out opacity-0 group-hover:opacity-100 group-hover:scale-105"
                         />
                       )}

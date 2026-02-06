@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { preloadComponent } from "@/lib/preload";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -131,6 +132,7 @@ export function Header() {
             >
               <a
                 href={item.href}
+                onMouseEnter={() => item.href.startsWith('/loja') && preloadComponent(() => import("@/pages/ShopPage"))}
                 className="flex items-center gap-1 text-[11px] font-medium tracking-wider text-foreground/70 hover:text-foreground transition-colors py-4 uppercase"
               >
                 {item.name}

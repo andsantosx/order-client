@@ -9,23 +9,22 @@ import { remove as removeFromWishlist } from "@/services/wishlist/remove"
 import toast from "react-hot-toast"
 
 export function WishlistPage() {
-  const { items, removeItem, clearWishlist, setItems } = useWishlistStore()
+  const { items, removeItem, clearWishlist, setItems, wishlistLoaded } = useWishlistStore()
   const { addItem } = useCartStore()
   const { user } = useAuthStore()
 
   useEffect(() => {
     const fetchWishlist = async () => {
-      if (!user) return
+      if (!user || wishlistLoaded) return // ORCHESTRATION: Satisfied by local store
       try {
         const apiItems = await getWishlistItems()
         setItems(apiItems)
       } catch (error) {
         console.error("Failed to sync wishlist", error)
-        // Optionally keep local items if API fails, or show error
       }
     }
     fetchWishlist()
-  }, [user, setItems])
+  }, [user, setItems, wishlistLoaded])
 
   const handleRemove = async (productId: string, wishlistId?: string) => {
     if (user && wishlistId) {

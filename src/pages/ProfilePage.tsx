@@ -6,36 +6,45 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import toast from "react-hot-toast";
 import { Package, LogOut, Settings, MapPin, Plus, Trash2 } from "lucide-react";
-import { getAll as getAddresses, type Address } from "@/services/address/getAll";
+import { useNavigate } from "react-router-dom";
+import { getAll as getAddresses } from "@/services/address/getAll";
 import { create as createAddressApi, type CreateAddressData } from "@/services/address/create";
 import { remove as removeAddressApi } from "@/services/address/delete";
-import { useNavigate } from "react-router-dom";
-
 import { listMyOrders, type Order } from "@/services/order/myOrders";
+import { useOrderStore } from "@/store/orderStore";
 
 export function ProfilePage() {
-    const { token, logout } = useAuthStore();
+    const {
+        token,
+        logout,
+        user,
+        profileLoaded,
+        setProfile,
+        addresses,
+        addressesLoaded,
+        setAddresses,
+        invalidateProfile,
+        invalidateAddresses
+    } = useAuthStore();
+    const { orders, setOrders, shouldFetch: shouldFetchOrders } = useOrderStore();
     const navigate = useNavigate();
 
     // Combined State
     const [activeTab, setActiveTab] = useState<'profile' | 'orders' | 'addresses'>('profile');
 
-    // Profile State
-    const [profileData, setProfileData] = useState({ name: '', email: '', password: '' });
-    const [isLoadingProfile, setIsLoadingProfile] = useState(true);
-
-    // Orders State
-    const [orders, setOrders] = useState<Order[]>([]);
+    // UI Local States
+    const [isLoadingProfile, setIsLoadingProfile] = useState(!profileLoaded);
     const [isLoadingOrders, setIsLoadingOrders] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
-    // Address State
-    const [addresses, setAddresses] = useState<Address[]>([]);
+    // Address Local States
     const [isLoadingAddresses, setIsLoadingAddresses] = useState(false);
     const [isAddingAddress, setIsAddingAddress] = useState(false);
     const [newAddress, setNewAddress] = useState<CreateAddressData>({
         street: '', city: '', state: '', zipCode: '', country: 'Brasil'
     });
+
+    const [password, setPassword] = useState('');
 
     // Initial Load
     useEffect(() => {
@@ -56,9 +65,13 @@ export function ProfilePage() {
 
     // Data Loaders
     const loadProfile = async () => {
+        if (profileLoaded) {
+            setIsLoadingProfile(false);
+            return;
+        }
         try {
             const data = await getProfile();
-            setProfileData({ ...profileData, name: data.name, email: data.email });
+            setProfile({ id: data.id, name: data.name, email: data.email, isAdmin: data.isAdmin });
         } catch (error) {
             toast.error("Failed to load profile");
         } finally {
@@ -67,6 +80,8 @@ export function ProfilePage() {
     };
 
     const loadOrders = async () => {
+        if (!shouldFetchOrders()) return; // ORCHESTRATION: Satisfied by cache TTL
+
         setIsLoadingOrders(true);
         try {
             const data = await listMyOrders();
@@ -79,6 +94,8 @@ export function ProfilePage() {
     };
 
     const loadAddresses = async () => {
+        if (addressesLoaded) return; // ORCHESTRATION: Satisfied by store flag
+
         setIsLoadingAddresses(true);
         try {
             const data = await getAddresses();
@@ -94,10 +111,10 @@ export function ProfilePage() {
     const handleUpdateProfile = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const { name, password } = profileData;
-            await updateProfile({ name, password: password || undefined });
+            await updateProfile({ name: user?.name || '', password: password || undefined });
             toast.success("Profile updated successfully");
-            setProfileData(prev => ({ ...prev, password: '' }));
+            setPassword('');
+            invalidateProfile(); // Trigger refetch on next view if needed, or update store directly
         } catch (error) {
             toast.error("Failed to update profile");
         }
@@ -106,15 +123,13 @@ export function ProfilePage() {
     const handleAddAddress = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            // Note: service handles formatting
             await createAddressApi(newAddress);
             toast.success("Endereço adicionado!");
             setIsAddingAddress(false);
             setNewAddress({ street: '', city: '', state: '', zipCode: '', country: 'Brasil' });
+            invalidateAddresses(); // ORCHESTRATION: Clear cache to force refetch
             loadAddresses();
         } catch (error: any) {
-            console.error("Erro ao adicionar endereço:", error);
-            console.error("Payload enviado:", newAddress);
             toast.error(error.response?.data?.error || "Erro ao adicionar endereço");
         }
     };
@@ -123,7 +138,7 @@ export function ProfilePage() {
         try {
             await removeAddressApi(id);
             toast.success("Endereço removido");
-            setAddresses(addresses.filter(a => a.id !== id));
+            invalidateAddresses(); // ORCHESTRATION: Clear cache
         } catch (error) {
             toast.error("Erro ao remover endereço");
         }
@@ -148,11 +163,11 @@ export function ProfilePage() {
                     <div className="space-y-8">
                         <div className="flex items-center gap-4 pb-8 border-b border-border">
                             <div className="w-12 h-12 bg-primary text-primary-foreground flex items-center justify-center font-bold text-xl uppercase">
-                                {profileData.name.charAt(0) || "U"}
+                                {user?.name?.charAt(0) || "U"}
                             </div>
                             <div>
-                                <p className="font-bold text-lg leading-none">{profileData.name}</p>
-                                <p className="text-sm text-muted-foreground truncate max-w-[180px]">{profileData.email}</p>
+                                <p className="font-bold text-lg leading-none">{user?.name}</p>
+                                <p className="text-sm text-muted-foreground truncate max-w-[180px]">{user?.email}</p>
                             </div>
                         </div>
 
@@ -214,15 +229,15 @@ export function ProfilePage() {
                                         <div className="space-y-2">
                                             <label className="text-sm font-semibold">Full Name</label>
                                             <Input
-                                                value={profileData.name}
-                                                onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
+                                                value={user?.name || ''}
+                                                onChange={(e) => user && setProfile({ ...user, name: e.target.value })}
                                                 className="bg-background"
                                             />
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-sm font-semibold">Email Address</label>
                                             <Input
-                                                value={profileData.email}
+                                                value={user?.email || ''}
                                                 disabled
                                                 className="bg-secondary/50 text-muted-foreground cursor-not-allowed"
                                             />
@@ -232,8 +247,8 @@ export function ProfilePage() {
                                             <Input
                                                 type="password"
                                                 placeholder="Leave blank to keep current"
-                                                value={profileData.password}
-                                                onChange={(e) => setProfileData({ ...profileData, password: e.target.value })}
+                                                value={password}
+                                                onChange={(e) => setPassword(e.target.value)}
                                                 className="bg-background"
                                             />
                                         </div>
@@ -344,7 +359,7 @@ export function ProfilePage() {
                                                 <Package className="w-4 h-4" /> Itens do Pedido
                                             </h4>
                                             <div className="space-y-3">
-                                                {selectedOrder.items?.map((item, idx) => (
+                                                {selectedOrder.items?.map((item: any, idx: number) => (
                                                     <div key={idx} className="flex items-center gap-4 bg-secondary/20 p-3 rounded-lg">
 
                                                         <div className="flex-1">

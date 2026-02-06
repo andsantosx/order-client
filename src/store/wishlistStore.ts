@@ -12,18 +12,21 @@ export interface WishlistItem {
 
 interface WishlistStore {
   items: WishlistItem[];
+  wishlistLoaded: boolean;
   addItem: (item: WishlistItem) => void;
   removeItem: (id: string) => void;
   isInWishlist: (id: string) => boolean;
   setItems: (items: WishlistItem[]) => void;
   updateItem: (id: string, updates: Partial<WishlistItem>) => void;
   clearWishlist: () => void;
+  invalidateWishlist: () => void;
 }
 
 export const useWishlistStore = create<WishlistStore>()(
   persist(
     (set, get) => ({
       items: [],
+      wishlistLoaded: false,
       addItem: (item) =>
         set((state) => {
           const exists = state.items.find((i) => i.id === item.id);
@@ -38,12 +41,13 @@ export const useWishlistStore = create<WishlistStore>()(
         const state = get();
         return state.items.some((i) => i.id === id);
       },
-      setItems: (items: WishlistItem[]) => set({ items }),
+      setItems: (items: WishlistItem[]) => set({ items, wishlistLoaded: true }),
       updateItem: (id, updates) =>
         set((state) => ({
           items: state.items.map((i) => (i.id === id ? { ...i, ...updates } : i)),
         })),
-      clearWishlist: () => set({ items: [] }),
+      clearWishlist: () => set({ items: [], wishlistLoaded: false }),
+      invalidateWishlist: () => set({ wishlistLoaded: false }),
     }),
     {
       name: "wishlist-store",
