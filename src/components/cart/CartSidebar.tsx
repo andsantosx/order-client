@@ -23,7 +23,7 @@ export function CartSidebar() {
 
   return (
     <Sheet open={isCartOpen} onOpenChange={toggleCart}>
-      <SheetContent className="flex w-full flex-col pr-0 sm:max-w-lg">
+      <SheetContent className="flex w-full flex-col pr-0 sm:max-w-lg premium-sidebar animate-smooth-slide-in">
         <SheetHeader className="pr-6">
           <SheetTitle className="flex items-center justify-between">
             <span className="text-xl font-bold">Meu Carrinho ({items.length})</span>
@@ -31,7 +31,7 @@ export function CartSidebar() {
         </SheetHeader>
 
         {items.length === 0 ? (
-          <div className="flex h-full flex-col items-center justify-center space-y-4 pr-6">
+          <div className="flex h-full flex-col items-center justify-center space-y-4 pr-6 animate-in fade-in zoom-in duration-500">
             <div className="relative mb-4">
               <div className="absolute -inset-4 rounded-full bg-primary/5 blur-xl" />
               <ShoppingBag className="relative h-16 w-16 text-muted-foreground" />

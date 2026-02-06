@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { preloadComponent } from "@/lib/preload";
+import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -102,6 +103,17 @@ export function Header() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const [isCartPop, setIsCartPop] = useState(false);
+  const cartItemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+
+  useEffect(() => {
+    if (cartItemCount > 0) {
+      setIsCartPop(true);
+      const timer = setTimeout(() => setIsCartPop(false), 400);
+      return () => clearTimeout(timer);
+    }
+  }, [cartItemCount]);
 
   const showBackground = scrolled || isHovered || activeDropdown !== null;
 
@@ -234,13 +246,19 @@ export function Header() {
 
           <button
             type="button"
-            className="relative flex items-center justify-center text-foreground/60 hover:text-foreground transition-colors"
+            className={cn(
+              "relative flex items-center justify-center text-foreground/60 hover:text-foreground transition-all duration-300",
+              isCartPop && "animate-cart-pop"
+            )}
             onClick={toggleCart}
           >
             <ShoppingBag className="h-[18px] w-[18px]" strokeWidth={1.5} />
             {cartItems.length > 0 && (
-              <span className="absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-medium text-primary-foreground">
-                {cartItems.reduce((sum, item) => sum + item.quantity, 0)}
+              <span className={cn(
+                "absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-medium text-primary-foreground",
+                isCartPop && "animate-badge-pop"
+              )}>
+                {cartItemCount}
               </span>
             )}
           </button>
