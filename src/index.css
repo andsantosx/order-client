@@ -6,57 +6,69 @@
 
 @layer base {
   :root {
-    /* Order Payload - User Specified Palette */
-    /* Background: #F3EFE8 - Off-white / Beige */
-    --background: 40 20% 93%;
-
-    /* Main Text/Brand: #1F1E2A - "Roxo" / Identity */
-    --foreground: 245 17% 14%;
+    /* Order Payload - Theme #4F3D66 */
+    
+    /* Base HSL: 266, 25%, 32% (#4F3D66) */
+    
+    --background: 0 0% 100%;
+    --foreground: 266 25% 32%; /* #4F3D66 */
 
     --card: 0 0% 100%;
-    --card-foreground: 245 17% 14%;
-
-    /* Primary Buttons/Actions: #1F1E2A */
-    --primary: 245 17% 14%;
-    --primary-foreground: 40 20% 93%;
-
-    /* Secondary: #1F1E2A */
-    --secondary: 245 17% 14%;
-    --secondary-foreground: 40 20% 93%;
-
-    --muted: 40 10% 88%;
-    --muted-foreground: 240 10% 50%;
-
-    --accent: 240 10% 18%;
-    --accent-foreground: 40 20% 93%;
-
+    --card-foreground: 266 25% 32%;
+ 
+    --popover: 0 0% 100%;
+    --popover-foreground: 266 25% 32%;
+ 
+    --primary: 266 25% 32%; /* #4F3D66 */
+    --primary-foreground: 0 0% 100%;
+ 
+    --secondary: 266 25% 96%; /* primary-50 */
+    --secondary-foreground: 266 25% 32%;
+ 
+    --muted: 266 25% 96%; /* primary-50 */
+    --muted-foreground: 266 15% 46%; /* ~primary-500/600 */
+ 
+    --accent: 266 25% 96%; /* primary-50 */
+    --accent-foreground: 266 25% 32%;
+ 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 40 10% 85%;
-    --input: 40 10% 85%;
-    --ring: 245 17% 14%;
-
-    --radius: 0rem;
+    --border: 266 20% 85%; /* Tinted border */
+    --input: 266 20% 85%;
+    --ring: 266 25% 32%; /* #4F3D66 */
+ 
+    --radius: 0.5rem; /* Standardizing radius */
   }
-
+ 
   .dark {
-    --background: 0 0% 10%;
+    --background: 266 25% 10%; /* Very dark plum */
     --foreground: 0 0% 98%;
-    --card: 0 0% 15%;
+ 
+    --card: 266 25% 13%; 
     --card-foreground: 0 0% 98%;
-    --primary: 280 70% 60%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 25%;
+ 
+    --popover: 266 25% 13%;
+    --popover-foreground: 0 0% 98%;
+ 
+    --primary: 266 25% 60%; /* Lighter plum for dark mode contrast */
+    --primary-foreground: 0 0% 100%;
+ 
+    --secondary: 266 25% 20%; 
     --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 30%;
-    --muted-foreground: 0 0% 70%;
-    --accent: 280 70% 75%;
-    --accent-foreground: 0 0% 10%;
-    --destructive: 0 70% 65%;
+ 
+    --muted: 266 25% 20%;
+    --muted-foreground: 266 15% 65%;
+ 
+    --accent: 266 25% 20%;
+    --accent-foreground: 0 0% 98%;
+ 
+    --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 25%;
-    --input: 0 0% 20%;
+ 
+    --border: 266 25% 20%;
+    --input: 266 25% 20%;
+    --ring: 266 25% 60%;
   }
 
   * {

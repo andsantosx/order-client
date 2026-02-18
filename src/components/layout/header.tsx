@@ -253,7 +253,7 @@ export function Header() {
             onClick={toggleCart}
           >
             <ShoppingBag className="h-[18px] w-[18px]" strokeWidth={1.5} />
-            {cartItems.length > 0 && (
+            {cartItemCount > 0 && (
               <span className={cn(
                 "absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-medium text-primary-foreground",
                 isCartPop && "animate-badge-pop"

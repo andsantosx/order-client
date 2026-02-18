@@ -80,7 +80,7 @@ export function CartSidebar() {
                         <div className="flex items-center gap-1 rounded-lg border bg-background p-1 shadow-sm">
                           <button
                             onClick={() =>
-                              updateQuantity(item.id, Math.max(0, item.quantity - 1))
+                              updateQuantity(item.id, Math.max(1, item.quantity - 1))
                             }
                             className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                           >

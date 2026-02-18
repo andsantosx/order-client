@@ -149,7 +149,7 @@ export function AdminOverviewPage() {
 
                 <div className="p-6 bg-card border rounded-xl shadow-sm">
                     <div className="flex items-center gap-4">
-                        <div className="p-3 bg-purple-100 text-purple-700 rounded-lg">
+                        <div className="p-3 bg-primary/10 text-primary rounded-lg">
                             <Package className="w-6 h-6" />
                         </div>
                         <div>
