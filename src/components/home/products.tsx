@@ -178,8 +178,8 @@ export function Products() {
                     />
                   )}
 
-                  {/* Hover Actions */}
-                  <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-20">
+                  {/* Hover Actions - Hidden on Mobile */}
+                  <div className="hidden lg:block absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-20">
                     <Button
                       onClick={(e) => {
                         e.stopPropagation()

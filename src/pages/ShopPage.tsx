@@ -373,8 +373,8 @@ export function ShopPage() {
                         />
                       )}
 
-                      {/* Overlay / Quick Add Button */}
-                      <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-10">
+                      {/* Overlay / Quick Add Button - Hidden on Mobile */}
+                      <div className="hidden lg:block absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-10">
                         <Button
                           onClick={(e) => {
                             e.stopPropagation(); // Prevent navigation when clicking 'add'
