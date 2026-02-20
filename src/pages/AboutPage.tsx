@@ -41,7 +41,7 @@ export function AboutPage() {
 
           <div className="flex flex-col items-end mt-12 pt-8 border-t border-border/30">
             <p className="font-bold text-lg">Anderson Santos</p>
-            <p className="text-sm text-muted-foreground italic">Fundador & Estudante de Engenharia de Software</p>
+            <p className="text-sm text-muted-foreground italic">Fundador & Engenheiro de Software</p>
           </div>
         </article>
 

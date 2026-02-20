@@ -1,9 +1,11 @@
-import { SlidersHorizontal } from "lucide-react";
+import { SlidersHorizontal, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/cartStore";
 import toast from "react-hot-toast";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AddedToCartToast } from "@/components/cart/AddedToCartToast";
+import { QuickAddOverlay } from "@/components/shop/QuickAddOverlay";
 
 import { getAll as getAllProducts, type Product } from "@/services/product/getAll";
 import { getFilters } from "@/services/product/getFilters";
@@ -19,6 +21,7 @@ export function ShopPage() {
   const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [quickAddProductId, setQuickAddProductId] = useState<string | null>(null);
 
   // Initialize filters from URL
   const initialMinPrice = searchParams.get("minPrice") || "";
@@ -209,83 +212,60 @@ export function ShopPage() {
   return (
     <div className="min-h-screen bg-background pt-24 pb-24">
       <div className="mx-auto max-w-[1400px] px-6 lg:px-10">
-
-        {/* Page Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-          <div>
-            <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter text-foreground mb-4 leading-none">
-              Nossa<br />Coleção
-            </h1>
-            <p className="text-muted-foreground text-lg max-w-sm">
-              Explore nossa última coleção de peças essenciais premium.
-            </p>
-          </div>
-          <div className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
-            {products.length} Resultados
-          </div>
-        </div>
-
-        <div className="lg:grid lg:grid-cols-[280px_1fr] gap-12">
-
-          {/* Desktop Sidebar */}
-          <aside className="hidden lg:block">
-            <Suspense fallback={<Skeleton className="h-[600px] w-full rounded-lg" />}>
-              <FilterSidebar
-                minPrice={minPrice}
-                maxPrice={maxPrice}
-                setMinPrice={setMinPrice}
-                setMaxPrice={setMaxPrice}
-                applyPriceFilter={applyPriceFilter}
-                selectedSizes={selectedSizes}
-                setSelectedSizes={setSelectedSizes}
-                selectedCategories={selectedCategories}
-                setSelectedCategories={setSelectedCategories}
-                sortBy={sortBy}
-                setSortBy={setSortBy}
-                availableCategories={availableCategories}
-                availableBrands={availableBrands}
-                availableSizes={availableSizes}
-                selectedBrands={selectedBrands}
-                setSelectedBrands={setSelectedBrands}
-              />
-            </Suspense>
-          </aside>
-
-          {/* Mobile Filter Toggle */}
-          <div className="lg:hidden mb-8">
+        <div className="flex flex-col gap-8">
+          {/* Controls Bar */}
+          <div className="flex items-center justify-between border-b border-border pb-4 mb-2">
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="outline" className="w-full flex justify-between uppercase font-bold tracking-wider h-12">
-                  Filtrar & Ordenar
+                <button className="flex items-center gap-2 uppercase font-medium tracking-widest text-[13px] hover:text-primary transition-colors py-2">
                   <SlidersHorizontal className="w-4 h-4" />
-                </Button>
+                  Filtrar e Ordenar
+                </button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-[320px] sm:w-[380px] p-6">
-                <Suspense fallback={<Skeleton className="h-[500px] w-full" />}>
-                  <FilterSidebar
-                    minPrice={minPrice}
-                    maxPrice={maxPrice}
-                    setMinPrice={setMinPrice}
-                    setMaxPrice={setMaxPrice}
-                    applyPriceFilter={applyPriceFilter}
-                    selectedSizes={selectedSizes}
-                    setSelectedSizes={setSelectedSizes}
-                    selectedCategories={selectedCategories}
-                    setSelectedCategories={setSelectedCategories}
-                    sortBy={sortBy}
-                    setSortBy={setSortBy}
-                    availableCategories={availableCategories}
-                    availableBrands={availableBrands}
-                    availableSizes={availableSizes}
-                    selectedBrands={selectedBrands}
-                    setSelectedBrands={setSelectedBrands}
-                    className="mt-6"
-                  />
-                </Suspense>
-                <div className="mt-8 pt-4 border-t border-border">
-                  <Button className="w-full font-bold uppercase tracking-wider">
-                    Ver {products.length} Resultados
-                  </Button>
+              <SheetContent side="right" className="w-full sm:w-[380px] p-0 border-l border-border bg-background">
+                <div className="h-full flex flex-col">
+                  <div className="px-6 py-8 flex items-center justify-between border-b border-border">
+                    <h2 className="text-xl font-black uppercase tracking-tight leading-none text-foreground">
+                      FILTRAR E<br />ORDENAR
+                    </h2>
+                    <SheetClose className="opacity-80 transition-opacity hover:opacity-100 focus:outline-none">
+                        <X className="h-5 w-5" strokeWidth={1} />
+                        <span className="sr-only">Close</span>
+                    </SheetClose>
+                  </div>
+                  
+                  <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+                    <Suspense fallback={<Skeleton className="h-[500px] w-full" />}>
+                      <FilterSidebar
+                        minPrice={minPrice}
+                        maxPrice={maxPrice}
+                        setMinPrice={setMinPrice}
+                        setMaxPrice={setMaxPrice}
+                        applyPriceFilter={applyPriceFilter}
+                        selectedSizes={selectedSizes}
+                        setSelectedSizes={setSelectedSizes}
+                        selectedCategories={selectedCategories}
+                        setSelectedCategories={setSelectedCategories}
+                        sortBy={sortBy}
+                        setSortBy={setSortBy}
+                        availableCategories={availableCategories}
+                        availableBrands={availableBrands}
+                        availableSizes={availableSizes}
+                        selectedBrands={selectedBrands}
+                        setSelectedBrands={setSelectedBrands}
+                      />
+                    </Suspense>
+                  </div>
+
+                  <div className="p-8 border-t border-border">
+                    <SheetClose asChild>
+                      <Button 
+                        className="w-full h-10 bg-foreground text-background hover:bg-foreground/90 font-black uppercase tracking-[0.2em] text-[10px] rounded-none transition-all"
+                      >
+                        Ver {products.length} Resultados
+                      </Button>
+                    </SheetClose>
+                  </div>
                 </div>
               </SheetContent>
             </Sheet>
@@ -314,8 +294,8 @@ export function ShopPage() {
             </Suspense>
 
             {isLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-12 gap-x-8">
-                {[1, 2, 3, 4, 5, 6].map(i => (
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-12 gap-x-4 md:gap-x-8">
+                {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
                   <div key={i} className="space-y-4">
                     <Skeleton className="aspect-[3/4] w-full rounded-md" />
                     <Skeleton className="h-4 w-2/3 rounded-full" />
@@ -324,7 +304,7 @@ export function ShopPage() {
                 ))}
               </div>
             ) : products.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-12 gap-x-8">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-12 gap-x-4 md:gap-x-8">
                 {products.map((product) => (
                   <div
                     key={product.id}
@@ -356,22 +336,51 @@ export function ShopPage() {
                         </div>
                       )}
 
-                      {/* Overlay / Quick Add */}
-                      <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-10">
-                        <Button
-                          onClick={(e) => {
-                            e.stopPropagation(); // Prevent navigation when clicking 'add'
+                      {/* Quick Add Overlay */}
+                      {quickAddProductId === product.id && (
+                        <QuickAddOverlay 
+                          sizes={product.sizes || []}
+                          onClose={() => setQuickAddProductId(null)}
+                          onSelect={(sizeName) => {
                             addItem({
                               productId: product.id,
                               name: product.name,
                               price: product.price,
                               quantity: 1,
-                              size: "M", // Default size for quick add
+                              size: sizeName,
                               imageUrl: product.image,
                             });
-                            toast.success("Adicionado à sacola");
+                            
+                            setQuickAddProductId(null);
+                            
+                            toast.custom((t) => (
+                              <AddedToCartToast 
+                                t={t}
+                                product={{
+                                  name: product.name,
+                                  price: product.price,
+                                  imageUrl: product.image,
+                                  size: sizeName
+                                }}
+                                cartSummary={{
+                                  totalItems: useCartStore.getState().getItemCount(),
+                                  totalAmount: useCartStore.getState().getTotal()
+                                }}
+                                onViewCart={() => useCartStore.getState().toggleCart()}
+                              />
+                            ), { duration: 4000, position: 'top-right' });
                           }}
-                          className="w-full bg-white text-black hover:bg-white/90 font-bold uppercase tracking-wider rounded shadow-lg"
+                        />
+                      )}
+
+                      {/* Overlay / Quick Add Button */}
+                      <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-10">
+                        <Button
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent navigation when clicking 'add'
+                            setQuickAddProductId(product.id);
+                          }}
+                          className="w-full bg-white text-black hover:bg-white/90 font-black uppercase tracking-[0.2em] text-[10px] rounded-none shadow-lg h-10"
                         >
                           Adicionar Rápido +
                         </Button>
@@ -396,10 +405,13 @@ export function ShopPage() {
                 ))}
               </div>
             ) : (
-              <div className="py-24 text-center border rounded-xl border-dashed">
+              <div className="py-24 text-center border rounded-xl border-dashed flex flex-col items-center justify-center">
+                <div className="w-32 h-32 mb-6 opacity-20 grayscale">
+                  <img src="/no-product.png" alt="Nenhum produto" className="w-full h-full object-contain" />
+                </div>
                 <p className="text-xl font-medium text-muted-foreground mb-2">Nenhum produto encontrado.</p>
                 <p className="text-sm text-muted-foreground mb-6">Tente ajustar seus filtros de busca.</p>
-                <Button variant="outline" onClick={clearAllFilters}>
+                <Button variant="outline" onClick={clearAllFilters} className="rounded-none border-foreground/20 hover:border-foreground uppercase tracking-widest text-[10px] font-black h-12 px-8">
                   Limpar Todos os Filtros
                 </Button>
               </div>

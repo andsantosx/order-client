@@ -137,7 +137,7 @@ export function Footer() {
 
             <div className="flex flex-col items-center pt-6 border-t border-border/30 text-center gap-1">
               <p className="text-xs text-muted-foreground/80">
-                Site desenvolvido pensando na segurança e praticidade do usuário.
+                Site desenvolvido pensando em segurança e praticidade.
               </p>
               <p className="text-xs text-muted-foreground/80">
                 Criado por <a href="https://www.instagram.com/andsantosb?igsh=MWYxYXpoNHJoNzBseQ%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer" className="font-semibold hover:text-primary transition-colors">Anderson Santos</a> & <a href="https://www.instagram.com/lorenzosegotuzzo?igsh=bmV3ZmJvemFpMG9p" target="_blank" rel="noopener noreferrer" className="font-semibold hover:text-primary transition-colors">Lorenzo Severo</a>

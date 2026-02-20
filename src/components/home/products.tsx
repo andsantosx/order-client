@@ -9,12 +9,15 @@ import { useAuthStore } from "@/store/authStore"
 import { add as addToWishlistApi } from "@/services/wishlist/add"
 import { remove as removeFromWishlistApi } from "@/services/wishlist/remove"
 import toast from "react-hot-toast"
+import { AddedToCartToast } from "@/components/cart/AddedToCartToast"
+import { QuickAddOverlay } from "@/components/shop/QuickAddOverlay"
 import { AnimateOnScroll } from '@/hooks/useScrollAnimation';
 import { useProductStore } from "@/store/productStore";
 import { generateProductCacheKey } from "@/lib/cacheKey"
 
 export function Products() {
   const [products, setProducts] = useState<Product[]>([])
+  const [quickAddProductId, setQuickAddProductId] = useState<string | null>(null)
   const { addItem } = useCartStore()
   const { isInWishlist, addItem: addToWishlistStore, removeItem: removeFromWishlistStore, updateItem: updateWishlistStore, items: wishlistItems } = useWishlistStore()
   const { user } = useAuthStore()
@@ -106,7 +109,7 @@ export function Products() {
           </div>
         </AnimateOnScroll>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 md:gap-x-8 gap-y-10 md:gap-y-12">
           {products.map((product, index) => (
             <AnimateOnScroll key={product.id} animation="fade-up" delay={index * 100}>
               <div
@@ -138,22 +141,51 @@ export function Products() {
                     </div>
                   )}
 
-                  {/* Hover Actions */}
-                  <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-20">
-                    <Button
-                      onClick={(e) => {
-                        e.stopPropagation()
+                  {/* Size Selection Overlay */}
+                  {quickAddProductId === product.id && (
+                    <QuickAddOverlay 
+                      sizes={product.sizes || []}
+                      onClose={() => setQuickAddProductId(null)}
+                      onSelect={(sizeName) => {
                         addItem({
                           productId: product.id,
                           name: product.name,
                           price: product.price,
                           imageUrl: product.image,
                           quantity: 1,
-                          size: "M" // Default size for quick add
+                          size: sizeName
                         })
-                        toast.success("Adicionado à sacola")
+                        
+                        setQuickAddProductId(null)
+                        
+                        toast.custom((t) => (
+                          <AddedToCartToast 
+                            t={t}
+                            product={{
+                              name: product.name,
+                              price: product.price,
+                              imageUrl: product.image,
+                              size: sizeName
+                            }}
+                            cartSummary={{
+                              totalItems: useCartStore.getState().getItemCount(),
+                              totalAmount: useCartStore.getState().getTotal()
+                            }}
+                            onViewCart={() => useCartStore.getState().toggleCart()}
+                          />
+                        ), { duration: 4000, position: 'top-right' })
                       }}
-                      className="w-full h-12 bg-white text-black hover:bg-white/90 font-bold uppercase tracking-widest text-xs shadow-lg rounded-none"
+                    />
+                  )}
+
+                  {/* Hover Actions */}
+                  <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-20">
+                    <Button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setQuickAddProductId(product.id)
+                      }}
+                      className="w-full h-12 bg-white text-black hover:bg-white/90 font-black uppercase tracking-[0.2em] text-[10px] shadow-lg rounded-none transition-all"
                     >
                       <ShoppingBag className="mr-2 h-3 w-3" />
                       Adicionar Rápido
@@ -171,11 +203,11 @@ export function Products() {
 
                 {/* Product Info */}
                 <div className="space-y-1">
-                  <div className="flex justify-between items-start">
-                    <h3 className="font-[var(--font-display)] font-bold text-lg uppercase tracking-wide text-foreground group-hover:underline decoration-1 underline-offset-4">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1">
+                    <h3 className="font-[var(--font-display)] font-bold text-sm md:text-base uppercase tracking-wide text-foreground group-hover:underline decoration-1 underline-offset-4 line-clamp-1">
                       {product.name}
                     </h3>
-                    <span className="font-mono text-sm text-foreground">
+                    <span className="font-mono text-xs md:text-sm text-foreground">
                       {new Intl.NumberFormat("pt-BR", {
                         style: "currency",
                         currency: "BRL",

@@ -5,7 +5,7 @@ import { useEffect, Suspense, lazy } from "react"
 import { InteractiveLoader } from "@/components/ui/interactive-loader"
 
 const BrandNarrative = lazy(() => import("@/components/home/brand-narrative").then(m => ({ default: m.BrandNarrative })));
-const Featured = lazy(() => import("@/components/home/featured").then(m => ({ default: m.Featured })));
+const BrandShowcase = lazy(() => import("@/components/home/brand-showcase").then(m => ({ default: m.BrandShowcase })));
 const Products = lazy(() => import("@/components/home/products").then(m => ({ default: m.Products })));
 const PromoBanner = lazy(() => import("@/components/home/promo-banner").then(m => ({ default: m.PromoBanner })));
 const FooterLazy = lazy(() => import("@/components/layout/footer").then(m => ({ default: m.Footer })));
@@ -32,7 +32,7 @@ export function HomePage() {
       <Suspense fallback={<div className="min-h-[600px] flex items-center justify-center">
         <InteractiveLoader size="lg" variant="pulse" />
       </div>}>
-        <Featured />
+        <BrandShowcase />
       </Suspense>
 
       <Suspense fallback={<div className="min-h-[600px] flex items-center justify-center">

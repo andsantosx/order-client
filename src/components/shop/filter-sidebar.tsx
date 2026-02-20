@@ -1,11 +1,10 @@
-import { Minus, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface FilterSidebarProps {
     minPrice: string;
@@ -59,11 +58,11 @@ export function FilterSidebar({
     className
 }: FilterSidebarProps) {
     const [openSections, setOpenSections] = useState({
-        price: true,
-        size: true,
-        category: true,
-        brand: true,
-        sort: true
+        price: false,
+        size: false,
+        category: false,
+        brand: false,
+        sort: false
     });
 
     const toggleSection = (section: keyof typeof openSections) => {
@@ -102,9 +101,12 @@ export function FilterSidebar({
                 isOpen={openSections.price}
                 onToggle={() => toggleSection('price')}
             >
-                <div className="space-y-6 pt-4">
+                <div className="space-y-3 pt-1">
                     <Slider
-                        defaultValue={[0, 1000]}
+                        value={[
+                            minPrice === "" ? 0 : Number(minPrice),
+                            maxPrice === "" ? 1000 : Number(maxPrice)
+                        ]}
                         max={1000}
                         step={10}
                         onValueChange={(vals) => {
@@ -114,10 +116,10 @@ export function FilterSidebar({
                         onValueCommit={applyPriceFilter}
                         className="py-4"
                     />
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
                         <div className="flex-1">
-                            <div className="flex items-center justify-center rounded-md border border-border bg-secondary/20 h-10 px-3">
-                                <span className="text-sm text-muted-foreground font-medium mr-1">R$</span>
+                            <div className="flex items-center justify-center rounded-sm border border-border bg-secondary/10 h-7 px-1.5">
+                                <span className="text-[8px] text-muted-foreground font-medium mr-0.5">R$</span>
                                 <Input
                                     type="number"
                                     min="0"
@@ -129,16 +131,16 @@ export function FilterSidebar({
                                     }}
                                     onKeyDown={(e) => e.key === "Enter" && applyPriceFilter()}
                                     onBlur={applyPriceFilter}
-                                    className="w-14 min-w-0 bg-transparent border-none h-auto p-0 shadow-none focus-visible:ring-0 text-left placeholder:text-muted-foreground/50"
+                                    className="w-10 min-w-0 bg-transparent border-none h-6 p-0 shadow-none focus-visible:ring-0 text-[9px] text-left placeholder:text-muted-foreground/50"
                                     // Remove arrows from input
                                     style={{ MozAppearance: 'textfield' }}
                                 />
                             </div>
                         </div>
-                        <span className="text-muted-foreground">—</span>
+                        <span className="text-muted-foreground text-[8px]">—</span>
                         <div className="flex-1">
-                            <div className="flex items-center justify-center rounded-md border border-border bg-secondary/20 h-10 px-3">
-                                <span className="text-sm text-muted-foreground font-medium mr-1">R$</span>
+                            <div className="flex items-center justify-center rounded-sm border border-border bg-secondary/10 h-7 px-1.5">
+                                <span className="text-[8px] text-muted-foreground font-medium mr-0.5">R$</span>
                                 <Input
                                     type="number"
                                     min="0"
@@ -150,7 +152,7 @@ export function FilterSidebar({
                                     }}
                                     onKeyDown={(e) => e.key === "Enter" && applyPriceFilter()}
                                     onBlur={applyPriceFilter}
-                                    className="w-14 min-w-0 bg-transparent border-none h-auto p-0 shadow-none focus-visible:ring-0 text-left placeholder:text-muted-foreground/50"
+                                    className="w-10 min-w-0 bg-transparent border-none h-6 p-0 shadow-none focus-visible:ring-0 text-[9px] text-left placeholder:text-muted-foreground/50"
                                 />
                             </div>
                         </div>
@@ -163,14 +165,14 @@ export function FilterSidebar({
                 isOpen={openSections.size}
                 onToggle={() => toggleSection('size')}
             >
-                <div className="grid grid-cols-3 gap-2 pt-4">
+                <div className="grid grid-cols-5 gap-1.5 pt-1">
                     {availableSizes.length > 0 ? availableSizes.map((size) => (
                         <Button
                             key={size}
                             variant={selectedSizes.includes(size) ? "default" : "outline"}
                             size="sm"
                             onClick={() => toggleSize(size)}
-                            className="w-full"
+                            className="w-full text-[9px] h-7 px-0"
                         >
                             {size}
                         </Button>
@@ -185,7 +187,7 @@ export function FilterSidebar({
                 isOpen={openSections.category}
                 onToggle={() => toggleSection('category')}
             >
-                <div className="space-y-3 pt-4">
+                <div className="space-y-1.5 pt-1">
                     {availableCategories.length > 0 ? availableCategories.map((category) => (
                         <div key={category.slug} className="flex items-center space-x-2">
                             <Checkbox
@@ -195,7 +197,7 @@ export function FilterSidebar({
                             />
                             <label
                                 htmlFor={`cat-${category.slug}`}
-                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                                className="text-[10px] font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                             >
                                 {category.name}
                             </label>
@@ -211,7 +213,7 @@ export function FilterSidebar({
                 isOpen={openSections.brand}
                 onToggle={() => toggleSection('brand')}
             >
-                <div className="space-y-3 pt-4">
+                <div className="space-y-1.5 pt-1">
                     {availableBrands && availableBrands.length > 0 ? availableBrands.map((brand) => (
                         <div key={brand.slug} className="flex items-center space-x-2">
                             <Checkbox
@@ -221,7 +223,7 @@ export function FilterSidebar({
                             />
                             <label
                                 htmlFor={`brand-${brand.slug}`}
-                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                                className="text-[10px] font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                             >
                                 {brand.name}
                             </label>
@@ -237,17 +239,20 @@ export function FilterSidebar({
                 isOpen={openSections.sort}
                 onToggle={() => toggleSection('sort')}
             >
-                <div className="space-y-2 pt-4">
-                    <RadioGroup value={sortBy} onValueChange={setSortBy}>
-                        {SORT_OPTIONS.map((option) => (
-                            <div key={option.value} className="flex items-center space-x-2">
-                                <RadioGroupItem value={option.value} id={`sort-${option.value}`} />
-                                <label htmlFor={`sort-${option.value}`} className="text-sm font-medium cursor-pointer">
-                                    {option.label}
-                                </label>
-                            </div>
-                        ))}
-                    </RadioGroup>
+                <div className="space-y-2 pt-1">
+                    {SORT_OPTIONS.map((option) => (
+                        <button
+                            key={option.value}
+                            onClick={() => setSortBy(option.value)}
+                            className={cn(
+                                "flex items-center justify-between w-full py-1.5 text-[10px] font-bold uppercase tracking-widest transition-colors",
+                                sortBy === option.value ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                            )}
+                        >
+                            {option.label}
+                            {sortBy === option.value && <div className="w-1 h-1 bg-foreground rounded-full" />}
+                        </button>
+                    ))}
                 </div>
             </CollapsibleSection>
         </div>
@@ -267,26 +272,22 @@ function CollapsibleSection({
     children: React.ReactNode;
 }) {
     return (
-        <div className="border-b border-border/50 pb-6 last:border-0 last:pb-0">
+        <div className="border-b border-border/50">
             <button
                 onClick={onToggle}
-                className="flex items-center justify-between w-full text-sm font-bold uppercase tracking-wider hover:text-primary transition-colors group"
+                className="flex items-center justify-between w-full py-2.5 text-[9px] font-bold uppercase tracking-[0.25em] hover:text-primary transition-colors group"
             >
                 {title}
-                <div className="relative w-4 h-4 flex items-center justify-center">
-                    {/* Animated Plus/Minus using rotation */}
-                    <Plus className={cn("w-4 h-4 absolute transition-all duration-300 ease-in-out", isOpen ? "rotate-90 opacity-0 scale-50" : "rotate-0 opacity-100 scale-100")} />
-                    <Minus className={cn("w-4 h-4 absolute transition-all duration-300 ease-in-out", isOpen ? "rotate-0 opacity-100 scale-100" : "-rotate-90 opacity-0 scale-50")} />
-                </div>
+                <Plus className={cn("w-4 h-4 transition-transform duration-300", isOpen && "rotate-45")} />
             </button>
 
             <div
                 className={cn(
-                    "grid transition-all duration-500 ease-in-out",
-                    isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                    "grid transition-all duration-500 ease-in-out overflow-hidden",
+                    isOpen ? "grid-rows-[1fr] opacity-100 mb-3" : "grid-rows-[0fr] opacity-0"
                 )}
             >
-                <div className="overflow-hidden">
+                <div className="min-h-0">
                     {children}
                 </div>
             </div>

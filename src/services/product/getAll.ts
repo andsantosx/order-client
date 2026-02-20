@@ -7,6 +7,7 @@ export interface Product {
     image?: string;
     images?: string[];
     category?: string;
+    sizes?: { id: string; name: string }[];
 }
 
 export interface ProductResponse {
@@ -62,7 +63,8 @@ export const getAll = async (params: ProductQueryParams = {}): Promise<Product[]
         price: (item.price_cents || 0) / 100, // Convert cents to float, safe fallback
         image: item.images?.[0]?.url,
         images: item.images?.map(img => img.url),
-        category: item.category?.name
+        category: item.category?.name,
+        sizes: item.sizes?.map(s => ({ id: s.size.id.toString(), name: s.size.name }))
     }));
 };
 

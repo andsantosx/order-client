@@ -46,12 +46,12 @@ export function ActiveFilters({
 
             {/* Sizes */}
             {selectedSizes.map(size => (
-                <Badge key={`size-${size}`} variant="secondary" className="gap-1 pl-2 pr-1 py-1">
-                    Tamanho: {size}
+                <Badge key={`size-${size}`} variant="outline" className="gap-1 pl-3 pr-1 py-1.5 border-border rounded-none text-[10px] font-black uppercase tracking-widest bg-secondary/30">
+                    Tam: {size}
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-4 w-4 ml-1 hover:bg-transparent"
+                        className="h-4 w-4 ml-1 hover:bg-transparent hover:text-primary transition-colors"
                         onClick={() => setSelectedSizes(selectedSizes.filter(s => s !== size))}
                     >
                         <X className="h-3 w-3" />
@@ -61,12 +61,12 @@ export function ActiveFilters({
 
             {/* Categories */}
             {selectedCategories.map(cat => (
-                <Badge key={`cat-${cat}`} variant="secondary" className="gap-1 pl-2 pr-1 py-1 capitalize">
+                <Badge key={`cat-${cat}`} variant="outline" className="gap-1 pl-3 pr-1 py-1.5 border-border rounded-none text-[10px] font-black uppercase tracking-widest bg-secondary/30">
                     {cat}
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-4 w-4 ml-1 hover:bg-transparent"
+                        className="h-4 w-4 ml-1 hover:bg-transparent hover:text-primary transition-colors"
                         onClick={() => setSelectedCategories(selectedCategories.filter(c => c !== cat))}
                     >
                         <X className="h-3 w-3" />
@@ -76,12 +76,12 @@ export function ActiveFilters({
 
             {/* Brands */}
             {selectedBrands && selectedBrands.map(brand => (
-                <Badge key={`brand-${brand}`} variant="secondary" className="gap-1 pl-2 pr-1 py-1 capitalize">
+                <Badge key={`brand-${brand}`} variant="outline" className="gap-1 pl-3 pr-1 py-1.5 border-border rounded-none text-[10px] font-black uppercase tracking-widest bg-secondary/30">
                     {brand}
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-4 w-4 ml-1 hover:bg-transparent"
+                        className="h-4 w-4 ml-1 hover:bg-transparent hover:text-primary transition-colors"
                         onClick={() => setSelectedBrands?.(selectedBrands.filter(b => b !== brand))}
                     >
                         <X className="h-3 w-3" />
@@ -91,18 +91,17 @@ export function ActiveFilters({
 
             {/* Price */}
             {(minPrice !== undefined || maxPrice !== undefined) && (
-                <Badge variant="secondary" className="gap-1 pl-2 pr-1 py-1">
-                    Preço: {minPrice ? `R$ ${minPrice}` : 'R$ 0'} - {maxPrice ? `R$ ${maxPrice}` : '...'}
+                <Badge variant="outline" className="gap-1 pl-3 pr-1 py-1.5 border-border rounded-none text-[10px] font-black uppercase tracking-widest bg-secondary/30">
+                    R$ {minPrice || 0} — R$ {maxPrice || '...'}
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-4 w-4 ml-1 hover:bg-transparent"
+                        className="h-4 w-4 ml-1 hover:bg-transparent hover:text-primary transition-colors"
                         onClick={() => {
                             setMinPrice("");
                             setMaxPrice("");
                             setActiveMinPrice(undefined);
                             setActiveMaxPrice(undefined);
-                            if (setSelectedBrands) setSelectedBrands([]);
                         }}
                     >
                         <X className="h-3 w-3" />
@@ -112,12 +111,12 @@ export function ActiveFilters({
 
             {/* Search Query */}
             {searchQuery && (
-                <Badge variant="secondary" className="gap-1 pl-2 pr-1 py-1">
-                    Busca: {searchQuery}
+                <Badge variant="outline" className="gap-1 pl-3 pr-1 py-1.5 border-border rounded-none text-[10px] font-black uppercase tracking-widest bg-secondary/30">
+                    "{searchQuery}"
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-4 w-4 ml-1 hover:bg-transparent"
+                        className="h-4 w-4 ml-1 hover:bg-transparent hover:text-primary transition-colors"
                         onClick={() => setSearchQuery?.("")}
                     >
                         <X className="h-3 w-3" />
@@ -125,8 +124,8 @@ export function ActiveFilters({
                 </Badge>
             )}
 
-            <Button variant="link" size="sm" onClick={clearAll} className="text-muted-foreground hover:text-foreground h-auto p-0 ml-2">
-                Limpar todos
+            <Button variant="link" size="sm" onClick={clearAll} className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary h-auto p-0 ml-4">
+                Limpar Tudo
             </Button>
         </div>
     );

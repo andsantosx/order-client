@@ -1,10 +1,11 @@
-import { ShoppingBag, Minus, Plus, Trash2 } from "lucide-react";
+import { X, ShoppingBag, Minus, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
+  SheetClose,
 } from "@/components/ui/sheet";
 import { useCartStore } from "@/store/cartStore";
 import { useNavigate } from "react-router-dom";
@@ -23,22 +24,28 @@ export function CartSidebar() {
 
   return (
     <Sheet open={isCartOpen} onOpenChange={toggleCart}>
-      <SheetContent className="flex w-full flex-col pr-0 sm:max-w-lg premium-sidebar animate-smooth-slide-in">
-        <SheetHeader className="pr-6">
-          <SheetTitle className="flex items-center justify-between">
-            <span className="text-xl font-bold">Meu Carrinho ({items.length})</span>
-          </SheetTitle>
+      <SheetContent className="flex w-full flex-col p-6 sm:max-w-lg premium-sidebar animate-smooth-slide-in">
+        <SheetHeader className="p-0 mb-6">
+          <div className="flex items-center justify-between">
+            <SheetTitle className="text-xl font-bold">
+              Meu Carrinho ({items.length})
+            </SheetTitle>
+            <SheetClose className="opacity-70 transition-opacity hover:opacity-100 focus:outline-none">
+              <X className="h-5 w-5" strokeWidth={1.5} />
+              <span className="sr-only">Fechar</span>
+            </SheetClose>
+          </div>
         </SheetHeader>
 
         {items.length === 0 ? (
-          <div className="flex h-full flex-col items-center justify-center space-y-4 pr-6 animate-in fade-in zoom-in duration-500">
+          <div className="flex-1 flex flex-col items-center justify-center space-y-4 animate-in fade-in zoom-in duration-500">
             <div className="relative mb-4">
               <div className="absolute -inset-4 rounded-full bg-primary/5 blur-xl" />
-              <ShoppingBag className="relative h-16 w-16 text-muted-foreground" />
+              <ShoppingBag className="relative h-12 w-12 text-muted-foreground/50" />
             </div>
-            <p className="text-xl font-medium">Seu carrinho está vazio</p>
-            <p className="text-muted-foreground">
-              Que tal dar uma olhada em nossos produtos?
+            <p className="text-lg font-bold uppercase tracking-tight">Seu carrinho está vazio</p>
+            <p className="text-[11px] text-muted-foreground uppercase tracking-widest text-center px-4">
+              Navegue pela nossa curadoria e encontre sua próxima peça.
             </p>
             <Button
               onClick={closeCart}
@@ -56,6 +63,20 @@ export function CartSidebar() {
                     key={`${item.id}`}
                     className="flex gap-4 rounded-xl border bg-card p-4 shadow-sm transition-all hover:shadow-md"
                   >
+                    {/* Product Image */}
+                    <div className="h-20 w-16 shrink-0 overflow-hidden bg-secondary">
+                      {item.imageUrl ? (
+                        <img
+                          src={item.imageUrl}
+                          alt={item.name}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-[10px] text-muted-foreground uppercase">
+                          ORDER
+                        </div>
+                      )}
+                    </div>
                     <div className="flex flex-1 flex-col justify-between">
                       <div className="space-y-1">
                         <div className="flex justify-between items-start gap-2">
@@ -111,27 +132,38 @@ export function CartSidebar() {
               </ul>
             </div>
 
-            <div className="space-y-4 border-t bg-background p-6 pr-6 shadow-[0_-4px_16px_rgba(0,0,0,0.05)]">
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between border-t py-4 text-base font-bold">
-                  <span>Total</span>
-                  <span>
+            <div className="space-y-6 border-t bg-background p-6 pr-6 shadow-[0_-4px_16px_rgba(0,0,0,0.05)]">
+              {/* Shipping Info */}
+              <div className="space-y-3 pb-2">
+                <div className="flex items-center gap-2 text-[10px] text-foreground font-black uppercase tracking-widest">
+                  <div className="w-1 h-1 bg-foreground rounded-full" />
+                  Frete Grátis para todo o Brasil
+                </div>
+                <p className="text-[10px] text-muted-foreground leading-relaxed italic">
+                  "Excelência em cada detalhe, da curadoria à sua porta."
+                </p>
+              </div>
+
+              <div className="space-y-4 pt-4 border-t border-border">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs uppercase font-medium text-muted-foreground">Subtotal</span>
+                  <span className="text-sm font-bold">
                     {new Intl.NumberFormat("pt-BR", {
                       style: "currency",
                       currency: "BRL",
                     }).format(getTotal())}
                   </span>
                 </div>
+                <Button
+                  className="w-full h-12 bg-foreground text-background hover:bg-foreground/90 font-black uppercase tracking-[0.2em] text-[11px] rounded-none transition-all"
+                  onClick={() => {
+                    closeCart();
+                    navigate("/checkout");
+                  }}
+                >
+                  Iniciar Compra
+                </Button>
               </div>
-              <Button
-                className="w-full h-12 rounded-full text-base font-bold shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.98]"
-                onClick={() => {
-                  closeCart();
-                  navigate("/checkout");
-                }}
-              >
-                Finalizar Compra
-              </Button>
             </div>
           </>
         )}

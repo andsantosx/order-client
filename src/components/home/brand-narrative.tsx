@@ -91,7 +91,7 @@ function AnimatedSubtitle() {
 }
 
 export function BrandNarrative() {
-    const narrativeText = "Valorizamos a simplicidade e o design atemporal. Cada peça une qualidade, funcionalidade e estilo.";
+    const narrativeText = "Simples. Autêntico. Atemporal.";
 
     return (
         <section className="py-24 lg:py-32 bg-background border-t border-border">
@@ -109,8 +109,9 @@ export function BrandNarrative() {
                     <div className="space-y-8">
                         <Typewriter
                             text={narrativeText}
-                            speed={20}
-                            className="text-2xl md:text-4xl font-light leading-tight text-foreground/90"
+                            speed={80}
+                            delay={600}
+                            className="text-2xl md:text-4xl font-light leading-tight text-foreground/90 font-serif italic"
                         />
                     </div>
 

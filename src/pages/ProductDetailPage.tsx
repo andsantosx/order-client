@@ -11,6 +11,7 @@ import { remove as removeFromWishlist } from "@/services/wishlist/remove";
 import toast from "react-hot-toast";
 import type { Product } from "@/services/product/getById";
 import { getById as getProductById } from "@/services/product/getById";
+import { AddedToCartToast } from "@/components/cart/AddedToCartToast";
 
 export function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -164,16 +165,37 @@ export function ProductDetailPage() {
     }
 
     const sizeObj = product.sizes.find(s => s.id === selectedSize);
+    const sizeName = sizeObj ? sizeObj.name : "N/A";
 
     addItem({
       productId: product.id,
       name: product.name,
       price: product.price,
       quantity: 1,
-      size: sizeObj ? sizeObj.name : "N/A",
+      size: sizeName,
       imageUrl: product.images[0]?.url,
     });
-    toast.success("Adicionado à sacola");
+
+    // Custom Toast
+    const totalItems = useCartStore.getState().getItemCount();
+    const totalAmount = useCartStore.getState().getTotal();
+
+    toast.custom((t) => (
+      <AddedToCartToast 
+        t={t}
+        product={{
+          name: product.name,
+          price: product.price,
+          imageUrl: product.images[0]?.url,
+          size: sizeName
+        }}
+        cartSummary={{
+          totalItems,
+          totalAmount
+        }}
+        onViewCart={() => useCartStore.getState().toggleCart()}
+      />
+    ), { duration: 4000, position: 'top-right' });
   };
 
   const handleToggleWishlist = async () => {
@@ -392,9 +414,19 @@ export function ProductDetailPage() {
                   <ChevronDown className={`w-4 h-4 transition-transform ${openSections.payment ? 'rotate-180' : ''}`} />
                 </button>
                 {openSections.payment && (
-                  <div className="pb-4 text-sm text-muted-foreground leading-relaxed">
-                    <p>Aceitamos cartões de crédito (Visa, Mastercard, Elo, Amex) em até 6x sem juros.</p>
-                    <p>Pagamento via PIX com 5% de desconto.</p>
+                  <div className="pb-4 text-[11px] text-muted-foreground leading-relaxed space-y-4">
+                    <div className="space-y-2">
+                       <p className="text-foreground font-black uppercase tracking-widest text-[10px]">Cartão de Crédito</p>
+                       <p>Visa, Mastercard, Amex, Elo e Hipercard. Parcelamento em até 12x.</p>
+                    </div>
+                    <div className="space-y-2">
+                       <p className="text-foreground font-black uppercase tracking-widest text-[10px]">Pix</p>
+                       <p>Aprovação instantânea. O processamento do seu pedido é iniciado imediatamente.</p>
+                    </div>
+                    <div className="pt-2 flex items-center gap-2 text-foreground/40">
+                      <div className="w-1 h-1 bg-foreground/40 rounded-full" />
+                      <span className="text-[9px] font-black uppercase tracking-[0.2em]">Transação 100% Segura</span>
+                    </div>
                   </div>
                 )}
               </div>
@@ -412,9 +444,14 @@ export function ProductDetailPage() {
                   <ChevronDown className={`w-4 h-4 transition-transform ${openSections.shipping ? 'rotate-180' : ''}`} />
                 </button>
                 {openSections.shipping && (
-                  <div className="pb-4 text-sm text-muted-foreground leading-relaxed">
-                    <p>Enviamos para todo o Brasil via Correios (SEDEX e PAC) e Jadlog.</p>
-                    <p>Frete grátis para compras acima de R$ 499,00.</p>
+                  <div className="pb-6 text-[11px] text-muted-foreground leading-relaxed space-y-4">
+                    <div className="flex items-center gap-2 text-foreground font-black">
+                      <div className="w-1.5 h-1.5 bg-foreground rounded-full" />
+                      FRETE GRÁTIS PARA TODO O BRASIL
+                    </div>
+                    <p className="italic">
+                      "Na ORDER, cada pedido é tratado como uma obra de arte. Nossa curadoria garante excelência desde a seleção de cada peça até a logística impecável na entrega às suas mãos."
+                    </p>
                   </div>
                 )}
               </div>
