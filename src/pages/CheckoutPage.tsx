@@ -60,10 +60,17 @@ export function CheckoutPage() {
 
   // Init Mercado Pago
   useEffect(() => {
-    if (window.MercadoPago) {
-      setMp(new window.MercadoPago(import.meta.env.VITE_MERCADOPAGO_PUBLIC_KEY, {
-        locale: "pt-BR",
-      }));
+    const publicKey = import.meta.env.VITE_MERCADOPAGO_PUBLIC_KEY;
+    if (window.MercadoPago && publicKey) {
+      try {
+        setMp(new window.MercadoPago(publicKey, {
+          locale: "pt-BR",
+        }));
+      } catch (error) {
+        console.error("Failed to initialize MercadoPago:", error);
+      }
+    } else if (!publicKey) {
+      console.warn("MercadoPago Public Key is missing in .env");
     }
   }, []);
 
