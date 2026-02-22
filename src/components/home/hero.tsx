@@ -1,4 +1,18 @@
+import { useEffect, useRef } from 'react'
+
 export function Hero() {
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  useEffect(() => {
+    // Tenta forçar o autoplay nativamente, que muitas vezes o iOS bloqueia
+    // se for apenas via atributo, dependendo do modo de economia de energia.
+    if (videoRef.current) {
+      videoRef.current.play().catch((error) => {
+        console.log("Autoplay preventted:", error)
+      })
+    }
+  }, [])
+
   return (
     <section className="relative w-full bg-background">
       {/* Main Hero Container */}
@@ -11,21 +25,15 @@ export function Hero() {
           className="hidden md:block absolute inset-0 w-full h-full object-cover object-top"
         />
         {/* Background Video - Mobile */}
-        <div
-          className="block md:hidden absolute inset-0 w-full h-full pointer-events-none"
-          dangerouslySetInnerHTML={{
-            __html: `
-              <video
-                src="/home-mobile.mp4"
-                poster="/home-mobile-poster.jpg"
-                autoplay
-                loop
-                muted
-                playsinline
-                class="w-full h-full object-cover object-top"
-              ></video>
-            `
-          }}
+        <video
+          ref={videoRef}
+          src="/home-mobile.mp4"
+          poster="/home-mobile-poster.jpg"
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="block md:hidden absolute inset-0 w-full h-full object-cover object-top"
         />
 
         {/* Overlay muito sutil */}
