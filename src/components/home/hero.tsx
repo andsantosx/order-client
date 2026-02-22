@@ -4,9 +4,10 @@ export function Hero() {
   const videoRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
-    // Tenta forçar o autoplay nativamente, que muitas vezes o iOS bloqueia
-    // se for apenas via atributo, dependendo do modo de economia de energia.
+    // Força configurações adicionais para driblar o Battery Saver do iOS
     if (videoRef.current) {
+      videoRef.current.defaultMuted = true;
+      videoRef.current.muted = true;
       videoRef.current.play().catch((error) => {
         console.log("Autoplay preventted:", error)
       })
@@ -33,6 +34,10 @@ export function Hero() {
           loop
           muted
           playsInline
+          disablePictureInPicture
+          onCanPlay={(e) => {
+            e.currentTarget.play().catch(() => { });
+          }}
           className="block md:hidden absolute inset-0 w-full h-full object-cover object-top"
         />
 

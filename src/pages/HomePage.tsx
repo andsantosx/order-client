@@ -29,15 +29,15 @@ export function HomePage() {
       </Suspense>
 
       <Suspense fallback={<div className="min-h-[600px] flex items-center justify-center">
-        <InteractiveLoader size="lg" variant="pulse" />
-      </div>}>
-        <BrandShowcase />
-      </Suspense>
-
-      <Suspense fallback={<div className="min-h-[600px] flex items-center justify-center">
         <InteractiveLoader size="lg" variant="dots" />
       </div>}>
         <Products />
+      </Suspense>
+
+      <Suspense fallback={<div className="min-h-[600px] flex items-center justify-center">
+        <InteractiveLoader size="lg" variant="pulse" />
+      </div>}>
+        <BrandShowcase />
       </Suspense>
 
       <Suspense fallback={<div className="h-64 bg-secondary/10 flex items-center justify-center">

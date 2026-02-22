@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { Typewriter } from '@/components/ui/typewriter';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
@@ -53,42 +53,7 @@ function AnimatedTitle() {
     );
 }
 
-// Animação do texto "Est. 2024" que aparece caractere por caractere
-function AnimatedSubtitle() {
-    const { ref, isVisible } = useScrollAnimation({ threshold: 0.3 });
-    const text = "Est. 2024 — Criciúma, SC";
-    const [displayedText, setDisplayedText] = useState('');
-    const hasStartedRef = useRef(false);
 
-    useEffect(() => {
-        if (!isVisible || hasStartedRef.current) return;
-        hasStartedRef.current = true;
-
-        // Delay inicial para sincronizar com outras animações
-        setTimeout(() => {
-            let currentIndex = 0;
-            const intervalId = setInterval(() => {
-                if (currentIndex < text.length) {
-                    setDisplayedText(text.slice(0, currentIndex + 1));
-                    currentIndex++;
-                } else {
-                    clearInterval(intervalId);
-                }
-            }, 40);
-
-            return () => clearInterval(intervalId);
-        }, 900);
-    }, [isVisible]);
-
-    return (
-        <p ref={ref} className="text-sm font-mono text-muted-foreground uppercase tracking-widest h-5">
-            {displayedText}
-            {displayedText.length < text.length && displayedText.length > 0 && (
-                <span className="inline-block w-[2px] h-[0.9em] bg-muted-foreground/50 ml-[1px] animate-pulse" />
-            )}
-        </p>
-    );
-}
 
 export function BrandNarrative() {
     const narrativeText = "Simples. Autêntico. Atemporal.";
@@ -102,7 +67,6 @@ export function BrandNarrative() {
                     <div className="space-y-6">
                         <AnimatedLine />
                         <AnimatedTitle />
-                        <AnimatedSubtitle />
                     </div>
 
                     {/* Lado direito com Typewriter */}
