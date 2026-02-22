@@ -4,13 +4,32 @@ export function Hero() {
   const videoRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
-    // Força configurações adicionais para driblar o Battery Saver do iOS
-    if (videoRef.current) {
-      videoRef.current.defaultMuted = true;
-      videoRef.current.muted = true;
-      videoRef.current.play().catch((error) => {
-        console.log("Autoplay preventted:", error)
-      })
+    // Busca a tag de vídeo inserida via innerHTML para forçar autoplay no iOS
+    const divElement = videoRef.current as unknown as HTMLDivElement;
+    if (divElement) {
+      const videoEl = divElement.querySelector('video');
+      if (videoEl) {
+        // iOS Safari workaround: mute explicitly before play
+        videoEl.muted = true;
+        videoEl.play().catch((error) => {
+          console.log("Autoplay prevented (likely Low Power Mode):", error)
+
+          // Fallback supremo: Tentar rodar o vídeo na primeira interação do usuário na tela
+          const playOnInteract = () => {
+            videoEl.play().then(() => {
+              // Se conseguiu tocar, removemos os listeners
+              window.removeEventListener('touchstart', playOnInteract);
+              window.removeEventListener('scroll', playOnInteract);
+              window.removeEventListener('click', playOnInteract);
+            }).catch(() => { });
+          };
+
+          // Adiciona os listeners de interação
+          window.addEventListener('touchstart', playOnInteract, { once: true });
+          window.addEventListener('scroll', playOnInteract, { once: true });
+          window.addEventListener('click', playOnInteract, { once: true });
+        })
+      }
     }
   }, [])
 
