@@ -31,7 +31,7 @@ export function ProductCarousel() {
     }, [getCachedProducts, setCachedProducts])
 
     return (
-        <section className="py-12 bg-background border-t border-border">
+        <section className="py-12 bg-background">
             <div className="mx-auto max-w-[1400px] px-6 lg:px-10">
                 {/* Carousel de miniaturas circulares */}
                 <div className="flex items-center justify-center gap-6 overflow-x-auto pb-4">

@@ -22,7 +22,7 @@ export function Footer() {
   }
 
   return (
-    <footer className="bg-card border-t border-border">
+    <footer className="bg-card">
       <div className="mx-auto max-w-[1400px] px-6 lg:px-10 py-16 lg:py-20">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-10 lg:gap-16">
           {/* Brand */}
@@ -122,7 +122,7 @@ export function Footer() {
         </div>
 
         {/* Bottom */}
-        <div className="mt-16 pt-8 border-t border-border">
+        <div className="mt-16 pt-8">
           <div className="flex flex-col gap-6">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
               <p className="text-sm text-muted-foreground">
@@ -135,7 +135,7 @@ export function Footer() {
               </div>
             </div>
 
-            <div className="flex flex-col items-center pt-6 border-t border-border/30 text-center gap-1">
+            <div className="flex flex-col items-center pt-6 text-center gap-1">
               <p className="text-xs text-muted-foreground/80">
                 Site desenvolvido pensando em segurança e praticidade.
               </p>

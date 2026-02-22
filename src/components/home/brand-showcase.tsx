@@ -80,7 +80,7 @@ export function BrandShowcase() {
       cardItems.forEach((item) => {
         const image = item.querySelector("img")
         const content = item.querySelector(".showcase-content")
-        
+
         // Base Entrance
         gsap.from(item, {
           scale: 0.8,
@@ -105,7 +105,7 @@ export function BrandShowcase() {
             scrollTrigger: {
               trigger: item,
               containerAnimation: horizontalAnimation,
-              start: "left center+=25%", 
+              start: "left center+=25%",
               end: "right center-=25%",
               toggleActions: "play reverse play reverse",
             }
@@ -119,7 +119,7 @@ export function BrandShowcase() {
             scrollTrigger: {
               trigger: item,
               containerAnimation: horizontalAnimation,
-              start: "left center+=25%", 
+              start: "left center+=25%",
               end: "right center-=25%",
               toggleActions: "play reverse play reverse",
             }
@@ -142,9 +142,9 @@ export function BrandShowcase() {
   }, [])
 
   return (
-    <section 
-      ref={sectionRef} 
-      className="relative overflow-hidden bg-background border-t border-border"
+    <section
+      ref={sectionRef}
+      className="relative overflow-hidden bg-background"
       id="brand-experience"
     >
       {/* Background Decor */}
@@ -154,8 +154,8 @@ export function BrandShowcase() {
 
       <div className="flex h-screen items-center">
         {/* Horizontal Container */}
-        <div 
-          ref={wrapperRef} 
+        <div
+          ref={wrapperRef}
           className="flex flex-nowrap items-center px-[10vw] gap-20"
         >
           {/* Intro Card */}
@@ -179,20 +179,20 @@ export function BrandShowcase() {
 
           {/* Interactive Cards */}
           {items.map((item, idx) => (
-            <div 
-              key={idx} 
+            <div
+              key={idx}
               className="showcase-card flex-shrink-0 w-[300px] md:w-[450px] group relative"
             >
               {/* Image Container */}
               <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-secondary/30 border border-border">
-                <img 
-                  src={item.image} 
+                <img
+                  src={item.image}
                   alt={item.title}
                   className="absolute inset-0 w-full h-full object-cover grayscale"
                 />
                 {/* Overlay - Strengthened for better legibility */}
                 <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent opacity-80" />
-                
+
                 {/* Tag */}
                 <div className="absolute top-6 left-6 px-4 py-1 rounded-full bg-background/20 backdrop-blur-md border border-white/10">
                   <span className="text-white text-[10px] font-black uppercase tracking-widest">{item.tag}</span>
@@ -223,7 +223,7 @@ export function BrandShowcase() {
           <div className="flex-shrink-0 w-[600px] md:w-[1000px] flex flex-col justify-center items-center text-center space-y-12 px-[10vw] relative">
             {/* Artistic Decoration */}
             <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none select-none -z-10">
-                <span className="text-[300px] font-serif italic">O</span>
+              <span className="text-[300px] font-serif italic">O</span>
             </div>
 
             <div className="space-y-4">
@@ -232,9 +232,9 @@ export function BrandShowcase() {
                 Simply <br /> <span className="translate-x-12 block">Elegance.</span>
               </h2>
             </div>
-            
+
             <div className="max-w-sm mx-auto h-[1px] bg-gradient-to-r from-transparent via-border to-transparent w-full" />
-            
+
             <p className="text-muted-foreground/40 text-[10px] font-medium tracking-[0.4em] uppercase">
               Order Payload &copy; 2026 — The Art of Essentialism
             </p>
@@ -245,8 +245,8 @@ export function BrandShowcase() {
       {/* Progress Bar (at the bottom) */}
       <div className="absolute bottom-10 left-0 w-full px-[10vw]">
         <div className="h-[2px] w-full bg-border overflow-hidden rounded-full">
-          <div 
-            id="progress-bar" 
+          <div
+            id="progress-bar"
             className="h-full bg-primary origin-left scale-x-0"
           />
         </div>

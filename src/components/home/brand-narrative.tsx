@@ -94,7 +94,7 @@ export function BrandNarrative() {
     const narrativeText = "Simples. Autêntico. Atemporal.";
 
     return (
-        <section className="py-24 lg:py-32 bg-background border-t border-border">
+        <section className="py-24 lg:py-32 bg-background">
             <div className="mx-auto max-w-[1200px] px-6 lg:px-10">
                 <div className="grid lg:grid-cols-[1fr_2fr] gap-12 lg:gap-24">
 

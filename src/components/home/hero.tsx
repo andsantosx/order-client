@@ -1,21 +1,31 @@
+import { useState } from 'react'
+
 export function Hero() {
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false)
+
   return (
     <section className="relative w-full bg-background">
       {/* Main Hero Container */}
-      <div className="relative h-screen min-h-[400px] max-h-[570px] overflow-hidden">
+      <div className="relative h-screen min-h-[400px] max-h-[570px] overflow-hidden bg-black">
 
-        {/* Background Image */}
         {/* Background Image - Desktop */}
         <img
           src="/home.jpg"
           alt="Hero Background"
           className="hidden md:block absolute inset-0 w-full h-full object-cover object-top"
         />
-        {/* Background Image - Mobile */}
-        <img
-          src="/home-mobile.png"
-          alt="Hero Background"
-          className="block md:hidden absolute inset-0 w-full h-full object-cover object-top"
+        {/* Background Video - Mobile */}
+        <video
+          src="/home-mobile.mp4"
+          poster="/home-mobile-poster.jpg"
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+          onLoadedData={() => setIsVideoLoaded(true)}
+          className={`block md:hidden absolute inset-0 w-full h-full object-cover object-top transition-opacity duration-1000 ${isVideoLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
         />
 
         {/* Overlay muito sutil */}

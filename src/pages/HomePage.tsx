@@ -7,7 +7,6 @@ import { InteractiveLoader } from "@/components/ui/interactive-loader"
 const BrandNarrative = lazy(() => import("@/components/home/brand-narrative").then(m => ({ default: m.BrandNarrative })));
 const BrandShowcase = lazy(() => import("@/components/home/brand-showcase").then(m => ({ default: m.BrandShowcase })));
 const Products = lazy(() => import("@/components/home/products").then(m => ({ default: m.Products })));
-const PromoBanner = lazy(() => import("@/components/home/promo-banner").then(m => ({ default: m.PromoBanner })));
 const FooterLazy = lazy(() => import("@/components/layout/footer").then(m => ({ default: m.Footer })));
 
 export function HomePage() {
@@ -21,7 +20,7 @@ export function HomePage() {
       <Hero />
       <CategorySection />
 
-      <Suspense fallback={<div className="py-24 lg:py-32 bg-background border-t border-border">
+      <Suspense fallback={<div className="py-24 lg:py-32 bg-background">
         <div className="mx-auto max-w-[1200px] px-6 lg:px-10 flex items-center justify-center min-h-[300px]">
           <InteractiveLoader size="lg" variant="spinner" />
         </div>
@@ -39,12 +38,6 @@ export function HomePage() {
         <InteractiveLoader size="lg" variant="dots" />
       </div>}>
         <Products />
-      </Suspense>
-
-      <Suspense fallback={<div className="min-h-[400px] flex items-center justify-center">
-        <InteractiveLoader size="lg" variant="spinner" />
-      </div>}>
-        <PromoBanner />
       </Suspense>
 
       <Suspense fallback={<div className="h-64 bg-secondary/10 flex items-center justify-center">

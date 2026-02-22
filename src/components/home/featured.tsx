@@ -90,7 +90,7 @@ export function Featured() {
   // However, let's enhance hover with GSAP-like smoothness classes.
 
   return (
-    <section ref={sectionRef} className="py-24 bg-background border-t border-border overflow-hidden">
+    <section ref={sectionRef} className="py-24 bg-background overflow-hidden">
       <div className="mx-auto max-w-[1400px] px-6 lg:px-10">
         <div ref={headerRef} className="flex items-end justify-between mb-12">
           <div>
