@@ -1,38 +1,4 @@
-import { useEffect, useRef } from 'react'
-
 export function Hero() {
-  const videoRef = useRef<HTMLVideoElement>(null)
-
-  useEffect(() => {
-    // Busca a tag de vídeo inserida via innerHTML para forçar autoplay no iOS
-    const divElement = videoRef.current as unknown as HTMLDivElement;
-    if (divElement) {
-      const videoEl = divElement.querySelector('video');
-      if (videoEl) {
-        // iOS Safari workaround: mute explicitly before play
-        videoEl.muted = true;
-        videoEl.play().catch((error) => {
-          console.log("Autoplay prevented (likely Low Power Mode):", error)
-
-          // Fallback supremo: Tentar rodar o vídeo na primeira interação do usuário na tela
-          const playOnInteract = () => {
-            videoEl.play().then(() => {
-              // Se conseguiu tocar, removemos os listeners
-              window.removeEventListener('touchstart', playOnInteract);
-              window.removeEventListener('scroll', playOnInteract);
-              window.removeEventListener('click', playOnInteract);
-            }).catch(() => { });
-          };
-
-          // Adiciona os listeners de interação
-          window.addEventListener('touchstart', playOnInteract, { once: true });
-          window.addEventListener('scroll', playOnInteract, { once: true });
-          window.addEventListener('click', playOnInteract, { once: true });
-        })
-      }
-    }
-  }, [])
-
   return (
     <section className="relative w-full bg-background">
       {/* Main Hero Container */}
@@ -44,20 +10,22 @@ export function Hero() {
           alt="Hero Background"
           className="hidden md:block absolute inset-0 w-full h-full object-cover object-top"
         />
-        {/* Background Video - Mobile */}
-        <video
-          ref={videoRef}
-          src="/home-mobile.mp4"
-          poster="/home-mobile-poster.jpg"
-          autoPlay
-          loop
-          muted
-          playsInline
-          disablePictureInPicture
-          onCanPlay={(e) => {
-            e.currentTarget.play().catch(() => { });
+        {/* Background Video - Mobile (Usando HTML puro para garantir que Safari reconheça atributos nativos) */}
+        <div
+          className="block md:hidden absolute inset-0 w-full h-full pointer-events-none"
+          dangerouslySetInnerHTML={{
+            __html: `
+              <video
+                src="/home-mobile.mp4"
+                poster="/home-mobile-poster.jpg"
+                autoplay
+                loop
+                muted
+                playsinline
+                class="w-full h-full object-cover object-top"
+              ></video>
+            `
           }}
-          className="block md:hidden absolute inset-0 w-full h-full object-cover object-top"
         />
 
         {/* Overlay muito sutil */}
