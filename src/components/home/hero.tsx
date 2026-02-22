@@ -1,8 +1,4 @@
-import { useState } from 'react'
-
 export function Hero() {
-  const [isVideoLoaded, setIsVideoLoaded] = useState(false)
-
   return (
     <section className="relative w-full bg-background">
       {/* Main Hero Container */}
@@ -15,17 +11,21 @@ export function Hero() {
           className="hidden md:block absolute inset-0 w-full h-full object-cover object-top"
         />
         {/* Background Video - Mobile */}
-        <video
-          src="/home-mobile.mp4"
-          poster="/home-mobile-poster.jpg"
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="auto"
-          onLoadedData={() => setIsVideoLoaded(true)}
-          className={`block md:hidden absolute inset-0 w-full h-full object-cover object-top transition-opacity duration-1000 ${isVideoLoaded ? 'opacity-100' : 'opacity-0'
-            }`}
+        <div
+          className="block md:hidden absolute inset-0 w-full h-full pointer-events-none"
+          dangerouslySetInnerHTML={{
+            __html: `
+              <video
+                src="/home-mobile.mp4"
+                poster="/home-mobile-poster.jpg"
+                autoplay
+                loop
+                muted
+                playsinline
+                class="w-full h-full object-cover object-top"
+              ></video>
+            `
+          }}
         />
 
         {/* Overlay muito sutil */}
