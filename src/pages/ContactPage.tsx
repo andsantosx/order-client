@@ -1,12 +1,14 @@
 import { useState } from "react"
-import { MapPin, Phone, Mail, Clock, Instagram } from "lucide-react"
+import { Phone, Mail, Instagram } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { create as createContactMessage } from "@/services/contact/create"
 import toast from "react-hot-toast"
+import ReCAPTCHA from "react-google-recaptcha"
 
 export function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -17,6 +19,12 @@ export function ContactPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!recaptchaToken) {
+      toast.error("Por favor, valide o reCAPTCHA para continuar.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -30,6 +38,7 @@ export function ContactPage() {
 
       toast.success("Mensagem enviada com sucesso!");
       setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
+      // Reset reCAPTCHA (optional if we had the ref, but changing state hides the button temporarily)
     } catch (error) {
       console.error("Error sending message:", error);
       toast.error("Erro ao enviar mensagem. Tente novamente.");
@@ -39,181 +48,127 @@ export function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background pt-24 pb-16">
-      <div className="mx-auto max-w-[1200px] px-6 lg:px-10">
-        {/* Header */}
-        <div className="mb-16 text-center">
-          <h1 className="text-4xl lg:text-5xl font-bold text-foreground mb-4">
-            Entre em Contato
-          </h1>
-          <p className="text-lg text-muted-foreground">
-            Estamos aqui para ajudar. Fale conosco!
-          </p>
-        </div>
+    <div className="min-h-screen bg-background pt-32 pb-16 flex items-center">
+      <div className="mx-auto max-w-[1200px] w-full px-6 lg:px-10">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
 
-        <div className="grid lg:grid-cols-2 gap-12 mb-16">
-          {/* Contact Info */}
-          <div className="space-y-8">
-            <div>
-              <h2 className="text-2xl font-bold text-foreground mb-6">Informações de Contato</h2>
-              <div className="space-y-4">
-                <div className="flex gap-4">
-                  <MapPin className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
-                  <div>
-                    <h3 className="font-semibold text-foreground mb-1">Endereço</h3>
-                    <p className="text-muted-foreground">
-                      Criciúma - SC<br />
-                      Brasil
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex gap-4">
-                  <Phone className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
-                  <div>
-                    <h3 className="font-semibold text-foreground mb-1">WhatsApp</h3>
-                    <p className="text-muted-foreground">
-                      <a href="https://wa.me/554898192343" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
-                        +55 48 9819-2343
-                      </a>
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex gap-4">
-                  <Mail className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
-                  <div>
-                    <h3 className="font-semibold text-foreground mb-1">Email</h3>
-                    <p className="text-muted-foreground">
-                      <a href="mailto:orderstoreco@gmail.com" className="hover:text-primary transition-colors">
-                        orderstoreco@gmail.com
-                      </a>
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex gap-4">
-                  <Clock className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
-                  <div>
-                    <h3 className="font-semibold text-foreground mb-1">Horário de Atendimento</h3>
-                    <p className="text-muted-foreground">
-                      Segunda a Sexta: 09h - 18h<br />
-                      Sábado: 10h - 16h<br />
-                      Domingo: Fechado
-                    </p>
-                  </div>
-                </div>
-              </div>
+          {/* Left Side: Inspired Text */}
+          <div className="space-y-8 lg:pr-10 text-center lg:text-left flex flex-col items-center lg:items-start">
+            <div className="space-y-6">
+              <h1 className="text-4xl lg:text-5xl xl:text-5xl font-light text-foreground leading-[1.2]">
+                Dúvidas sobre o seu <br className="hidden lg:block" />
+                <span className="font-bold text-primary">pedido ou estilo?</span>
+              </h1>
+              <div className="w-full max-w-[200px] h-0.5 bg-primary mx-auto lg:mx-0"></div>
+              <p className="text-lg text-muted-foreground leading-relaxed max-w-md mx-auto lg:mx-0">
+                Nossa equipe está pronta para te ajudar. Envie sua mensagem e responderemos o mais rápido possível.
+              </p>
             </div>
 
-            {/* Social Links */}
-            <div>
-              <h3 className="font-semibold text-foreground mb-4">Siga-nos</h3>
-              <div className="flex gap-3">
-                <a
-                  href="https://www.instagram.com/orderstore.co?igsh=MXhmdGZvemgyYjFvMA%3D%3D&utm_source=qr"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-6 py-3 rounded-full bg-card border border-border hover:border-primary/50 transition-all group"
-                >
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-                    <Instagram className="h-5 w-5" />
-                  </div>
-                  <span className="font-medium">@orderstore.co</span>
+            {/* Subtle Contact Info below the text */}
+            <div className="pt-8 space-y-4 inline-block text-left">
+              <div className="flex items-center gap-4 text-muted-foreground">
+                <Mail className="h-5 w-5 text-primary" />
+                <a href="mailto:orderstoreco@gmail.com" className="hover:text-primary transition-colors">
+                  orderstoreco@gmail.com
+                </a>
+              </div>
+              <div className="flex items-center gap-4 text-muted-foreground">
+                <Phone className="h-5 w-5 text-primary" />
+                <a href="https://wa.me/554898192343" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
+                  +55 48 9819-2343
+                </a>
+              </div>
+              <div className="flex items-center gap-4 text-muted-foreground">
+                <Instagram className="h-5 w-5 text-primary" />
+                <a href="https://www.instagram.com/orderstore.co?igsh=MXhmdGZvemgyYjFvMA%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
+                  @orderstore.co
                 </a>
               </div>
             </div>
           </div>
 
-          {/* Contact Form */}
-          <div>
-            <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Right Side: Form Card */}
+          <div className="bg-card border border-border rounded-2xl p-6 md:p-10 w-full max-w-xl mx-auto lg:mx-0">
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block text-sm font-semibold text-foreground mb-2">Nome</label>
+                <label className="block text-sm font-semibold text-foreground mb-1.5">Nome</label>
                 <Input
-                  placeholder="Seu nome completo"
+                  className="bg-transparent border-input focus-visible:ring-primary shadow-sm h-11"
+                  placeholder="Seu nome"
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 />
               </div>
-              <div>
-                <label className="block text-sm font-semibold text-foreground mb-2">Email</label>
-                <Input
-                  type="email"
-                  placeholder="seu@email.com"
-                  required
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                />
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                  <label className="block text-sm font-semibold text-foreground mb-1.5">Telefone</label>
+                  <Input
+                    className="bg-transparent border-input focus-visible:ring-primary shadow-sm h-11"
+                    placeholder="DDD + Telefone"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-foreground mb-1.5">E-mail</label>
+                  <Input
+                    className="bg-transparent border-input focus-visible:ring-primary shadow-sm h-11"
+                    type="email"
+                    placeholder="E-mail"
+                    required
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  />
+                </div>
               </div>
+
               <div>
-                <label className="block text-sm font-semibold text-foreground mb-2">Telefone</label>
+                <label className="block text-sm font-semibold text-foreground mb-1.5">Assunto</label>
                 <Input
-                  placeholder="+55 48 9819-2343"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-foreground mb-2">Assunto</label>
-                <Input
+                  className="bg-transparent border-input focus-visible:ring-primary shadow-sm h-11"
                   placeholder="Qual é o assunto?"
                   required
                   value={formData.subject}
                   onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                 />
               </div>
+
               <div>
-                <label className="block text-sm font-semibold text-foreground mb-2">Mensagem</label>
+                <label className="block text-sm font-semibold text-foreground mb-1.5">Mensagem</label>
                 <textarea
-                  className="w-full px-4 py-3 rounded-lg bg-card border border-border text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                  rows={5}
-                  placeholder="Sua mensagem aqui..."
+                  className="w-full px-4 py-3 rounded-lg bg-transparent border border-input shadow-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary resize-y min-h-[120px]"
+                  placeholder="Escreva sua mensagem"
                   required
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                 />
               </div>
+
+              <div className="pt-2 flex justify-center sm:justify-start">
+                {/* 
+                  Note: A key abaixo DEVE ser configurada na Vercel/Railway ou .env do Cliente como:
+                  VITE_RECAPTCHA_SITE_KEY=6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI
+                */}
+                <ReCAPTCHA
+                  sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || "Chave_Nao_Configurada"}
+                  onChange={(token) => setRecaptchaToken(token)}
+                  theme="light"
+                />
+              </div>
+
               <Button
                 type="submit"
-                className="w-full h-12 bg-primary text-primary-foreground hover:bg-primary/90"
-                disabled={isSubmitting}
+                className="w-full h-12 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md font-bold mt-4 transition-all active:scale-[0.99] shadow-md"
+                disabled={isSubmitting || !recaptchaToken}
               >
-                {isSubmitting ? "Enviando..." : "Enviar Mensagem"}
+                {isSubmitting ? "Enviando..." : "Enviar"}
               </Button>
             </form>
           </div>
-        </div>
 
-        {/* FAQ Section */}
-        <div className="pt-16 border-t border-border">
-          <h2 className="text-3xl font-bold text-foreground mb-8">Perguntas Frequentes</h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            {[
-              {
-                q: "Qual é o tempo de entrega?",
-                a: "Nossos produtos são importados e entregues em todo o Brasil com prazo médio de 15 a 45 dias úteis.",
-              },
-              {
-                q: "Como rastrear meu pedido?",
-                a: "Você receberá o código por email. O rastreio internacional pode levar de 3 a 5 dias para atualizar no sistema.",
-              },
-              {
-                q: "Qual é a política de devolução?",
-                a: "Aceitamos devoluções em até 7 dias corridos após o recebimento, conforme o Código de Defesa do Consumidor.",
-              },
-              {
-                q: "Quais são as formas de pagamento?",
-                a: "Aceitamos Cartão de Crédito (até 12x), PIX e Boleto Bancário via Mercado Pago.",
-              },
-            ].map((faq, i) => (
-              <div key={i} className="p-6 rounded-lg bg-card border border-border">
-                <h3 className="font-semibold text-foreground mb-2">{faq.q}</h3>
-                <p className="text-sm text-muted-foreground">{faq.a}</p>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
     </div>

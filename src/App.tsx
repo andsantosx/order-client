@@ -19,6 +19,7 @@ const PoliciesPage = lazy(() => import("@/pages/PoliciesPage").then(m => ({ defa
 const ExchangesReturnsPage = lazy(() => import("@/pages/ExchangesReturnsPage").then(m => ({ default: m.ExchangesReturnsPage })));
 const PaymentsPage = lazy(() => import("@/pages/PaymentsPage").then(m => ({ default: m.PaymentsPage })));
 const DeliveryPage = lazy(() => import("@/pages/DeliveryPage").then(m => ({ default: m.DeliveryPage })));
+const TermsPage = lazy(() => import("@/pages/TermsPage").then(m => ({ default: m.TermsPage })));
 const LoginPage = lazy(() => import("@/pages/LoginPage").then(m => ({ default: m.LoginPage })));
 const RegisterPage = lazy(() => import("@/pages/RegisterPage").then(m => ({ default: m.RegisterPage })));
 const AdminDashboardPage = lazy(() => import("@/pages/admin/AdminDashboardPage").then(m => ({ default: m.AdminDashboardPage })));
@@ -55,6 +56,7 @@ function AppContent() {
             <Route path="/trocas-devolucoes" element={<ExchangesReturnsPage />} />
             <Route path="/pagamentos" element={<PaymentsPage />} />
             <Route path="/entregas" element={<DeliveryPage />} />
+            <Route path="/termos" element={<TermsPage />} />
             <Route path="/contato" element={<ContactPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/order-confirmation" element={<OrderConfirmationPage />} />

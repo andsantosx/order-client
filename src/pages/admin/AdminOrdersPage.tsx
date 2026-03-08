@@ -59,10 +59,10 @@ export function AdminOrdersPage() {
                 params.append('status', status);
             }
 
-            const { data } = await apiClient.get<Order[]>(`/orders?${params.toString()}`, {
+            const { data } = await apiClient.get<any>(`/orders?${params.toString()}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            setOrders(data);
+            setOrders(data.data || []);
         } catch (error) {
             console.error(error);
             toast.error("Erro ao carregar pedidos");

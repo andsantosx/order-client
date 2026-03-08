@@ -229,11 +229,11 @@ export function ShopPage() {
                       FILTRAR E<br />ORDENAR
                     </h2>
                     <SheetClose className="opacity-80 transition-opacity hover:opacity-100 focus:outline-none">
-                        <X className="h-5 w-5" strokeWidth={1} />
-                        <span className="sr-only">Close</span>
+                      <X className="h-5 w-5" strokeWidth={1} />
+                      <span className="sr-only">Close</span>
                     </SheetClose>
                   </div>
-                  
+
                   <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
                     <Suspense fallback={<Skeleton className="h-[500px] w-full" />}>
                       <FilterSidebar
@@ -259,7 +259,7 @@ export function ShopPage() {
 
                   <div className="p-8 border-t border-border">
                     <SheetClose asChild>
-                      <Button 
+                      <Button
                         className="w-full h-10 bg-foreground text-background hover:bg-foreground/90 font-black uppercase tracking-[0.2em] text-[10px] rounded-none transition-all"
                       >
                         Ver {products.length} Resultados
@@ -320,6 +320,12 @@ export function ShopPage() {
                             alt={product.name}
                             loading="lazy"
                             className={`h-full w-full object-cover transition-all duration-700 ${product.images && product.images[1] ? 'group-hover:opacity-0' : 'group-hover:scale-105'}`}
+                            onError={(e) => {
+                              // Prevent infinite loop if fallback also fails
+                              e.currentTarget.onerror = null;
+                              e.currentTarget.src = "/no-product.png";
+                              e.currentTarget.className = "w-full h-full object-contain opacity-20 grayscale transition-transform duration-700 p-8 bg-secondary/50 group-hover:scale-105";
+                            }}
                           />
                           {product.images && product.images[1] && (
                             <img
@@ -327,18 +333,25 @@ export function ShopPage() {
                               alt={`${product.name} view 2`}
                               loading="lazy"
                               className="absolute inset-0 h-full w-full object-cover transition-all duration-700 opacity-0 group-hover:opacity-100 scale-105"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                              }}
                             />
                           )}
                         </>
                       ) : (
-                        <div className="h-full w-full flex items-center justify-center text-muted-foreground text-xs uppercase tracking-widest bg-secondary/50">
-                          Sem Imagem
+                        <div className="h-full w-full flex items-center justify-center bg-secondary/50 p-8">
+                          <img
+                            src="/no-product.png"
+                            alt="Sem Imagem"
+                            className="w-full h-full object-contain opacity-20 grayscale transition-transform duration-700 group-hover:scale-105"
+                          />
                         </div>
                       )}
 
                       {/* Quick Add Overlay */}
                       {quickAddProductId === product.id && (
-                        <QuickAddOverlay 
+                        <QuickAddOverlay
                           sizes={product.sizes || []}
                           onClose={() => setQuickAddProductId(null)}
                           onSelect={(sizeName) => {
@@ -350,11 +363,11 @@ export function ShopPage() {
                               size: sizeName,
                               imageUrl: product.image,
                             });
-                            
+
                             setQuickAddProductId(null);
-                            
+
                             toast.custom((t) => (
-                              <AddedToCartToast 
+                              <AddedToCartToast
                                 t={t}
                                 product={{
                                   name: product.name,

@@ -58,6 +58,26 @@ export function CheckoutPage() {
     if (user?.name) setGuestName(user.name);
   }, [user]);
 
+  // Gatekeeper: LGPD Hard Block requirement
+  useEffect(() => {
+    const preferencesObj = localStorage.getItem('cookiePreferences_v2');
+    if (!preferencesObj) {
+      toast.error('Para prosseguir com o pagamento, você deve aceitar os Termos de Uso e o nível essencial de Cookies para transações seguras.', { duration: 6000 });
+      navigate('/'); // Redirect back to Home to force Banner interaction
+    } else {
+      try {
+        const parsed = JSON.parse(preferencesObj);
+        if (!parsed.essential) {
+          toast.error('Cookies essenciais são mandatórios para um checkout seguro. Por favor, reavalie suas preferências na Home.', { duration: 6000 });
+          navigate('/');
+        }
+      } catch (e) {
+        localStorage.removeItem('cookiePreferences_v2');
+        navigate('/');
+      }
+    }
+  }, [navigate]);
+
   // Init Mercado Pago
   useEffect(() => {
     const publicKey = import.meta.env.VITE_MERCADOPAGO_PUBLIC_KEY;

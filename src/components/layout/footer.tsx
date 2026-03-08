@@ -18,6 +18,7 @@ export function Footer() {
     ],
     company: [
       { name: "Sobre", href: "/sobre" },
+      { name: "Termos Gerais de Uso", href: "/termos" }
     ],
   }
 
@@ -32,9 +33,6 @@ export function Footer() {
                 ORDER
               </span>
             </a>
-            <p className="text-muted-foreground mb-8 max-w-sm leading-relaxed">
-              Moda contemporânea para quem transforma atitude em identidade.
-            </p>
             <div className="flex flex-col gap-2 mb-6">
               <a href="https://wa.me/554898192343" target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
                 <span className="font-semibold">WhatsApp:</span> +55 48 9819-2343
@@ -137,7 +135,7 @@ export function Footer() {
 
             <div className="flex flex-col items-center pt-6 text-center gap-1">
               <p className="text-xs text-muted-foreground/80">
-                Site desenvolvido pensando em segurança e praticidade.
+                Desenvolvido pensando em segurança e praticidade.
               </p>
               <p className="text-xs text-muted-foreground/80">
                 Criado por <a href="https://www.instagram.com/andsantosb?igsh=MWYxYXpoNHJoNzBseQ%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer" className="font-semibold hover:text-primary transition-colors">Anderson Santos</a> & <a href="https://www.instagram.com/lorenzosegotuzzo?igsh=bmV3ZmJvemFpMG9p" target="_blank" rel="noopener noreferrer" className="font-semibold hover:text-primary transition-colors">Lorenzo Severo</a>

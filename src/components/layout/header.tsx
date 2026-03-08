@@ -9,6 +9,7 @@ import {
   SheetContent,
   SheetTrigger,
   SheetTitle,
+  SheetClose,
 } from "@/components/ui/sheet";
 import { useWishlistStore } from "@/store/wishlistStore";
 import { useCartStore } from "@/store/cartStore";
@@ -280,6 +281,12 @@ export function Header() {
               className="w-full max-w-md bg-background border-border"
             >
               <SheetTitle className="sr-only">Menu de navegação</SheetTitle>
+
+              <SheetClose className="absolute right-4 top-4 p-2 rounded-md opacity-70 transition-opacity hover:opacity-100 hover:bg-secondary/50 focus:outline-none">
+                <X className="h-5 w-5" />
+                <span className="sr-only">Fechar</span>
+              </SheetClose>
+
               <div className="flex flex-col gap-6 pt-10">
                 {/* Mobile Search */}
                 <form

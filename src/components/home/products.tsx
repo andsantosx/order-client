@@ -125,6 +125,12 @@ export function Products() {
                         alt={product.name}
                         loading="lazy"
                         className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                        onError={(e) => {
+                          // Prevent infinite loop if fallback also fails
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = "/no-product.png";
+                          e.currentTarget.className = "w-full h-full object-contain opacity-20 grayscale transition-transform duration-700 ease-out group-hover:scale-105 p-8 bg-secondary/50";
+                        }}
                       />
                       {product.images?.[1] && (
                         <img
@@ -132,18 +138,25 @@ export function Products() {
                           alt={product.name}
                           loading="lazy"
                           className="absolute inset-0 h-full w-full object-cover transition-all duration-700 ease-out opacity-0 group-hover:opacity-100 group-hover:scale-105"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
                         />
                       )}
                     </>
                   ) : (
-                    <div className="h-full w-full flex items-center justify-center text-muted-foreground text-xs uppercase tracking-widest">
-                      Sem Imagem
+                    <div className="h-full w-full flex items-center justify-center bg-secondary/50 p-8">
+                      <img
+                        src="/no-product.png"
+                        alt="Sem Imagem"
+                        className="w-full h-full object-contain opacity-20 grayscale transition-transform duration-700 ease-out group-hover:scale-105"
+                      />
                     </div>
                   )}
 
                   {/* Size Selection Overlay */}
                   {quickAddProductId === product.id && (
-                    <QuickAddOverlay 
+                    <QuickAddOverlay
                       sizes={product.sizes || []}
                       onClose={() => setQuickAddProductId(null)}
                       onSelect={(sizeName) => {
@@ -155,11 +168,11 @@ export function Products() {
                           quantity: 1,
                           size: sizeName
                         })
-                        
+
                         setQuickAddProductId(null)
-                        
+
                         toast.custom((t) => (
-                          <AddedToCartToast 
+                          <AddedToCartToast
                             t={t}
                             product={{
                               name: product.name,

@@ -58,7 +58,6 @@ export function WishlistPage() {
         {/* Header */}
         <div className="mb-12">
           <h1 className="text-4xl lg:text-5xl font-bold text-foreground mb-4 flex items-center gap-3">
-            <Heart className="h-10 w-10 text-primary" />
             Meus Favoritos
           </h1>
           <p className="text-lg text-muted-foreground">

@@ -173,7 +173,7 @@ export function ProductDetailPage() {
       price: product.price,
       quantity: 1,
       size: sizeName,
-      imageUrl: product.images[0]?.url,
+      imageUrl: product.images?.[0]?.url || "",
     });
 
     // Custom Toast
@@ -181,12 +181,12 @@ export function ProductDetailPage() {
     const totalAmount = useCartStore.getState().getTotal();
 
     toast.custom((t) => (
-      <AddedToCartToast 
+      <AddedToCartToast
         t={t}
         product={{
           name: product.name,
           price: product.price,
-          imageUrl: product.images[0]?.url,
+          imageUrl: product.images?.[0]?.url || "",
           size: sizeName
         }}
         cartSummary={{
@@ -226,7 +226,7 @@ export function ProductDetailPage() {
         id: product.id,
         name: product.name,
         price: product.price,
-        image: product.images[0]?.url,
+        image: product.images?.[0]?.url || "",
         addedAt: Date.now()
       });
       toast.success("Adicionado aos favoritos");
@@ -252,22 +252,37 @@ export function ProductDetailPage() {
 
           {/* Column 1: Thumbnails (Order 2 on Mobile, Order 1 on Desktop) */}
           <div className="order-2 lg:order-1 hidden lg:flex flex-col gap-4 overflow-x-auto pb-2 lg:pb-0 scrollbar-hide">
-            {product.images.map((img, idx) => (
-              <button
-                key={img.id || idx}
-                onClick={() => setCurrentImageIndex(idx)}
-                className={`
-                  w-full aspect-[3/4] overflow-hidden bg-secondary transition-all duration-300 rounded-sm
-                  ${currentImageIndex === idx ? 'opacity-100 ring-1 ring-black' : 'opacity-60 hover:opacity-100'}
-                `}
-              >
+            {product.images?.length > 0 ? (
+              product.images.map((img, idx) => (
+                <button
+                  key={img.id || idx}
+                  onClick={() => setCurrentImageIndex(idx)}
+                  className={`
+                    w-full aspect-[3/4] overflow-hidden bg-secondary transition-all duration-300 rounded-sm
+                    ${currentImageIndex === idx ? 'opacity-100 ring-1 ring-black' : 'opacity-60 hover:opacity-100'}
+                  `}
+                >
+                  <img
+                    src={img.url}
+                    alt=""
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = "/no-product.png";
+                      e.currentTarget.className = "w-full h-full object-contain p-2 opacity-20 grayscale";
+                    }}
+                  />
+                </button>
+              ))
+            ) : (
+              <div className="w-full aspect-[3/4] overflow-hidden bg-secondary transition-all duration-300 rounded-sm opacity-100 ring-1 ring-black">
                 <img
-                  src={img.url}
-                  alt=""
-                  className="w-full h-full object-cover"
+                  src="/no-product.png"
+                  alt="Sem imagem"
+                  className="w-full h-full object-contain p-2 opacity-20 grayscale"
                 />
-              </button>
-            ))}
+              </div>
+            )}
           </div>
 
           {/* Column 2: Main Image (Order 1 on Mobile, Order 2 on Desktop) */}
@@ -279,15 +294,30 @@ export function ProductDetailPage() {
               onScroll={handleScroll}
               className="flex w-full h-full overflow-x-auto lg:overflow-hidden snap-x snap-mandatory scrollbar-hide lg:pointer-events-none"
             >
-              {product.images.map((img, idx) => (
-                <div key={img.id || idx} className="min-w-full h-full snap-center">
+              {product.images?.length > 0 ? (
+                product.images.map((img, idx) => (
+                  <div key={img.id || idx} className="min-w-full h-full snap-center">
+                    <img
+                      src={img.url}
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = "/no-product.png";
+                        e.currentTarget.className = "w-full h-full object-contain p-12 opacity-20 grayscale bg-secondary";
+                      }}
+                    />
+                  </div>
+                ))
+              ) : (
+                <div className="min-w-full h-full snap-center bg-secondary flex items-center justify-center p-12 lg:p-16">
                   <img
-                    src={img.url}
-                    alt={product.name}
-                    className="w-full h-full object-cover"
+                    src="/no-product.png"
+                    alt="Sem imagem"
+                    className="w-full h-full object-contain opacity-20 grayscale"
                   />
                 </div>
-              ))}
+              )}
             </div>
 
             {/* Navigation Arrows (Mobile Only) */}
@@ -416,12 +446,12 @@ export function ProductDetailPage() {
                 {openSections.payment && (
                   <div className="pb-4 text-[11px] text-muted-foreground leading-relaxed space-y-4">
                     <div className="space-y-2">
-                       <p className="text-foreground font-black uppercase tracking-widest text-[10px]">Cartão de Crédito</p>
-                       <p>Visa, Mastercard, Amex, Elo e Hipercard. Parcelamento em até 12x.</p>
+                      <p className="text-foreground font-black uppercase tracking-widest text-[10px]">Cartão de Crédito</p>
+                      <p>Visa, Mastercard, Amex, Elo e Hipercard. Parcelamento em até 12x.</p>
                     </div>
                     <div className="space-y-2">
-                       <p className="text-foreground font-black uppercase tracking-widest text-[10px]">Pix</p>
-                       <p>Aprovação instantânea. O processamento do seu pedido é iniciado imediatamente.</p>
+                      <p className="text-foreground font-black uppercase tracking-widest text-[10px]">Pix</p>
+                      <p>Aprovação instantânea. O processamento do seu pedido é iniciado imediatamente.</p>
                     </div>
                     <div className="pt-2 flex items-center gap-2 text-foreground/40">
                       <div className="w-1 h-1 bg-foreground/40 rounded-full" />

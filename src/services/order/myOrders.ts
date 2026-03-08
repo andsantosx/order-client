@@ -32,6 +32,6 @@ export interface Order {
 }
 
 export const listMyOrders = async (): Promise<Order[]> => {
-    const { data } = await apiClient.get<Order[]>("/orders");
-    return data;
+    const { data } = await apiClient.get<any>("/orders");
+    return data.data || [];
 };

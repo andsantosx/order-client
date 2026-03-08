@@ -1,11 +1,12 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import { ArrowRight } from "lucide-react"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 
 gsap.registerPlugin(ScrollTrigger)
+ScrollTrigger.config({ ignoreMobileResize: true })
 
 const items = [
   {
@@ -32,7 +33,7 @@ const items = [
   {
     title: "Order",
     subtitle: "NOSSO MANIFESTO",
-    description: "Não fazemos apenas roupas. Criamos uniformes para quem busca ordem no caos urbano.",
+    description: "Não temos apenas roupas. Criamos uniformes para quem busca ordem no caos urbano.",
     image: "/image4.jpg",
     tag: "Manifesto"
   }
@@ -41,6 +42,7 @@ const items = [
 export function BrandShowcase() {
   const sectionRef = useRef<HTMLElement>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
+  const [expandedCard, setExpandedCard] = useState<number | null>(null)
 
   useEffect(() => {
     const section = sectionRef.current
@@ -48,23 +50,23 @@ export function BrandShowcase() {
     if (!section || !wrapper) return
 
     const ctx = gsap.context(() => {
-      // Horizontal Scroll Animation
-      const totalWidth = wrapper.scrollWidth
-      const windowWidth = window.innerWidth
-      // Ensure we scroll exactly the distance needed to show the last card fully
-      const scrollDistance = totalWidth - windowWidth
+      // Horizontal Scroll Animation recalculado progressivamente baseando-se no viewport
+      const getScrollAmount = () => {
+        const viewportWidth = window.innerWidth;
+        return Math.max(0, wrapper.scrollWidth - viewportWidth);
+      };
 
       const horizontalAnimation = gsap.to(wrapper, {
-        x: -scrollDistance,
+        x: () => -getScrollAmount(),
         ease: "none",
         scrollTrigger: {
           trigger: section,
           pin: true,
-          scrub: 1,
+          scrub: true, // Use scrub puro (sem lag de interpolador numérico que causa o "engasgo/stutter" na entrada e saída com mousewheel veloz)
           start: "top top",
-          end: () => `+=${scrollDistance}`,
+          end: () => `+=${getScrollAmount()}`,
           invalidateOnRefresh: true,
-          // Animate progress bar
+          anticipatePin: 1,
           onUpdate: (self) => {
             gsap.to("#progress-bar", {
               scaleX: self.progress,
@@ -81,62 +83,47 @@ export function BrandShowcase() {
         const image = item.querySelector("img")
         const content = item.querySelector(".showcase-content")
 
-        // Base Entrance
-        gsap.from(item, {
-          scale: 0.8,
-          opacity: 0,
-          y: 50,
-          scrollTrigger: {
-            trigger: item,
-            containerAnimation: horizontalAnimation,
-            start: "left right",
-            toggleActions: "play none none reverse",
-          }
-        })
-
-        // Color Reveal ScrollTrigger
         if (image && content) {
-          // Use a wider trigger zone for smoother mobile transition
           gsap.to(image, {
             filter: "grayscale(0%)",
             scale: 1.05,
-            duration: 0.8,
-            ease: "power2.out",
+            ease: "none",
             scrollTrigger: {
               trigger: item,
               containerAnimation: horizontalAnimation,
               start: "left center+=25%",
               end: "right center-=25%",
-              toggleActions: "play reverse play reverse",
+              scrub: true,
             }
           })
 
           gsap.to(content, {
             y: 0,
             opacity: 1,
-            duration: 0.6,
-            ease: "power2.out",
+            ease: "none",
             scrollTrigger: {
               trigger: item,
               containerAnimation: horizontalAnimation,
               start: "left center+=25%",
               end: "right center-=25%",
-              toggleActions: "play reverse play reverse",
+              scrub: true,
             }
           })
         }
 
         // Desktop Hover Highlight
         item.addEventListener("mouseenter", () => {
-          gsap.to(image, { filter: "grayscale(0%)", scale: 1.08, duration: 0.4 })
-          gsap.to(content, { y: 0, opacity: 1, duration: 0.4 })
+          gsap.to(image, { filter: "grayscale(0%)", scale: 1.08, duration: 0.3 })
+          gsap.to(content, { y: 0, opacity: 1, duration: 0.3 })
         })
         item.addEventListener("mouseleave", () => {
-          // Hover reversal is handled by ScrollTrigger automatically on next update
-          // but we can add a simple ease back if desired.
+          gsap.to(image, { scale: 1.05, duration: 0.3 })
         })
       })
     }, sectionRef)
+
+    // Delay a bit to let images impact layout
+    setTimeout(() => ScrollTrigger.refresh(), 100)
 
     return () => ctx.revert()
   }, [])
@@ -144,7 +131,8 @@ export function BrandShowcase() {
   return (
     <section
       ref={sectionRef}
-      className="relative overflow-hidden bg-background"
+      className="relative overflow-hidden bg-background will-change-transform"
+      style={{ isolation: 'isolate' }}
       id="brand-experience"
     >
       {/* Background Decor */}
@@ -156,7 +144,7 @@ export function BrandShowcase() {
         {/* Horizontal Container */}
         <div
           ref={wrapperRef}
-          className="flex flex-nowrap items-center px-[10vw] gap-20"
+          className="flex flex-nowrap items-center px-[10vw] gap-20 w-fit"
         >
           {/* Intro Card */}
           <div className="flex-shrink-0 w-[400px] md:w-[600px] space-y-8">
@@ -181,7 +169,8 @@ export function BrandShowcase() {
           {items.map((item, idx) => (
             <div
               key={idx}
-              className="showcase-card flex-shrink-0 w-[300px] md:w-[450px] group relative"
+              className={`showcase-card flex-shrink-0 w-[300px] md:w-[450px] group relative ${expandedCard === idx ? "cursor-default" : "cursor-pointer"}`}
+              onClick={() => setExpandedCard(expandedCard === idx ? null : idx)}
             >
               {/* Image Container */}
               <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-secondary/30 border border-border">
@@ -191,7 +180,7 @@ export function BrandShowcase() {
                   className="absolute inset-0 w-full h-full object-cover grayscale"
                 />
                 {/* Overlay - Strengthened for better legibility */}
-                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent opacity-80" />
+                <div className={`absolute inset-0 bg-gradient-to-t from-background via-background/60 to-black/40 transition-opacity duration-300 ${expandedCard === idx ? "opacity-100" : "opacity-80"}`} />
 
                 {/* Tag */}
                 <div className="absolute top-6 left-6 px-4 py-1 rounded-full bg-background/20 backdrop-blur-md border border-white/10">
@@ -206,9 +195,16 @@ export function BrandShowcase() {
                   <h3 className="text-foreground text-4xl md:text-5xl font-medium uppercase tracking-tighter italic leading-none mb-4 font-serif drop-shadow-md">
                     {item.title}
                   </h3>
-                  <p className="text-foreground/80 text-sm font-medium leading-relaxed line-clamp-3 drop-shadow-sm">
-                    {item.description}
-                  </p>
+                  <div className={`transition-all duration-300 w-full overflow-hidden ${expandedCard === idx ? "max-h-48" : "max-h-20"}`}>
+                    <p className={`text-foreground/90 text-sm font-medium leading-relaxed drop-shadow-md transition-all duration-300 ${expandedCard === idx ? "" : "line-clamp-3"}`}>
+                      {item.description}
+                    </p>
+                  </div>
+                  {expandedCard !== idx && item.description.length > 80 && (
+                    <span className="text-[10px] text-foreground/60 uppercase tracking-widest font-black mt-3 md:hidden">
+                      + Toque para ler
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -236,7 +232,7 @@ export function BrandShowcase() {
             <div className="max-w-sm mx-auto h-[1px] bg-gradient-to-r from-transparent via-border to-transparent w-full" />
 
             <p className="text-muted-foreground/40 text-[10px] font-medium tracking-[0.4em] uppercase">
-              Order Payload &copy; 2026 — The Art of Essentialism
+              Order &copy; 2026 — The Art of Essentialism
             </p>
           </div>
         </div>
